@@ -1,0 +1,33 @@
+<%= render :partial => 'docflows/head' %>
+
+<%= fields_for @version do |ff|%>
+  <p>
+    <%= label_tag l(:label_docflow_new_version_for) %>
+    <%= @version.docflow.title %>
+  </p>
+
+  <p>
+    <%= label_tag l(:label_docflow_version) %>
+    <%= '#'+ @version.version.to_s %>
+  </p>
+
+  <p>
+    <% approvers = Group.find(Setting.plugin_docflows['approve_allowed_to']) %>
+    <%= ff.label l(:label_docflow_approver) %>
+    <%= ff.collection_select(:approver_id, approvers.users.sort_by{|user| user.name}, :id, :name) %>
+  </p>
+
+  <p>
+    <%= ff.label l(:label_docflow_actual_from) %>
+    <%= ff.text_field(:actual_date, {:value => @version.actual_date ? @version.actual_date.utc.getlocal.to_date : "", :size => "10"}) %>
+    <%= calendar_for('docflow_version_actual_date') %>
+  </p>
+
+  <p>
+  <%= ff.label l(:label_docflow_check_list) %>
+  </p>
+  <%= ff.hidden_field :docflow_id %>
+  <%= ff.hidden_field :version %>
+  <%= ff.hidden_field :author_id %>
+  <%= ff.hidden_field :docflow_status_id %>
+<% end %>

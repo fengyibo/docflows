@@ -1,0 +1,14 @@
+<h2><%= l(:label_docflow) %> / <%= l(:label_docflow_categories) %> </h2>
+
+<%= form_for @category do |f| %>
+  <div class="box tabular">
+    <div id="all_attributes">
+      <%= render 'form' %>
+    </div>
+  </div>
+  <%= f.submit l(:button_create) %>
+<% end %>
+
+<%= javascript_tag "Form.Element.focus('docflow_category_name');" %>
+
+<%= link_to l(:label_docflow_back), docflow_categories_path, :class => 'btn' %>

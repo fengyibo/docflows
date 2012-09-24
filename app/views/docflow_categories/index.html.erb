@@ -1,0 +1,14 @@
+<%= render :partial => 'docflows/head' %>
+
+<div class="contextual">
+  <%= link_to(l(:label_docflow_add_category), {:controller => 'docflow_categories', :action => 'new'}, :class => 'icon icon-add')  %>
+</div>
+
+<h2><%= l(:label_docflow) %> / <%= l(:label_docflow_categories) %> </h2>
+
+<br />
+<%= div_tree @categories %>
+
+<% content_for :sidebar do %>
+  <%= render :partial => 'docflows/sidebar' %>
+<% end %>

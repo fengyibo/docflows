@@ -1,0 +1,42 @@
+<h3><%= l(:label_docflow) %></h3>
+<%
+  actual = DocflowVersion.actual.count # accepted but not canceled
+  unread = DocflowVersion.unread.count
+  canceled = DocflowVersion.canceled.count
+  in_work = DocflowVersion.in_work.count
+
+  created_by_me = DocflowVersion.created_by_me.count
+  approved_by_me = DocflowVersion.approved_by_me.count
+  sent_to_approvial = DocflowVersion.sent_to_approvial.count
+  waiting_for_my_approvial = DocflowVersion.waiting_for_my_approvial.count
+  under_control = Docflow.where("responsible_id=?", User.current.id).count
+%>
+<ul class="nav-menu">
+<%= content_tag(:li, link_to(l(:label_docflow_needed_for_your_attention) +' ('+unread.to_s+'/'+waiting_for_my_approvial.to_s+'/'+in_work.to_s+')', docflows_path)) %>
+<br>
+<%= content_tag(:li,link_to(l(:label_docflows_in_work) +' ('+in_work.to_s+')',
+                             docflows_in_work_path)) %>
+
+<%= content_tag(:li, link_to(l(:label_docflows_waiting_for_my_approvial) +' ('+waiting_for_my_approvial.to_s+')',
+                              docflows_waiting_for_my_approvial_path)) %>
+
+<%= content_tag(:li, link_to(l(:label_docflows_approved_by_me) +' ('+approved_by_me.to_s+')',
+                              docflows_approved_by_me_path)) %>
+
+<%= content_tag(:li, link_to(l(:label_docflows_sent_to_approvial) +' ('+sent_to_approvial.to_s+')',
+                              docflows_sent_to_approvial_path)) %>
+
+<%= content_tag(:li, link_to(l(:label_docflows_created_by_me) +' ('+created_by_me.to_s+')',
+                              docflows_created_by_me_path)) %>
+
+<%= content_tag(:li, link_to(l(:label_docflows_under_control)+' ('+under_control.to_s+')',
+                              docflows_under_control_path)) %>
+<br>
+<%= content_tag(:li,link_to(l(:label_docflows_actual) +' ('+actual.to_s+')', docflows_actual_path)) %>
+<%= content_tag(:li,link_to(l(:label_docflows_canceled) +' ('+canceled.to_s+')', docflows_canceled_path)) %>
+</ul>
+
+<h3><%= l(:label_docflow_categories) %></h3>
+<ul class="nav-menu">
+<%= content_tag(:li, link_to(l(:label_docflow_categories), docflow_categories_path )) %>
+</ul>

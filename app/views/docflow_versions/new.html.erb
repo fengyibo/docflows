@@ -1,0 +1,31 @@
+<%= render :partial => 'docflows/head' %>
+
+<h2><%= l(:label_docflow_new_version) %></h2>
+<%= form_for(@version, :html => {:multipart => true}) do |f| %>
+  <div class="box tabular">
+    <div id="all_attributes">
+      <p>
+        <%= label_tag l(:label_docflow_new_version_for) %>
+        <%= @version.docflow.title %>
+      </p>
+      <p>
+        <%= label_tag l(:label_docflow_version) %>
+        <%= '#'+ @version.version.to_s %>
+      </p>
+      <p>
+        <%= label_tag l(:label_docflow_additional) %>
+        <%= check_box_tag("inherit_know_list", 'y') + l(:label_docflow_inherit_know_list) %>
+        <br />
+        <%= check_box_tag("inherit_approver", 'y') + l(:label_docflow_inherit_approver) %>
+      </p>
+      <%= f.hidden_field :docflow_id %>
+      <%= f.hidden_field :version %>
+      <%= f.hidden_field :author_id %>
+      <%= f.hidden_field :docflow_status_id %>
+
+      <%= render "docflow_files/form" %>
+    </div>
+  </div>
+  <%= f.submit l(:button_create),  :class => "btn" %>
+  <%= link_to l(:label_docflow_back), @version.docflow.last_version,  :class => "btn", :style=>"color:#000;" %>
+<% end %>

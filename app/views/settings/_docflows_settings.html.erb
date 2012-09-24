@@ -1,0 +1,84 @@
+<%-
+  defaults = Redmine::Plugin::registered_plugins[:docflows].settings[:default]
+  docflows_max_file_size = @settings[:max_file_size]  || defaults['docflows_max_file_size']
+  docflows_max_files = @settings[:max_files] || defaults['docflows_max_files']
+  docflows_enabled_extensions = @settings[:enabled_extensions] || defaults['docflows_enabled_extensions']
+  docflows_storage_path = @settings[:storage_path] || File.join(Rails.root, "files")
+  empty_group = Group.new()
+
+  if @settings[:cancel_allowed_to].empty? || @settings[:approve_allowed_to].empty? ||
+    @settings[:edit_documents_allowed_to].empty? || @settings[:edit_categories_allowed_to].empty? ||
+    @settings[:responsibile_users].empty?
+    flash[:warning] = l(:label_docflow_settings_groups_was_not_selected)
+  end
+%>
+
+<p>
+  <label><%= l(:label_docflow_enable_plugin) %></label>
+  <%= check_box_tag("settings[enable_plugin]", true, @settings[:enable_plugin]) %>
+</p>
+
+<p>
+  <label><%= l(:label_docflow_settings_cancel_group) %></label>
+  <%= select_tag('settings[cancel_allowed_to]',
+      options_from_collection_for_select( Group.order("lastname").unshift(empty_group),
+                                          "id",
+                                          "name",
+                                          @settings[:cancel_allowed_to]) ) %>
+</p>
+
+<p>
+  <label><%= l(:label_docflow_settings_approve_group) %></label>
+  <%= select_tag('settings[approve_allowed_to]',
+      options_from_collection_for_select( Group.order("lastname").unshift(empty_group),
+                                          "id",
+                                          "name",
+                                          @settings[:approve_allowed_to]) ) %>
+</p>
+
+<p>
+  <label><%= l(:label_docflow_settings_edit_group) %></label>
+  <%= select_tag('settings[edit_documents_allowed_to]',
+      options_from_collection_for_select( Group.order("lastname").unshift(empty_group),
+                                          "id",
+                                          "name",
+                                          @settings[:edit_documents_allowed_to]) ) %>
+</p>
+
+<p>
+  <label><%= l(:label_docflow_settings_edit_categories) %></label>
+  <%= select_tag('settings[edit_categories_allowed_to]',
+        options_from_collection_for_select( Group.order("lastname").unshift(empty_group),
+                                            "id",
+                                            "name",
+                                            @settings[:edit_categories_allowed_to]) ) %>
+</p>
+
+<p>
+  <label><%= l(:label_docflow_settings_responsibiles_group) %></label>
+  <%= select_tag('settings[responsibile_users]',
+        options_from_collection_for_select( Group.order("lastname").unshift(empty_group),
+                                            "id",
+                                            "name",
+                                            @settings[:responsibile_users]) ) %>
+</p>
+
+<p>
+  <label><%= l(:label_docflow_settings_storgae_path) %></label>
+  <%= text_field_tag('settings[storage_path]', docflows_storage_path, :size => "60") %>
+</p>
+
+<p>
+  <label><%= l(:label_docflow_settings_enabled_extensions) %></label>
+  <%= text_field_tag('settings[enabled_extensions]', docflows_enabled_extensions, :size => "60") %>
+</p>
+
+<p>
+  <label><%= l(:label_docflow_settings_max_file_size) %></label>
+  <%= text_field_tag('settings[max_file_size]', docflows_max_file_size) %> Kb
+</p>
+
+<p>
+  <label><%= l(:label_docflow_settings_max_number_of_files) %></label>
+  <%= text_field_tag('settings[max_files]', docflows_max_files) %>
+</p>

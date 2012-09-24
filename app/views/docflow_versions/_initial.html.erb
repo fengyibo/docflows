@@ -1,0 +1,16 @@
+<hr>
+<%= fields_for @doc do |ff|%>
+  <%= ff.fields_for :versions do |vf|%>
+  <p>
+  <% approvers = Group.find(Setting.plugin_docflows['approve_allowed_to']) %>
+  <%= vf.label l(:label_docflow_approver) %>
+  <%= vf.collection_select(:approver_id, approvers.users.sort_by{|user| user.name}, :id, :name) %>
+  </p>
+
+  <p>
+    <%= vf.label l(:label_docflow_actual_from) %>
+    <%= vf.text_field(:actual_date, {:value => "", :size => "10"}) %>
+    <%= calendar_for('docflow_versions_attributes_0_actual_date') %>
+  </p>
+  <% end %>
+<% end %>

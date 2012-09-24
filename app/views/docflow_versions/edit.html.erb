@@ -1,0 +1,12 @@
+<h2><%= l(:label_docflow_edit_version) %></h2>
+<%= form_for(@version, :html => {:multipart => true}) do |f| %>
+  <div class="box tabular">
+    <div id="all_attributes">
+      <%= render 'form' %>
+      <%= render 'docflow_files/edit_attachments' %>
+      <%= render 'docflow_files/form' %>
+    </div>
+  </div>
+  <%= f.submit l(:button_update),  :class => "btn" %>
+  <%= link_to l(:label_docflow_back), @version,  :class => "btn", :style => "color:#000;" %>
+<% end %>

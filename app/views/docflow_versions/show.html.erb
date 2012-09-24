@@ -1,0 +1,140 @@
+<%= render :partial => 'docflows/head' %>
+
+<% if @version.errors.any? %>
+  <div id="error_explanation">
+    <h2><%= pluralize(@version.errors.count, "error") %> prohibited this version from being saved:</h2>
+    <ul>
+    <% @version.errors.full_messages.each do |msg| %>
+      <li><%= msg %></li>
+    <% end %>
+    </ul>
+  </div>
+<% end %>
+
+<div class="contextual">
+<%= link_to l(:label_docflow_edit), edit_docflow_path(@version.docflow), :class=>"icon icon-edit" %>
+<%= link_to(l(:label_docflow_remove), docflow_path(@version.docflow), :confirm => l(:label_docflow_delete_confirm),
+        :method => :delete, :action => :destory, :class => 'icon icon-del') if @version.docflow.versions.size == 1 && @version.status.id < 3 %>
+</div>
+<% #css = "background-color: #DDD; padding-left: 5px; padding-right: 5px;" if @version.status.id == 4
+#    css = "background-color: #AEA; padding-left: 5px; padding-right: 5px;" if @version.status.id == 3
+#    css = "background-color: #AAE; padding-left: 5px; padding-right: 5px;" if @version.status.id == 2
+#    css = "background-color: #FFF; padding-left: 5px; padding-right: 5px;" if @version.status.id == 1
+  css = "background-color: rgb(196, 67, 67); color: #FFF; padding: 3px 7px;"
+
+  status = @version.status.name
+  status = l(:label_docflows_need_to_familiarize) if @version.status.id != 4 && @version.user_in_checklist?(User.current.id)
+  status = l(:label_docflows_familiarized) if @version.status.id != 4 && !DocflowFamiliarization.where('user_id=? and docflow_version_id=?', User.current.id, @version.id).first.nil?
+ %>
+<h2>
+  <%= content_tag(:span, status, :style => css) %> 
+  <%= content_tag(:span,@version.docflow.type.name, :style => "font-weight:normal;") %> 
+  <%= content_tag(:span, "&rarr;".html_safe, :style => "font-size: 18px;") %> 
+  <%= @version.docflow.title %>
+</h2>
+
+<%= link_to( image_tag("bullet_go.png", :class=>'img-b')+' '+content_tag(:span,l(:label_docflow_version_to_approvial), :class => "dotted_link"), 
+             {:controller => 'docflow_versions', :action=> 'to_approvial'}, :class => 'btn') if @version.status.id == 1 %>
+
+<%= link_to( image_tag("bullet_end.png", :class=>'img-b')+' '+content_tag(:span,l(:label_docflow_version_ro_rework), :class => "dotted_link"), 
+             {:controller => 'docflow_versions', :action=> 'postpone'}, :class => 'btn') if @version.status.id == 2 %>
+
+<%= link_to( image_tag("exclamation.png", :class=>'img-b')+' '+content_tag(:span,l(:label_docflow_version_approve), :class => "dotted_link"), 
+             '#', :class => 'btn', :id => "show-approve-btn") if @version.status.id == 2 %>
+
+<%= link_to( image_tag("false.png", :class=>'img-b')+' '+content_tag(:span,l(:label_docflow_version_cancel), :class => "dotted_link"), 
+             {:controller => 'docflow_versions', :action=> 'cancel'}, :class => 'btn', :id => "cancel-doc-btn") if @version.status.id == 3 && @version.id == @version.docflow.last_version.id %>
+
+<%= link_to( image_tag("delete.png", :class=>'img-b')+' '+content_tag(:span, l(:label_docflow_version_delete), :class => "dotted_link"),
+             docflow_version_path(@version),
+             :confirm => l(:label_docflow_delete_confirm),
+             :method => :delete, :action => :destory, :class => "btn btn-right") if @version.status.id == 1 %>
+<%= link_to( image_tag("group.png", :class=>'img-b')+' '+content_tag(:span,l(:label_docflow_check_list), :class => "dotted_link"),
+             {:controller => 'docflow_versions', :action => 'checklist'},
+             :class => "btn btn-right") if @version.status.id == 1 %>
+<%= link_to( image_tag("edit.png", :class=>'img-b')+' '+content_tag(:span,l(:label_docflow_edit_version), :class => "dotted_link"),
+             edit_docflow_version_path(@version),
+             :class => "btn btn-right") if @version.status.id == 1 %>
+
+<%= link_to( image_tag("add.png", :class=>'img-b')+' '+content_tag(:span,l(:label_docflow_new_version), :class => "dotted_link"),
+             {:controller => 'docflow_versions', :action => 'new', :docflow_id => @version.docflow_id},
+             :class => "btn btn-right") if @version.docflow.last_version.status.id == 3 || @version.docflow.last_version.status.id  == 4 %>
+
+<% if DocflowFamiliarization.where('user_id=? and docflow_version_id=?', User.current.id, @version.id).first.nil? %>
+  <%= link_to( image_tag("true.png", :class=>'img-b')+content_tag(:span,' Ознакомиться', :class => "dotted_link"),
+               {:controller => 'docflow_versions', :action=> 'accept'},
+               :class => 'btn', :id => "accept-ver-btn", :style => 'color:#000;') if @version.status.id == 3 && @version.user_in_checklist?(User.current.id) %>
+<% end %>
+
+<%= content_tag(:span, "" ,
+                :class => "fake-block") if @version.docflow.last_version.status.id == 3 || @version.docflow.last_version.status.id  == 4 %>
+                
+<% if @version.status.id == 2 %>
+  <div id="approve-form" style="display:none;">
+    <%= form_tag({:controller => 'docflow_versions', :action=> 'approve'}, :method => "post") do %>
+      <%= link_to('',{},:class=>'icon close-icon',:id => "close-approve-btn") %>
+      <p>
+        <%= l(:label_docflow_actual_from) %>
+        <%= text_field_tag(:actual_date, (@version.actual_date ? @version.actual_date.utc.getlocal.to_date : ""), :size => "10") %><%= calendar_for('actual_date') %>
+      </p>
+      <%= submit_tag('Утвердить') %>
+    <% end %>
+  </div>
+<% end %>
+<div class="issue status-1 priority-1 details">
+  <div class="ver-list" style="padding: 5px;">
+    <strong><%= l(:label_docflow_versions) %></strong>
+      <% if @version.docflow.versions.any? %>
+        <% @version.docflow.versions.order(:id).each do |ver| %>
+            <% css = (ver.id == @version.id) ? "ver-current" : "ver-common"
+               css += " ver-actual" if !@version.docflow.actual_version.nil? && @version.docflow.actual_version.id == ver.id
+               ver_date = ver.actual_date.nil? ? "" : " "+content_tag(:span,"("+format_date(ver.actual_date)+")", :style=>"font-size: 10px;") %>
+            <%= link_to ('#'+ver.version.to_s+ver_date).html_safe, ver, :class =>  css %>
+            <%= "<span style='font-size:16px; margin-top:-3px; margin-bottom:-3px;'>&rarr;</span>".html_safe unless ver == @version.docflow.versions.order(:id).last %>
+        <% end %>
+      <% end %>
+  </div>
+  <hr>
+
+  <p class="author">
+    <%= authoring @version.created_at, @version.author %>.
+    <%= l(:label_updated_time, time_tag(@version.updated_at)).html_safe if @version.created_at != @version.updated_at %>.
+  </p>
+
+  <%= render 'docflow_files/show_attachments' %>
+  <hr>
+
+  <p><strong><%= l(:label_docflow_description) %></strong></p>
+  <div class="wiki">
+    <%= textilizable @version.docflow, :description %>
+  </div>
+  <br>
+
+  <hr>
+  <div id="version_detail">
+      <table class="invisi-table">
+      <tbody><tr>
+          <th><%= l(:label_docflow_approver)%>:</th>
+          <td><%= link_to( @version.approver.name,@version.approver ) unless @version.approver.nil? %></td>
+          <th rowspan=3><%= l(:label_docflow_check_list) %></th>
+          <td rowspan=3><%= render 'docflow_checklists/selected_rules', :compact => 'y' %></td>
+      </tr>
+      <tr>
+          <th><%= l(:label_docflow_approved_date) %></th>
+          <td><%= format_date(@version.approve_date.utc.getlocal) unless @version.approve_date.nil? %></td>
+      </tr>
+      <tr>
+          <th><%= l(:label_docflow_responsible) %></th>
+          <td><%= link_to @version.docflow.responsible.name, @version.docflow.responsible %></td>
+      </tr>
+      </tbody></table>
+  </div>
+</div>
+
+<div id="fam_list">
+  <%= render 'docflow_checklists/result_list' %>
+</div>
+
+<% content_for :sidebar do %>
+    <%= render :partial => 'docflows/sidebar' %>
+<% end %>

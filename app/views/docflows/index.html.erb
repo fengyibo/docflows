@@ -1,0 +1,33 @@
+<%= render :partial => 'docflows/head' %>
+<div class="contextual">
+  <%= link_to(l(:label_docflow_add), {:controller => 'docflows', :action => 'new'}, :class => 'icon icon-add')  %>
+</div>
+
+<h2><%= l(:label_docflow) %></h2>
+<% unless @docs.empty? %>
+  <table class="list">
+    <tr>
+      <th> <%= l(:label_docflow_type) %> </th>      
+      <th> <%= l(:label_docflow_title) %> </th>      
+      <th> <%= l(:label_docflow_version) %> </th>
+      <th> <%= l(:label_docflow_category) %> </th>
+      <th> <%= l(:label_docflow_current_version) %> </th>
+      <th> <%= l(:label_docflow_actual_from) %> </th>
+    </tr>
+  <% @docs.each do |doc| %>
+    <tr>
+      <td> <%= doc.type.name %> </td>  
+      <td> <%= link_to doc.title, doc.last_version %> </td>      
+      <td> <%= link_to ((doc.last_version.nil?) ? "-" : '#'+doc.last_version.version.to_s), edit_docflow_path(doc)  %> </td>
+      <td> <%= doc.category.name %> </td>
+      <td> <%= (doc.current_version.nil?) ? "-" : doc.current_version.version %> </td>
+      <td> <%= (doc.current_version.nil?) ? "-" : format_date(doc.current_version.actual_date.utc.getlocal)  %> </td>
+    </tr>
+  <% end %>
+  </table>
+<% end %>
+
+<% content_for :sidebar do %>
+    <%= render :partial => 'docflows/sidebar' %>
+<% end %>
+

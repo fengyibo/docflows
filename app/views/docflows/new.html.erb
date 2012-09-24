@@ -1,0 +1,35 @@
+<h2><%= l(:label_docflow_new) %></h2>
+
+<%= form_for(@doc,:html => {:multipart => true}) do |f| %>
+<div class="box tabular">
+  <div id="all_attributes">
+
+    <fieldset class="docflow_annotation"><legend><strong> Инструкция </strong></legend>
+      Для создания первой версии документа необходимо:
+      <ul>
+        <li>Оперделить категорию и тип документа</li>
+        <li>Заполнить заголовок документа</li>
+        <li>Выбрать ответсвенного сотрудника</li>
+        <li>Назначить утверждающего</li>
+        <li>Приложить исходный файл для редактирования в формате <strong>docx</strong></li>
+        <li>Приложить файл для ознакомления в формате <strong>pdf</strong></li>
+        <li>Указать дату вступления в силу этой версии документа</li>
+      </ul>
+      Указанные выше поля являются <strong>обязательными</strong>. Дополнительно можно добавить описание к документу, а также   приложения в виде прочих файлов. Общее количество файлов в одной версии документа не должно превышать
+      <strong><%= Setting.plugin_docflows['max_files'].to_s %></strong>.
+      <br>
+      <br>
+      После нажатия кнопки "Сохранить", на втором шаге следует выбрать сотрудников/отделы/должности для ознакомления с  документом.
+    </fieldset>
+
+    <%= render 'form' %>
+    <%= render 'docflow_versions/initial' %>
+    <%= render 'docflow_files/form', :is_new => true %>
+  </div>
+</div>
+<%= f.submit l(:button_create), :class=>"btn" %>
+<% end %>
+
+<%= javascript_tag "Form.Element.focus('docflow_title');" %>
+
+<%= link_to l(:label_docflow_back), docflows_path, :class => "btn", :style => "color:#000;" %>

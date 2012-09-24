@@ -1,0 +1,23 @@
+<div id="new_files">
+  <%  if local_assigns[:is_new] %>
+    <p class='new_attach src_file'>
+      <label><%= l(:label_docflow_source_file) %></label>
+      <input class='docfile' type=file name='new_files[0][file]'>
+      <input type=text name='new_files[0][description]'>
+      <input type=hidden name='new_files[0][filetype]' value='src_file'>
+      <a href='#' title='Delete' class='remove_docfile icon icon-del icon-only'>&nbsp;</a><br />
+    </p>
+    <p class='new_attach pub_file'>
+      <label><%= l(:label_docflow_public_file) %></label>
+      <input class='docfile' type=file name='new_files[1][file]'>
+      <input type=text name='new_files[1][description]'>
+      <input type=hidden name='new_files[1][filetype]' value='pub_file'>
+      <a href='#' title='Delete' class='remove_docfile icon icon-del icon-only'>&nbsp;</a><br />
+    </p>
+  <% end %>
+</div>
+<p><%= link_to l(:label_docflow_add_file), '#', :class => 'add_docfile icon icon-add' %>
+<%= hidden_field_tag("docfile_max_size", Setting.plugin_docflows['max_file_size'].to_i.kilobytes) %>
+<%= hidden_field_tag("pub_file_string", l(:label_docflow_public_file)) %>
+<%= hidden_field_tag("src_file_string", l(:label_docflow_source_file)) %>
+(<%= l(:label_max_size) %>: <%= number_to_human_size(Setting.plugin_docflows['max_file_size'].to_i.kilobytes) %>)</p>

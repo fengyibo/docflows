@@ -1,0 +1,48 @@
+<%= render :partial => 'docflows/head' %>
+
+<% if @category.errors.any? %>
+  <div id="error_explanation">
+    <h2><%= pluralize(@category.errors.count, "error") %> prohibited this category from being saved:</h2>
+    <ul>
+    <% @category.errors.full_messages.each do |msg| %>
+      <li><%= msg %></li>
+    <% end %>
+    </ul>
+  </div>
+<% end %>
+
+<%= fields_for @category do |ff|%>
+  <p>
+  <%# todo: remove parent category equal to self.id !%>
+  <%# It's a problem due deletion of one node leds tree distruction %>
+    <%= ff.label l(:label_docflow_parent_category) %>
+    <%  childs_list = []
+        @category.self_and_descendants.each{|ch| childs_list << ch.id } %>
+    <%= ff.select( :parent_id,
+                   nested_set_options(DocflowCategory) {|i| "#{'..' * i.level} #{i.name}" }.unshift(["",""]),
+                   {:disabled => childs_list},
+                   {:class=>"w100"} ) %>
+  </p>
+
+  <p>
+    <%= ff.label l(:label_docflow_title) %>
+    <%= ff.text_field :name %>
+  </p>
+
+  <p>
+    <%= ff.label l(:label_docflow_editor_department) %>
+    <%= ff.collection_select(:editor_department_id, UserDepartment.all.sort_by{|dep| dep.name }, :id, :name) %>
+  </p>
+
+  <p>
+    <%= ff.label l(:label_docflow_editor_title) %>
+    <%= ff.collection_select(:editor_title_id, UserTitle.all.sort_by{|title| title.name }, :id, :name) %>
+  </p>
+
+  <p>
+    <% approvers = Group.find(Setting.plugin_docflows['approve_allowed_to']) %>
+    <%= ff.label l(:label_docflow_default_approver) %>
+    <%= ff.collection_select(:default_approver_id, approvers.users.sort_by{|user| user.name }, :id, :name) %>
+  </p>
+
+<% end %>

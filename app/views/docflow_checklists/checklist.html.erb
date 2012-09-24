@@ -1,0 +1,12 @@
+<%= render :partial => 'docflows/head' %>
+<h2><%= l(:label_docflow_check_list_for)+" "+@version.docflow.title %></h2>
+<div  style="float:left;width:70%; padding-top: 5px;">
+  <%= render 'docflow_checklists/selected_rules' %>
+  <p id="no_checklist_records" class="nodata" style="display:none;"><%= l(:label_no_data) %></p>
+</div><div id="users-selection" style="float:left;width:25%;padding-left:20px;">
+  <%= render :partial => 'docflow_checklists/users_selection' %>
+</div>
+
+<% content_for :sidebar do %>
+    <%= render :partial => 'docflows/sidebar' %>
+<% end %>

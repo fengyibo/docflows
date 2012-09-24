@@ -1,0 +1,20 @@
+<% users = @version.familiarization_list.sort_by{|el| el.name} %>
+<fieldset style="float: left; margin-top: 20px; width: 47%;">
+  <legend><%= l(:label_docflows_not_familiarized) %></legend>
+  <ul class="nav-menu">
+    <% users.each do |user| %>
+      <%= content_tag(:li,user.name) if user.read_date(@version.id).nil? %>
+    <% end %>
+  </ul>
+</fieldset>
+<fieldset style="float: right; margin-top: 20px; width: 47%;">
+  <legend><%= l(:label_docflows_users_familiarized) %></legend>
+  <ul class="nav-menu">
+    <% users.each do |user| %>
+      <%= content_tag(:li,
+                      user.name+" ("+
+                      format_date(user.read_date(@version.id).utc.getlocal)+")") unless user.read_date(@version.id).nil? %>
+    <% end %>
+  </ul>
+</fieldset>
+

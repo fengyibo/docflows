@@ -1,0 +1,30 @@
+<ul id="content-checklists" class="nav-menu" style="margin:0px;">
+  <% is_all = @version.checklists.where("all_users='y'") %>
+  <% is_all.each do |rec| %>
+    <%= local_assigns[:compact] ? content_tag(:li,rec.display_name) : link_to_remove_checklist_record(rec) %>
+  <% end %>
+
+  <%= "<br class='br_space'>".html_safe if is_all.any? && !local_assigns[:compact] %>
+
+  <% deps = @version.checklists.where('user_department_id IS NOT NULL AND user_title_id IS NULL') %>
+  <% deps.sort_by{|el| el.display_name}.each do |rec| %>
+    <%= local_assigns[:compact] ? content_tag(:li,rec.display_name) : link_to_remove_checklist_record(rec) %>
+  <% end %>
+
+  <% titles = @version.checklists.where('user_department_id IS NULL AND user_title_id IS NOT NULL') %>
+  <% titles.sort_by{|el| el.display_name}.each do |rec| %>
+    <%= local_assigns[:compact] ? content_tag(:li,rec.display_name) : link_to_remove_checklist_record(rec) %>
+  <% end %>
+
+  <% groups = @version.checklists.where('user_department_id IS NOT NULL AND user_title_id IS NOT NULL') %>
+  <% groups.sort_by{|el| el.display_name}.each do |rec| %>
+    <%= local_assigns[:compact] ? content_tag(:li,rec.display_name) : link_to_remove_checklist_record(rec) %>
+  <% end %>
+
+  <%= "<br class='br_space'>".html_safe if (groups.any? || deps.any? || titles.any?) && !local_assigns[:compact] %>
+
+  <% users = @version.checklists.where('user_id is not null') %>
+  <% users.sort_by{|el| el.display_name}.each do |rec| %>
+    <%= local_assigns[:compact] ? content_tag(:li,rec.display_name) : link_to_remove_checklist_record(rec) %>
+  <% end %>
+</ul>

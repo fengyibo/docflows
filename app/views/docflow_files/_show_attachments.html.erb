@@ -1,0 +1,31 @@
+<div class="attached_files">
+  <% pub_file = @version.files.where("filetype='pub_file'")
+     src_file = @version.files.where("filetype='src_file'")
+     files = @version.files.where("filetype=''") %>
+  <p class="base_files" style="margin-top: 20px; margin-bottom: 20px;">
+  <% pub_file.each do |file| %>
+    <span class="base_file">
+        <%= link_to( l(:label_docflow_read_document),
+               {:controller => "docflow_versions", :action => "show_file", :fid => file.id},
+               :class => "icon icon-file application-pdf", :target => "_blank") %>
+        <%= content_tag(:span," ("+number_to_human_size(file.filesize).to_s+")", :class =>"size") %>
+    </span>
+  <% end %>
+
+  <% src_file.each do |file| %>
+    <span class="base_file">
+        <%= link_to( l(:label_docflow_download_source_file),
+               {:controller => "docflow_versions", :action => "show_file", :fid => file.id},
+               :class => "icon icon-file text-xml") %>
+        <%= content_tag(:span," ("+number_to_human_size(file.filesize).to_s+")", :class =>"size") %>
+    </span>
+  <% end %>
+  </p>
+  <% if files.any? %>
+    <fieldset><legend><%= l(:label_docflows_additional_files) %></legend>
+    <% files.each do |attached_file| %>
+      <%=  link_to_show_attached_file(attached_file) %>
+    <% end %>
+    </fieldset>
+  <% end %>
+</div>

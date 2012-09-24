@@ -1,0 +1,55 @@
+<%= render :partial => 'docflows/head' %>
+
+<% if @doc.errors.any? %>
+  <div id="error_explanation">
+    <h2><%= pluralize(@doc.errors.count, "error") %> prohibited this document from being saved:</h2>
+    <ul>
+    <% @doc.errors.full_messages.each do |msg| %>
+      <li><%= msg %></li>
+    <% end %>
+    </ul>
+  </div>
+<% end %>
+
+<%= fields_for @doc do |ff|%>
+
+  <p>
+    <%= ff.label l(:label_docflow_category) %>
+    <%= ff.select :docflow_category_id,
+                  nested_set_options(DocflowCategory) {|i| "#{'.. ' * i.level} #{i.name}" },
+                  {},
+                  {:class=>"w100"} %>
+  </p>
+
+  <p>
+    <%= ff.label l(:label_docflow_title) %>
+    <%= ff.text_field :title, :size => 80, :required => true %>
+  </p>
+
+  <p>
+    <%= ff.label l(:label_docflow_type) %>
+    <%= ff.collection_select(:docflow_type_id, DocflowType.order("name"), :id, :name) %>
+  </p>
+
+  <p>
+    <% responsibles = Group.find(Setting.plugin_docflows['responsibile_users']) %>
+    <%= ff.label l(:label_docflow_responsible) %>
+    <%= ff.collection_select(:responsible_id, responsibles.users.sort_by{|user| user.name}, :id, :name) %>
+  </p>
+
+  <p>
+    <label><%= l(:field_description) %></label>
+    <%= link_to_function image_tag('edit.png'),
+      'Element.hide(this); Effect.toggle("doc_description_and_toolbar", "appear", {duration:0.3})' unless @doc.new_record? %>
+    <%= content_tag 'span', :id => "doc_description_and_toolbar", :style => (@doc.new_record? ? nil : 'display:none') do %>
+    <%= ff.text_area :description,
+                     :cols => 60,
+                     :rows => (@doc.description.blank? ? 10 : [[10, @doc.description.length / 50].max, 100].min),
+                     :accesskey => accesskey(:edit),
+                     :class => 'wiki-edit',
+                     :no_label => true %>
+    <% end %>
+  </p>
+  <%= wikitoolbar_for 'docflow_description' %>
+
+<% end %>

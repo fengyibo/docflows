@@ -1,0 +1,16 @@
+<div class="contextual">
+  <%= link_to(l(:label_docflow_remove), docflow_path(@doc), :confirm => l(:label_docflow_delete_confirm),
+        :method => :delete, :action => :destory, :class => 'icon icon-del') %>
+</div>
+<h2><%= l(:label_docflow_edit) %></h2>
+
+<%= form_for(@doc,:html => {:multipart => true}) do |f| %>
+<div class="box tabular">
+  <div id="all_attributes">
+    <%= render 'form'  %>
+  </div>
+</div>
+<%= f.submit l(:button_update), :class => "btn" %>
+<% end %>
+
+<%= link_to l(:label_docflow_back), docflows_path, :class => "btn", :style => "color:#000;" %>
