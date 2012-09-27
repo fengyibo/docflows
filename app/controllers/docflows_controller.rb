@@ -106,7 +106,7 @@ class DocflowsController < ApplicationController
 
   # Read and accepted documents which was not canceled
   def actual
-    @versions = DocflowVersion.actual
+    @versions = DocflowVersion.actual_for_user
     @page_title = l(:label_docflows_actual)
     render 'actual_versions'
   end

@@ -1,6 +1,6 @@
 <h3><%= l(:label_docflow) %></h3>
 <%
-  actual = DocflowVersion.actual.count # accepted but not canceled
+  actual = DocflowVersion.actual_for_user.count # accepted but not canceled
   unread = DocflowVersion.unread.count
   canceled = DocflowVersion.canceled.count
   in_work = DocflowVersion.in_work.count

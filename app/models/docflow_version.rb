@@ -57,9 +57,9 @@ class DocflowVersion < ActiveRecord::Base
   end
 
   def visible_for_user?
-    (user_in_checklist?(User.current.id) || approver_id == User.current.id || docflow.responsible_id == User.current.id || author_id == User.current.id || 
+    (user_in_checklist?(User.current.id) || [approver_id, docflow.responsible_id, author_id].include?(User.current.id) || 
     User.current.edit_docflows? || User.current.edit_docflows_in_category?(docflow.docflow_category_id) || 
-    User.current.cancel_docflows? || User.current.approve_docflows? || User.current.admin?)
+    User.current.cancel_docflows? || User.current.approve_docflows?)
   end
 
   def editable_by_user?
@@ -116,6 +116,20 @@ class DocflowVersion < ActiveRecord::Base
             WHERE v.docflow_status_id=3 AND last_stat.stat<4"
     find_by_sql(sql)
   end
+
+  # selects only last accepted version if document was not canceled and no any new approved unaccepted version
+  def self.actual_for_user
+    sql = "SELECT v.* FROM docflow_versions v
+              INNER JOIN
+                (SELECT docflow_id, MAX(id) AS id FROM docflow_versions WHERE docflow_status_id=3 AND actual_date<NOW() GROUP BY docflow_id) last_actual 
+              ON last_actual.id=v.id
+                 INNER JOIN docflow_familiarizations fam ON fam.docflow_version_id=last_actual.id AND fam.user_id=#{User.current.id}
+              
+              INNER JOIN (SELECT docflow_id, MAX(docflow_status_id) as stat FROM docflow_versions GROUP BY docflow_id) last_stat 
+              ON last_stat.docflow_id=v.docflow_id
+            WHERE v.docflow_status_id=3 AND last_stat.stat<4"
+    find_by_sql(sql)
+  end  
 
   # actual versions with familiarization for user
   def self.for_familiarization

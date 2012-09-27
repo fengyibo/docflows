@@ -17,15 +17,13 @@ class DocflowVersionsController < ApplicationController
   end
 
   def authorize
-    return true if User.current.admin?
-
     return false if params[:id].nil? || params[:id] == ""
     ver = DocflowVersion.find(params[:id])
 
     if ( params[:action] == "show")
       render_403 unless ver.visible_for_user?
     elsif ( params[:action] == "postpone" )
-      render_403 unless ver.author_id == User.current.id  || ver.approver_id == User.current.id
+      render_403 unless [ver.author_id, ver.approver_id].include?(User.current.id) || User.current.admin?
     elsif ( params[:action] == "accept" )
       render_403 unless ver.user_in_checklist?(User.current.id)
     elsif  (params[:action] == "cancel" )
