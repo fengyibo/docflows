@@ -1,0 +1,32 @@
+<%= render :partial => 'docflows/head' %>
+<div class="contextual">
+  <%= docflow_new_button %>
+</div>
+
+<h2><%= content_tag(:span,@page_title)  %></h2>
+<% unless @versions.empty? %>
+  <table class="list">
+    <tr>
+      <th> <%= l(:label_docflow_type) %> </th>      
+      <th> <%= l(:label_docflow_title) %> </th>      
+      <th> <%= l(:label_docflow_version) %> </th>
+      <th> <%= l(:label_docflow_category) %> </th>
+      <th> <%= l(:label_docflow_was_actual_from) %> </th>
+      <th> <%= l(:label_docflow_version_canceled) %> </th>
+    </tr>
+  <% @versions.sort_by{|v| v.docflow.title}.each do |ver| %>
+    <tr>
+      <td> <%= ver.docflow.type.name %> </td>  
+      <td> <%= link_to ver.docflow.title, ver %> </td>      
+      <td> <%= link_to_version(ver) %> </td>
+      <td> <%= ver.docflow.category.name %> </td>
+      <td> <%= (ver.actual_date.nil?) ? "-" : format_date(ver.actual_date.utc.getlocal)  %> </td>
+      <td> <%= (ver.docflow.last_version.docflow_status_id == 4) ? format_date(ver.docflow.last_version.updated_at.utc.getlocal) : format_date(ver.updated_at.utc.getlocal) %> </td>
+    </tr>
+  <% end %>
+  </table>
+<% end %>
+
+<% content_for :sidebar do %>
+  <%= render :partial => 'docflows/sidebar' %>
+<% end %>

@@ -12,31 +12,38 @@
   under_control = Docflow.where("responsible_id=?", User.current.id).count
 %>
 <ul class="nav-menu">
-<%= content_tag(:li, link_to(l(:label_docflow_needed_for_your_attention) +' ('+unread.to_s+'/'+waiting_for_my_approvial.to_s+'/'+in_work.to_s+')', docflows_path)) %>
+<%= content_tag(:li, link_to(l(:label_docflow_needed_for_your_attention) +' ('+unread.to_s+'/'+waiting_for_my_approvial.to_s+'/'+in_work.to_s+')', docflows_path),
+                :class => (controller.action_name == "index" ? "sel_menu" : "")) %>
 <br>
 <%= content_tag(:li,link_to(l(:label_docflows_in_work) +' ('+in_work.to_s+')',
-                             docflows_in_work_path)) %>
+                             docflows_in_work_path), 
+                :class => (controller.action_name == "in_work" ? "sel_menu" : "")) %>
 
 <%= content_tag(:li, link_to(l(:label_docflows_waiting_for_my_approvial) +' ('+waiting_for_my_approvial.to_s+')',
-                              docflows_waiting_for_my_approvial_path)) %>
+                              docflows_waiting_for_my_approvial_path), 
+                :class => (controller.action_name == "waiting_for_my_approvial" ? "sel_menu" : "")) %>
 
 <%= content_tag(:li, link_to(l(:label_docflows_approved_by_me) +' ('+approved_by_me.to_s+')',
-                              docflows_approved_by_me_path)) %>
+                              docflows_approved_by_me_path), 
+                :class => (controller.action_name == "approved_by_me" ? "sel_menu" : "")) %>
 
 <%= content_tag(:li, link_to(l(:label_docflows_sent_to_approvial) +' ('+sent_to_approvial.to_s+')',
-                              docflows_sent_to_approvial_path)) %>
+                              docflows_sent_to_approvial_path),
+                :class => (controller.action_name == "sent_to_approvial" ? "sel_menu" : "")) %>
 
 <%= content_tag(:li, link_to(l(:label_docflows_created_by_me) +' ('+created_by_me.to_s+')',
-                              docflows_created_by_me_path)) %>
+                              docflows_created_by_me_path),
+                :class => (controller.action_name == "created_by_me" ? "sel_menu" : "")) %>
 
 <%= content_tag(:li, link_to(l(:label_docflows_under_control)+' ('+under_control.to_s+')',
-                              docflows_under_control_path)) %>
+                              docflows_under_control_path),
+                :class => (controller.action_name == "under_control" ? "sel_menu" : "")) %>
 <br>
-<%= content_tag(:li,link_to(l(:label_docflows_actual) +' ('+actual.to_s+')', docflows_actual_path)) %>
-<%= content_tag(:li,link_to(l(:label_docflows_canceled) +' ('+canceled.to_s+')', docflows_canceled_path)) %>
+<%= content_tag(:li,link_to(l(:label_docflows_actual_for_me) +' ('+actual.to_s+')', docflows_actual_path), :class => (controller.action_name == "actual" ? "sel_menu" : "")) %>
+<%= content_tag(:li,link_to(l(:label_docflows_canceled_for_me) +' ('+canceled.to_s+')', docflows_canceled_path), :class => (controller.action_name == "canceled" ? "sel_menu" : "")) %>
 </ul>
 
 <h3><%= l(:label_docflow_categories) %></h3>
 <ul class="nav-menu">
-<%= content_tag(:li, link_to(l(:label_docflow_categories), docflow_categories_path )) %>
+<%= content_tag(:li, link_to(l(:label_docflow_categories), docflow_categories_path ), :class => (controller.controller_name == "docflow_categories" ? "sel_menu" : "")) %>
 </ul>

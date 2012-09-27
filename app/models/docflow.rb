@@ -12,18 +12,21 @@ class Docflow < ActiveRecord::Base
 
   attr_accessor :editable_version
 
-  # last approved document, which actual_date older than current
-  # select * FROM versions  WHERE status = approved AND actual_date >= current_date order by id (or approved_at) DESC Limit 1
-
   # todo: magick numbers in status comparements
-  def current_version
-    versions.where('docflow_status_id = ? AND actual_date <= ?', 3, Time.now).last # order(version)? or order(actual_from)?
+
+  def canceled?
+    !last_version.nil? && last_version.docflow_status_id == 4
   end
 
-  # last approved document, not currently
-  # todo: magick numbers in status comparements
+  # last approved document, which actual_date older than current
+  # select * FROM versions  WHERE status = approved AND actual_date >= current_date order by id (or approved_at) DESC Limit 1
+  def current_version
+    canceled? ? nil : versions.where('docflow_status_id = ? AND actual_date <= ?', 3, Time.now).order(:id).last
+  end
+
+  # last approved document, but not current
   def actual_version
-    versions.where(:docflow_status_id => 3).last
+    canceled? ? nil : versions.where(:docflow_status_id => 3).order(:id).last
   end
 
   def last_version
@@ -37,10 +40,11 @@ class Docflow < ActiveRecord::Base
   private
 
   def validate_fields
-    # errors.add(:base, "Document has no files in editable version!") if editable_version.attachments.nil? || editable_version.attachments.empty?
-    errors.add(:docflow_category_id, "Category should be defined!") if docflow_category_id.nil?
-    errors.add(:docflow_type_id, "Type should be defined!") if docflow_type_id.nil?
-    errors.add(:responsible_id, "Type should be defined!") if responsible_id.nil? || User.find(responsible_id).nil?
-    errors.add(:title, "Title can't be empty!") if title.nil? || title == ""
+    errors.add(:base, l(:label_docflow_permissions_cant_save_document)) unless User.current.edit_docflows? || User.current.edit_docflows_in_category?(docflow_category_id)
+    # errors.add(:base, l(:label_docflow_permissions_cant_save_document_in_category)) unless User.current.edit_docflows_in_category?(docflow_category_id)
+    errors.add(:docflow_category_id, l(:label_docflow_category_undefined)) if docflow_category_id.nil?
+    errors.add(:docflow_type_id, l(:label_docflow_type_undefined)) if docflow_type_id.nil?
+    errors.add(:responsible_id, l(:label_docflow_responsible_undefined)) if responsible_id.nil? || User.find(responsible_id).nil?
+    errors.add(:title, l(:label_docflow_title_undefined)) if title.nil? || title == ""
   end
 end

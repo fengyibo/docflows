@@ -14,7 +14,8 @@ Redmine::Plugin.register :docflows do
                           "docflows_enabled_extensions" => "docx;pdf;jpg;jpeg;gif;txt;doc;xls;xlsx",
                           "docflows_storage_path" => File.join(Rails.root, "files") }
 
-  menu :top_menu, :docflow, { :controller => 'docflows', :action => 'index' }, :caption => :label_docflow, :if => Proc.new { Setting.plugin_docflows['enable_plugin'] && User.current.logged? }
+  menu :top_menu, :docflow, { :controller => 'docflows', :action => 'index' }, :caption => Proc.new {User.current.df_top_menu_link}, :if => Proc.new { Setting.plugin_docflows['enable_plugin'] && User.current.logged? }
+  # +" ("+Proc.new{ DocflowVersions.unread.to_s }+")"
 
   project_module :docflows do
     permission :new_docflows, :docflows => :new

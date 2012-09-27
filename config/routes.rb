@@ -13,7 +13,7 @@ get 'docflows/actual', :to =>"docflows#actual"
 get 'docflows/canceled', :to =>"docflows#canceled"
 get 'docflows/plugin_disabled', :to =>"docflows#plugin_disabled"
 
-resources :docflow_categories, :except => [:show] #:only => [:index,:edit,:create]
+resources :docflow_categories, :except => [:show]
 
 resources :docflow_versions, :except => [:index] # do
 #   member do

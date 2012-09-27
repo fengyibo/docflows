@@ -1,0 +1,96 @@
+<%= render :partial => 'docflows/head' %>
+<div class="contextual">
+  <%= docflow_new_button %>
+</div>
+
+<h2><%= content_tag(:span,l(:label_docflow_needed_for_your_attention))  %></h2>
+
+<% unless @waiting.empty? %>
+  <h3><%= l(:label_docflows_waiting_for_my_approvial)+" ("+@waiting.size.to_s+")" %></h3>
+  <table class="list">  
+    <tr>
+      <th> <%= l(:label_docflow_type) %> </th>      
+      <th> <%= l(:label_docflow_title) %> </th>      
+      <th> <%= l(:label_docflow_version) %> </th>
+      <th> <%= l(:label_docflow_category) %> </th>
+      <th> <%= l(:label_docflow_author) %> </th>
+      <th> <%= l(:label_docflow_actual_from) %> </th>
+    </tr>
+  <% @waiting.sort_by{|v| [v.docflow.title,v.version]}.each do |ver| %>
+    <tr>
+      <td> <%= ver.docflow.type.name %> </td>  
+      <td> <%= link_to ver.docflow.title, ver %> </td>      
+      <td> <%= link_to_version(ver) %> </td>
+      <td> <%= ver.docflow.category.name %> </td>
+      <td> <%= link_to_user ver.author %> </td>
+      <td> <%= format_date(ver.actual_date.utc.getlocal) %> </td>
+    </tr>
+  <% end %>
+  </table>
+<% end %>
+
+<% unless @unread.empty? %>
+  <h3><%= l(:label_docflows_need_to_familiarize)+" ("+@unread.size.to_s+")" %></h3>
+  <table class="list">  
+    <tr>
+      <th> <%= l(:label_docflow_type) %> </th>      
+      <th> <%= l(:label_docflow_title) %> </th>      
+      <th> <%= l(:label_docflow_version) %> </th>
+      <th> <%= l(:label_docflow_category) %> </th>
+      <th> <%= l(:label_docflow_author) %> </th>
+      <th> <%= l(:label_docflow_actual_from) %> </th>
+    </tr>
+  <% @unread.sort_by{|v| [v.docflow.title,v.version]}.each do |ver| %>
+    <tr>
+      <td> <%= ver.docflow.type.name %> </td>  
+      <td> <%= link_to ver.docflow.title, ver %> </td>      
+      <td> <%= link_to_version(ver) %> </td>
+      <td> <%= ver.docflow.category.name %> </td>
+      <td> <%= link_to_user ver.author %> </td>
+      <td> <%= format_date(ver.actual_date.utc.getlocal) %> </td>
+    </tr>
+  <% end %>
+  </table>
+<% end %>
+
+<% unless @in_work.empty? %>
+  <h3><%= l(:label_docflows_in_work)+" ("+@in_work.size.to_s+")" %></h3>
+  <table class="list">
+    <tr>
+      <th colspan=4 style="text-align:center; background-color: #BAD8BA;"> <%= l(:label_docflow_selected_version) %> </th>      
+      <th colspan=2 style="text-align:center; background-color: #D1BDBD;"> <%= l(:label_docflow_current_version) %> </th>      
+    </tr>    
+    <tr>
+      <th> <%= l(:label_docflow_type) %> </th>      
+      <th> <%= l(:label_docflow_title) %> </th>      
+      <th> <%= l(:label_docflow_version) %> </th>
+      <th> <%= l(:label_docflow_category) %> </th>
+      <th> <%= l(:label_docflow_version) %> </th>
+      <th> <%= l(:label_docflow_actual_from) %> </th>
+    </tr>
+  <% @in_work.sort_by{|v| [v.docflow.title,v.version]}.each do |ver| %>
+    <%
+      if ver.docflow.canceled?
+        txt_cur_date = (ver.docflow.last_version.actual_date.nil?) ? ver.docflow.last_version.updated_at : ver.docflow.last_version.actual_date
+        txt_cur_date = (content_tag(:span, format_date(txt_cur_date.utc.getlocal), :style => "text-decoration: line-through;")+" ("+l(:label_docflow_version_canceled)+")")
+        txt_ver = link_to_version(ver.docflow.last_version)
+      else
+        txt_cur_date = (ver.docflow.actual_version.nil?) ? "-" : format_date(ver.docflow.actual_version.actual_date.utc.getlocal)
+        txt_ver = (ver.docflow.actual_version.nil?) ? "-" : link_to_version(ver.docflow.actual_version)
+      end 
+    %>
+    <tr>
+      <td> <%= ver.docflow.type.name %> </td>  
+      <td> <%= link_to ver.docflow.title, ver %> </td>      
+      <td> <%= link_to_version(ver) %> </td>
+      <td> <%= ver.docflow.category.name %> </td>
+      <td> <%= txt_ver %> </td>
+      <td> <%= txt_cur_date %> </td>
+    </tr>
+  <% end %>
+  </table>
+<% end %>
+
+<% content_for :sidebar do %>
+  <%= render :partial => 'docflows/sidebar' %>
+<% end %>

@@ -41,9 +41,9 @@ jQuery(document).ready(function(){
   });
 
   jQuery('a.add_docfile').live('click', function(){
-    num_files = jQuery("#new_files > p.new_attach").size();
-    file_type = (jQuery("#new_files > p.src_file").size() + jQuery("div.attached_files a.src_file").size() > 0) ? "" : "src_file";
-    file_type = (jQuery("#new_files > p.pub_file").size() + jQuery("div.attached_files a.pub_file").size() > 0) ? file_type : "pub_file";
+    num_files = jQuery("p.new_attach").size();
+    file_type = (jQuery("p.src_file").size() > 0) ? "" : "src_file";
+    file_type = (jQuery("p.pub_file").size() > 0) ? file_type : "pub_file";
     file_label = (file_type == "src_file") ? jQuery("#src_file_string").val() : "";
     file_label = (file_type == "pub_file") ? jQuery("#pub_file_string").val() : file_label;
 
@@ -52,7 +52,7 @@ jQuery(document).ready(function(){
     +"<input class='docfile' type=file name='new_files["+num_files+"][file]'> "
     +"<input type=text name='new_files["+num_files+"][description]'>"
     +"<input type=hidden name='new_files["+num_files+"][filetype]' value='"+file_type+"'>"
-    +"<a href='#' title='Delete' class='remove_docfile icon icon-del icon-only'>&nbsp;</a><br /></p>";
+    +"<a href='#' title='Delete' class='remove_docfile icon-del icon-only'>&nbsp;</a></p>";
     if(file_type == ""){
       jQuery("#new_files").append(html);
     }

@@ -1,12 +1,29 @@
 class DocflowsController < ApplicationController
   unloadable
 
-  before_filter :removial_allowed?, :only => [:destroy]
+  helper :docflow_versions
+
   before_filter :check_settings
+  before_filter :authorize, :only => [:new,:edit,:destory] # :create,:update, - need not due model validation
 
   def check_settings
     flash[:warning] = "Setup Plugin! Groups was not selected" if Setting.plugin_docflows['approve_allowed_to'].nil?
     redirect_to "/docflows/plugin_disabled" unless Setting.plugin_docflows['enable_plugin']
+  end
+
+  def authorize
+    return true if User.current.admin?
+
+    return false if params[:id].nil? || params[:id] == ""
+    doc = Docflow.find(params[:id])    
+    
+    if (params[:action] == "new")
+      render_403 unless User.current.edit_docflows_in_some_category?
+    else
+      render_403 unless User.current.edit_docflows? || ( !doc.nil? && User.current.edit_docflows_in_category?(doc.docflow_category_id) )
+    end
+
+    removial_allowed? if params[:action] == "destroy"
   end
 
   def removial_allowed?
@@ -25,7 +42,17 @@ class DocflowsController < ApplicationController
   def index
     # todo:
     # Show 3 blocks at one: Waiting for my approvial, In work and unread
+    @unread = DocflowVersion.unread
+    @waiting = DocflowVersion.waiting_for_my_approvial
+    @in_work = DocflowVersion.in_work
+    render 'important_versions'
+  end
+
+  def all
+    # todo:
+    # Show 3 blocks at one: Waiting for my approvial, In work and unread
     @docs = Docflow.all
+    render 'index'
   end
 
   # todo: select only one version for unread, accepted - equal to current
@@ -81,14 +108,14 @@ class DocflowsController < ApplicationController
   def actual
     @versions = DocflowVersion.actual
     @page_title = l(:label_docflows_actual)
-    render 'versions_list' #, :page_title => "TEST" # 
+    render 'actual_versions'
   end
 
   # Canceled documents which was read and accepted by user
   def canceled
     @versions = DocflowVersion.canceled
-    @page_title = l(:label_docflows_actual)
-    render 'versions_list'
+    @page_title = l(:label_docflows_canceled)
+    render 'canceled_versions'
   end
 
   def new
@@ -127,7 +154,7 @@ class DocflowsController < ApplicationController
 
     respond_to do |format|
       if @doc.update_attributes(params[:docflow])
-        format.html { redirect_to(:action => "index", :notice => l(:label_docflow_doc_saved)) }
+        format.html { redirect_to(:controller => "docflow_versions",:action => "show", :id => @doc.last_version.id) }
         format.xml  { head :ok }
       else
         format.html { render :action => "edit" }

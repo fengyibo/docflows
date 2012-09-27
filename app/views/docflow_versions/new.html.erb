@@ -23,9 +23,9 @@
       <%= f.hidden_field :author_id %>
       <%= f.hidden_field :docflow_status_id %>
 
-      <%= render "docflow_files/form" %>
+      <%= render "docflow_files/form", :is_new => "y" %>
     </div>
   </div>
-  <%= f.submit l(:button_create),  :class => "btn" %>
-  <%= link_to l(:label_docflow_back), @version.docflow.last_version,  :class => "btn", :style=>"color:#000;" %>
+  <%= f.submit l(:button_create),  :class => "btn-def" %>
+  <%= link_to l(:label_docflow_back), @version.docflow.last_version,  :class => "btn-def" %>
 <% end %>

@@ -1,7 +1,42 @@
 <div class="attached_files">
-<% if @files.any? %>
-  <% @files.each do |attached_file| %>
-  <%=  link_to_edit_attached_file(attached_file) %>
+  <% pub_file = @version.files.where("filetype='pub_file'")
+     src_file = @version.files.where("filetype='src_file'")
+     files = @version.files.where("filetype=''") 
+     num_files = 0 %>
+
+  <% if src_file.any? %>
+    <% src_file.each do |file| %>
+      <%=  link_to_edit_attached_file(file) %>
+    <% end %>  
+  <% else %>
+    <p class='new_attach src_file'>
+      <label><%= l(:label_docflow_source_file) %></label>
+      <input class='docfile' type=file name='new_files[<%= num_files %>][file]'>
+      <input type=text name='new_files[<%= num_files %>][description]'>
+      <input type=hidden name='new_files[<%= num_files %>][filetype]' value='src_file'>
+      <a href='#' title='Delete' class='remove_docfile icon-del icon-only'>&nbsp;</a>
+    </p>    
+    <% num_files += 1 %>    
   <% end %>
-<% end %>
+
+  <% if pub_file.any? %>
+    <% pub_file.each do |file| %>
+      <%=  link_to_edit_attached_file(file) %>
+    <% end %>  
+  <% else %>
+    <p class='new_attach pub_file'>
+      <label><%= l(:label_docflow_public_file) %></label>
+      <input class='docfile' type=file name='new_files[<%= num_files %>][file]'>
+      <input type=text name='new_files[<%= num_files %>][description]'>
+      <input type=hidden name='new_files[<%= num_files %>][filetype]' value='pub_file'>
+      <a href='#' title='Delete' class='remove_docfile icon-del icon-only'>&nbsp;</a>
+    </p>    
+  <% end %>
+
+  <% if files.any? %>
+    <% files.each do |attached_file| %>
+    <%=  link_to_edit_attached_file(attached_file) %>
+    <% end %>
+  <% end %>
+
 </div>

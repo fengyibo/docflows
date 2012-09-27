@@ -1,18 +1,41 @@
 class DocflowVersionsController < ApplicationController
   unloadable
 
+  helper :docflows
+  # helper :docflow_files
+
+  before_filter :check_settings
   before_filter :modification_allowed?, :only => [:add_checklists, :remove_checklist, :remove_file, :checklist, :edit, :update, :destroy]
   before_filter :new_allowed?, :only => [:new, :create]
 
-  before_filter :check_settings
+  before_filter :authorize
+  
 
   def check_settings
     flash[:warning] = "Setup Plugin! Groups was not selected" if Setting.plugin_docflows['approve_allowed_to'].nil?
     redirect_to "/docflows/plugin_disabled" unless Setting.plugin_docflows['enable_plugin']
   end
 
-  # helper :docflow_files
-  # helper :docflow_checklists
+  def authorize
+    return true if User.current.admin?
+
+    return false if params[:id].nil? || params[:id] == ""
+    ver = DocflowVersion.find(params[:id])
+
+    if ( params[:action] == "show")
+      render_403 unless ver.visible_for_user?
+    elsif ( params[:action] == "postpone" )
+      render_403 unless ver.author_id == User.current.id  || ver.approver_id == User.current.id
+    elsif ( params[:action] == "accept" )
+      render_403 unless ver.user_in_checklist?(User.current.id)
+    elsif  (params[:action] == "cancel" )
+      render_403 unless User.current.cancel_docflows?
+    elsif ( params[:action] == "approve" )
+      render_403 unless User.current.approve_docflows? && ver.approver_id == User.current.id
+    else
+      render_403 unless ver.editable_by_user?
+    end
+  end
 
   def modification_allowed?
     cur_version = DocflowVersion.find(params[:id]) unless params[:id].nil? || params[:id] == ""
@@ -65,7 +88,7 @@ class DocflowVersionsController < ApplicationController
       if @version.save
         @version.save_files(params[:new_files])
         flash[:warning] = (l(:label_docflow_files_not_saved, :num_files => @version.failed_files.size.to_s)+"<br>").html_safe if @version.failed_files.size > 0
-        flash[:warning] +=  @version.errors_msgs.join("<br>".html_safe) if @version.errors_msgs.any?
+        flash[:warning] +=  @version.errors_msgs.join("<br>").html_safe if @version.errors_msgs.any?
         format.html { redirect_to(@version, :notice => l(:label_docflow_version_saved)) }
         format.xml  { render :xml => @version, :status => :created, :location => @version }
       else
@@ -76,9 +99,6 @@ class DocflowVersionsController < ApplicationController
       end
     end
 
-  end
-
-  def index
   end
 
   def edit
@@ -92,8 +112,8 @@ class DocflowVersionsController < ApplicationController
     respond_to do |format|
       if @version.update_attributes(params[:docflow_version])
         @version.save_files(params[:new_files])
-        flash[:warning] = "There are "+@version.failed_files.size.to_s+" files was not saved<br>".html_safe if @version.failed_files.size > 0
-        flash[:warning] +=  @version.errors_msgs.join("<br>".html_safe) if @version.errors_msgs.any?
+        flash[:warning] = (l(:label_docflow_files_not_saved, :num_files => @version.failed_files.size.to_s)+"<br>").html_safe if @version.failed_files.size > 0
+        flash[:warning] +=  @version.errors_msgs.join("<br>").html_safe if @version.errors_msgs.any?
         format.html { redirect_to(@version, :notice => l(:label_docflow_version_saved)) }
         format.xml  { head :ok }
       else

@@ -16,6 +16,56 @@ class DocflowVersion < ActiveRecord::Base
   before_destroy :drop_files
   before_save :validate_fields, :validate_conditions
 
+  validate :validate_permissions
+
+  def validate_permissions
+    errors.add(:base, l(:label_docflow_permissions_cant_save_document)) unless User.current.edit_docflows? || User.current.edit_docflows_in_category?(docflow.docflow_category_id)
+    # errors.add(:base, l(:label_docflow_permissions_cant_save_document_in_category)) unless User.current.edit_docflows_in_category?(docflow.docflow_category_id)    
+  end
+
+  def validate_fields
+    errors.add(:author_id, l(:label_docflow_category_undefined)) if author_id.nil? || User.find(author_id).nil?
+    #errors.add(:approver_id, "Approver should be defined!") if approver_id.nil? || User.find(approver_id).nil?
+    errors.add(:docflow_status_id, l(:label_docflow_type_undefined)) if docflow_status_id.nil? || DocflowStatus.find(docflow_status_id).nil?
+    return false if errors.any?
+  end
+
+  def validate_conditions
+    if self.new_record?
+      errors.add(:base, l(:label_docflow_only_new_possible_on_create)) unless self.docflow_status_id == 1
+      df = Docflow.find(self.docflow_id)
+      errors.add(:base, l(:label_docflow_cant_create_new_while_previous)) unless df.last_version.nil? || df.last_version.status.id == 3 || df.last_version.status.id == 4
+    else
+      prev_state = DocflowVersion.find(self.id)
+      errors.add(:base, l(:label_docflow_cant_edit_unless_last)) if self.id != self.docflow.last_version.id
+      if docflow_status_id == 2
+        vailidate_files_and_users
+        errors.add(:base, l(:label_docflow_only_new_can_be_sent_to_approvial)) if !prev_state.nil? && !(prev_state.docflow_status_id == 1 || prev_state.docflow_status_id == 2)
+      elsif docflow_status_id == 3
+        vailidate_files_and_users
+        errors.add(:base, l(:label_docflow_no_date_entry)) if self.actual_date.nil? || self.actual_date == ""
+        errors.add(:base, l(:label_docflow_no_date_approvial)) if self.approve_date.nil? || self.approve_date == ""
+        errors.add(:base, l(:label_docflow_cant_approve_if_not_on_approvial)) if !prev_state.nil? && prev_state.docflow_status_id != 2
+      end
+    end
+    return false if errors.any?
+  end
+
+  def vailidate_files_and_users
+      errors.add(:base, l(:label_docflow_no_files_attached)) unless self.files.any?
+      errors.add(:base, l(:label_docflow_no_users_attached)) unless self.checklists.any?
+  end
+
+  def visible_for_user?
+    (user_in_checklist?(User.current.id) || approver_id == User.current.id || docflow.responsible_id == User.current.id || author_id == User.current.id || 
+    User.current.edit_docflows? || User.current.edit_docflows_in_category?(docflow.docflow_category_id) || 
+    User.current.cancel_docflows? || User.current.approve_docflows? || User.current.admin?)
+  end
+
+  def editable_by_user?
+    User.current.edit_docflows? || User.current.edit_docflows_in_category?(docflow.docflow_category_id)    
+  end  
+
   def self.approved_by_me
     where("approver_id=? AND docflow_status_id=3", User.current.id)
   end
@@ -55,19 +105,20 @@ class DocflowVersion < ActiveRecord::Base
     find_by_sql(sql)
   end
 
-  # select only last accepted version
+  # selects only last accepted version if document was not canceled
   def self.actual
     sql = "SELECT v.* FROM docflow_versions v
               INNER JOIN
                 (SELECT ver.docflow_id, MAX(ver.id) AS last_fam_id FROM docflow_versions ver 
                   INNER JOIN docflow_familiarizations fam ON fam.docflow_version_id=ver.id AND fam.user_id=#{User.current.id}
                  GROUP BY ver.docflow_id) ver_last ON ver_last.last_fam_id=v.id
-            WHERE v.docflow_status_id=3"
+              INNER JOIN (SELECT docflow_id, MAX(docflow_status_id) as stat FROM docflow_versions GROUP BY docflow_id) last_stat ON last_stat.docflow_id=v.docflow_id
+            WHERE v.docflow_status_id=3 AND last_stat.stat<4"
     find_by_sql(sql)
   end
 
   # actual versions with familiarization for user
-  def self.actual_versions
+  def self.for_familiarization
     sql = "SELECT v.* FROM docflow_versions v
           INNER JOIN
               (SELECT dc.docflow_version_id FROM users u
@@ -84,55 +135,28 @@ class DocflowVersion < ActiveRecord::Base
     find_by_sql(sql)
   end 
 
-  # todo: select only last version
+  # selects only last accepted version where document was canceled (last version canceled)
   def self.canceled
     sql = "SELECT v.* FROM docflow_versions v
-          INNER JOIN
-              (SELECT dc.docflow_version_id FROM users u
-                   INNER JOIN docflow_checklists dc ON
-                     ((dc.user_id IS NOT NULL AND u.id = dc.user_id) OR
-                      (dc.all_users='y' AND dc.user_department_id IS NULL AND dc.user_title_id IS NULL) OR
-                      (dc.user_department_id IS NOT NULL AND dc.user_title_id IS NOT NULL AND dc.user_title_id=u.user_title_id AND dc.user_department_id=u.user_department_id AND dc.all_users IS NULL) OR
-                      (dc.user_department_id IS NOT NULL AND dc.user_department_id=u.user_department_id AND dc.user_title_id IS NULL))
-                WHERE u.id=#{User.current.id}
-                GROUP BY dc.docflow_version_id) vids
-          ON vids.docflow_version_id=v.id
-          INNER JOIN docflow_familiarizations df ON df.docflow_version_id=v.id AND df.user_id=#{User.current.id}
-          WHERE v.docflow_status_id=4"
+              INNER JOIN
+                (SELECT ver.docflow_id, MAX(ver.id) AS last_fam_id FROM docflow_versions ver 
+                  INNER JOIN docflow_familiarizations fam ON fam.docflow_version_id=ver.id AND fam.user_id=#{User.current.id}
+                 GROUP BY ver.docflow_id) ver_last ON ver_last.last_fam_id=v.id
+              INNER JOIN (SELECT docflow_id, MAX(docflow_status_id) as stat FROM docflow_versions GROUP BY docflow_id) last_stat ON last_stat.docflow_id=v.docflow_id
+            WHERE v.docflow_status_id>2 AND last_stat.stat=4"
     find_by_sql(sql)
   end
 
-  def validate_fields
-    errors.add(:author_id, l(:label_docflow_category_undefined)) if author_id.nil? || User.find(author_id).nil?
-    #errors.add(:approver_id, "Approver should be defined!") if approver_id.nil? || User.find(approver_id).nil?
-    errors.add(:docflow_status_id, l(:label_docflow_type_undefined)) if docflow_status_id.nil? || DocflowStatus.find(docflow_status_id).nil?
-    return false if errors.any?
-  end
-
-  def validate_conditions
-    if self.new_record?
-      errors.add(:base, l(:label_docflow_only_new_possible_on_create)) unless self.docflow_status_id == 1
-      df = Docflow.find(self.docflow_id)
-      errors.add(:base, l(:label_docflow_cant_create_new_while_previous)) unless df.last_version.nil? || df.last_version.status.id == 3 || df.last_version.status.id == 4
-    else
-      prev_state = DocflowVersion.find(self.id)
-      errors.add(:base, l(:label_docflow_cant_edit_unless_last)) if self.id != self.docflow.last_version.id
-      if docflow_status_id == 2
-        vailidate_files_and_users
-        errors.add(:base, l(:label_docflow_only_new_can_be_sent_to_approvial)) if !prev_state.nil? && !(prev_state.docflow_status_id == 1 || prev_state.docflow_status_id == 2)
-      elsif docflow_status_id == 3
-        vailidate_files_and_users
-        errors.add(:base, l(:label_docflow_no_date_entry)) if self.actual_date.nil? || self.actual_date == ""
-        errors.add(:base, l(:label_docflow_no_date_approvial)) if self.approve_date.nil? || self.approve_date == ""
-        errors.add(:base, l(:label_docflow_cant_approve_if_not_on_approvial)) if !prev_state.nil? && prev_state.docflow_status_id != 2
-      end
-    end
-    return false if errors.any?
-  end
-
-  def vailidate_files_and_users
-      errors.add(:base, l(:label_docflow_no_files_attached)) unless self.files.any?
-      errors.add(:base, l(:label_docflow_no_users_attached)) unless self.checklists.any?
+  # if document canceled or user not in last fam-list
+  def self.canceled_for_user
+    sql = "SELECT v.* FROM docflow_versions v
+              INNER JOIN
+                (SELECT ver.docflow_id, MAX(ver.id) AS last_fam_id FROM docflow_versions ver 
+                  INNER JOIN docflow_familiarizations fam ON fam.docflow_version_id=ver.id AND fam.user_id=#{User.current.id}
+                 GROUP BY ver.docflow_id) ver_last ON ver_last.last_fam_id=v.id
+              INNER JOIN (SELECT docflow_id, MAX(docflow_status_id) as stat FROM docflow_versions GROUP BY docflow_id) last_stat ON last_stat.docflow_id=v.docflow_id
+            WHERE v.docflow_status_id>2 AND last_stat.stat=4"
+    find_by_sql(sql)
   end
 
   def familiarization_list
@@ -182,28 +206,30 @@ class DocflowVersion < ActiveRecord::Base
     files_left = Setting.plugin_docflows['max_files'].to_i - self.files.count
     if new_files.is_a?(Array)
       new_files.each do |new_file|
-        num_files += 1
-        err = ""
+        if new_file['file'].respond_to?(:original_filename)
+          num_files += 1
+          err = ""
 
-        docfile = DocflowFile.new( :file => new_file['file'],
-                                   :docflow_version_id => self.id,
-                                   :description => new_file['description'],
-                                   :filetype => new_file['filetype'] ) if err == ""
+          docfile = DocflowFile.new( :file => new_file['file'],
+                                     :docflow_version_id => self.id,
+                                     :description => new_file['description'],
+                                     :filetype => new_file['filetype'] )
 
-        err = ("<br>"+l(:label_docflow_file_not_pdf)).html_safe if docfile.filetype == "pub_file" && !docfile.pdf?
-        err += ("<br>"+l(:label_docflow_file_not_docx)).html_safe if docfile.filetype == "src_file" && !docfile.docx?
-        err += ("<br>"+l(:label_docflow_file_type_not_allowed)+docfile.filename).html_safe unless docfile.allowed_type?
-        err += ("<br>"+l(:label_docflow_file_more_than_allowed_files, 
-                         :max_files => Setting.plugin_docflows['max_files'].to_s, 
-                         :fname => docfile.filename)).html_safe if num_files > files_left
+          err = ("<br>"+l(:label_docflow_file_not_pdf)).html_safe if docfile.filetype == "pub_file" && !docfile.pdf?
+          err += ("<br>"+l(:label_docflow_file_not_docx)).html_safe if docfile.filetype == "src_file" && !docfile.docx?
+          err += ("<br>"+l(:label_docflow_file_type_not_allowed)+docfile.filename).html_safe unless docfile.allowed_type?
+          err += ("<br>"+l(:label_docflow_file_more_than_allowed_files, 
+                           :max_files => Setting.plugin_docflows['max_files'].to_s, 
+                           :fname => docfile.filename)).html_safe if num_files > files_left
 
-        docfile.save if err == ""
+          docfile.save if err == ""
 
-        if docfile.new_record?
-          self.failed_files << new_file
-          self.errors_msgs << err
-        else
-          self.saved_files << new_file
+          if docfile.new_record?
+            self.failed_files << new_file
+            self.errors_msgs << err
+          else
+            self.saved_files << new_file
+          end
         end
       end
     end

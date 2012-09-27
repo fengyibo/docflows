@@ -43,8 +43,7 @@ class DocflowFile < ActiveRecord::Base
   #   return super if delete_from_disk!
   # end
 
-  def allowed_type?
-    # ext = filename.split('.')[-1]
+  def allowed_type?    
     Setting.plugin_docflows['enabled_extensions'].to_s.split(',').include?(filename.split('.')[-1])
   end
 

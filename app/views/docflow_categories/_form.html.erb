@@ -1,8 +1,8 @@
 <%= render :partial => 'docflows/head' %>
 
 <% if @category.errors.any? %>
-  <div id="error_explanation">
-    <h2><%= pluralize(@category.errors.count, "error") %> prohibited this category from being saved:</h2>
+  <div id="error_explanation" class="flash error">
+    <h4><%= pluralize(@category.errors.count, "error")+l(:label_docflow_errors_found) %> </h4>
     <ul>
     <% @category.errors.full_messages.each do |msg| %>
       <li><%= msg %></li>
@@ -13,8 +13,6 @@
 
 <%= fields_for @category do |ff|%>
   <p>
-  <%# todo: remove parent category equal to self.id !%>
-  <%# It's a problem due deletion of one node leds tree distruction %>
     <%= ff.label l(:label_docflow_parent_category) %>
     <%  childs_list = []
         @category.self_and_descendants.each{|ch| childs_list << ch.id } %>
@@ -26,7 +24,7 @@
 
   <p>
     <%= ff.label l(:label_docflow_title) %>
-    <%= ff.text_field :name %>
+    <%= ff.text_field :name, :required => true  %>
   </p>
 
   <p>

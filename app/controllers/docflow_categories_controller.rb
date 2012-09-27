@@ -1,11 +1,17 @@
 class DocflowCategoriesController < ApplicationController
   unloadable
 
-  before_filter :check_settings
+  before_filter :check_settings, :authorize
 
   def check_settings
     flash[:warning] = "Setup Plugin! Groups was not selected" if Setting.plugin_docflows['approve_allowed_to'].nil?
     redirect_to "/docflows/plugin_disabled" unless Setting.plugin_docflows['enable_plugin']
+  end
+
+  def authorize
+    return true if User.current.admin?
+    
+    render_403 unless User.current.edit_docflows_categories?
   end
 
   def index
@@ -26,7 +32,7 @@ class DocflowCategoriesController < ApplicationController
 
     respond_to do |format|
       if @category.save
-        format.html { redirect_to(:action => "index", :notice => 'Category was successfully created.') }
+        format.html { redirect_to(:action => "index", :notice => l(:label_docflow_category_saved)) }
         format.xml  { render :xml => @category, :status => :created, :location => @category }
       else
         format.html { render :action => "new" }
@@ -40,7 +46,7 @@ class DocflowCategoriesController < ApplicationController
 
     respond_to do |format|
       if @category.update_attributes(params[:docflow_category])
-        format.html { redirect_to(:action => "index", :notice => 'Category was successfully updated.') }
+        format.html { redirect_to(:action => "index", :notice => l(:label_docflow_category_saved)) }
         format.xml  { head :ok }
       else
         format.html { render :action => "edit" }

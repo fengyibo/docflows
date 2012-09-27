@@ -2,13 +2,13 @@
 
 <%= fields_for @version do |ff|%>
   <p>
-    <%= label_tag l(:label_docflow_new_version_for) %>
+    <%= label_tag l(:label_docflow_version_of_document) %>
     <%= @version.docflow.title %>
   </p>
 
   <p>
     <%= label_tag l(:label_docflow_version) %>
-    <%= '#'+ @version.version.to_s %>
+    <%= link_to_version(@version) %>
   </p>
 
   <p>
@@ -23,9 +23,6 @@
     <%= calendar_for('docflow_version_actual_date') %>
   </p>
 
-  <p>
-  <%= ff.label l(:label_docflow_check_list) %>
-  </p>
   <%= ff.hidden_field :docflow_id %>
   <%= ff.hidden_field :version %>
   <%= ff.hidden_field :author_id %>

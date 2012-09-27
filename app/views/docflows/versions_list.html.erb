@@ -1,27 +1,41 @@
 <%= render :partial => 'docflows/head' %>
 <div class="contextual">
-  <%= link_to(l(:label_docflow_add), {:controller => 'docflows', :action => 'new'}, :class => 'icon icon-add')  %>
+  <%= docflow_new_button %>
 </div>
 
 <h2><%= content_tag(:span,@page_title)  %></h2>
 <% unless @versions.empty? %>
   <table class="list">
     <tr>
+      <th colspan=4 style="text-align:center; background-color: #BAD8BA;"> <%= l(:label_docflow_selected_version) %> </th>      
+      <th colspan=2 style="text-align:center; background-color: #D1BDBD;"> <%= l(:label_docflow_current_version) %> </th>      
+    </tr>    
+    <tr>
       <th> <%= l(:label_docflow_type) %> </th>      
       <th> <%= l(:label_docflow_title) %> </th>      
       <th> <%= l(:label_docflow_version) %> </th>
       <th> <%= l(:label_docflow_category) %> </th>
-      <th> <%= l(:label_docflow_current_version) %> </th>
+      <th> <%= l(:label_docflow_version) %> </th>
       <th> <%= l(:label_docflow_actual_from) %> </th>
     </tr>
-  <% @versions.each do |ver| %>
+  <% @versions.sort_by{|v| [v.docflow.title,v.version]}.each do |ver| %>
+    <%
+      if ver.docflow.canceled?
+        txt_cur_date = (ver.docflow.last_version.actual_date.nil?) ? ver.docflow.last_version.updated_at : ver.docflow.last_version.actual_date
+        txt_cur_date = (content_tag(:span, format_date(txt_cur_date.utc.getlocal), :style => "text-decoration: line-through;")+" ("+l(:label_docflow_version_canceled)+")")
+        txt_ver = link_to_version(ver.docflow.last_version)
+      else
+        txt_cur_date = (ver.docflow.actual_version.nil?) ? "-" : format_date(ver.docflow.actual_version.actual_date.utc.getlocal)
+        txt_ver = (ver.docflow.actual_version.nil?) ? "-" : link_to_version(ver.docflow.actual_version)
+      end 
+    %>
     <tr>
       <td> <%= ver.docflow.type.name %> </td>  
       <td> <%= link_to ver.docflow.title, ver %> </td>      
-      <td> #<%= ver.version %> </td>
+      <td> <%= link_to_version(ver) %> </td>
       <td> <%= ver.docflow.category.name %> </td>
-      <td> <%= (ver.docflow.actual_version.nil?) ? "-" : ver.docflow.actual_version.version %> </td>
-      <td> <%= (ver.docflow.actual_version.nil?) ? "-" : format_date(ver.docflow.actual_version.actual_date.utc.getlocal)  %> </td>
+      <td> <%= txt_ver %> </td>
+      <td> <%= txt_cur_date %> </td>
     </tr>
   <% end %>
   </table>

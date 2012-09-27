@@ -1,6 +1,5 @@
 <div class="contextual">
-  <%= link_to(l(:label_docflow_remove), docflow_path(@doc), :confirm => l(:label_docflow_delete_confirm),
-        :method => :delete, :action => :destory, :class => 'icon icon-del') %>
+  <%= docflow_delete_button %>
 </div>
 <h2><%= l(:label_docflow_edit) %></h2>
 
@@ -10,7 +9,7 @@
     <%= render 'form'  %>
   </div>
 </div>
-<%= f.submit l(:button_update), :class => "btn" %>
+<%= f.submit l(:button_update), :class => "btn-def" %>
 <% end %>
 
-<%= link_to l(:label_docflow_back), docflows_path, :class => "btn", :style => "color:#000;" %>
+<%= link_to l(:label_docflow_back), @doc.last_version, :class => "btn-def" %>

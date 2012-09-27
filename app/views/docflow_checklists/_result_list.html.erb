@@ -3,7 +3,7 @@
   <legend><%= l(:label_docflows_not_familiarized) %></legend>
   <ul class="nav-menu">
     <% users.each do |user| %>
-      <%= content_tag(:li,user.name) if user.read_date(@version.id).nil? %>
+      <%= content_tag(:li,link_to_user(user)) if user.read_date(@version.id).nil? %>
     <% end %>
   </ul>
 </fieldset>
@@ -12,7 +12,7 @@
   <ul class="nav-menu">
     <% users.each do |user| %>
       <%= content_tag(:li,
-                      user.name+" ("+
+                      link_to_user(user)+" ("+
                       format_date(user.read_date(@version.id).utc.getlocal)+")") unless user.read_date(@version.id).nil? %>
     <% end %>
   </ul>

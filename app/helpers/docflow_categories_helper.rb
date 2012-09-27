@@ -47,9 +47,9 @@ module DocflowCategoriesHelper
       result += "<table class='invisi-table'><tr>"
       result += content_tag(:td, link_to(n.name, edit_docflow_category_path(n)), :style => "padding-left: #{pad_left}px;")
       result += content_tag(:td,
-                    link_to('&nbsp;'.html_safe, new_docflow_category_path(:parent_id => n.id),:class => 'icon icon-add icon-only')+" "+
+                    link_to('&nbsp;'.html_safe, new_docflow_category_path(:parent_id => n.id),:class => 'icon-add icon-only')+" "+
                     link_to('&nbsp;'.html_safe, docflow_category_path(n), :confirm => l(:label_docflow_delete_category_confirm),
-                        :method => :delete, :action => :destory, :class => 'icon icon-del icon-only'),
+                        :method => :delete, :action => :destory, :class => 'icon-del icon-only'),
                   :style => "width:40px")
       result += "</tr></table></div>"
 

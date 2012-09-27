@@ -27,9 +27,9 @@
     <%= render 'docflow_files/form', :is_new => true %>
   </div>
 </div>
-<%= f.submit l(:button_create), :class=>"btn" %>
+<%= f.submit l(:button_create), :class=>"btn-def" %>
 <% end %>
 
 <%= javascript_tag "Form.Element.focus('docflow_title');" %>
 
-<%= link_to l(:label_docflow_back), docflows_path, :class => "btn", :style => "color:#000;" %>
+<%= link_to l(:label_docflow_back), docflows_path, :class => "btn-def" %>

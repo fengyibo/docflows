@@ -1,8 +1,8 @@
 <%= render :partial => 'docflows/head' %>
 
 <% if @doc.errors.any? %>
-  <div id="error_explanation">
-    <h2><%= pluralize(@doc.errors.count, "error") %> prohibited this document from being saved:</h2>
+  <div id="error_explanation" class="flash error">
+    <h4><%= pluralize(@doc.errors.count, "error")+l(:label_docflow_errors_found) %> </h4>
     <ul>
     <% @doc.errors.full_messages.each do |msg| %>
       <li><%= msg %></li>
