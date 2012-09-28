@@ -14,13 +14,11 @@ class DocflowVersion < ActiveRecord::Base
 
   has_many :files, :class_name => "DocflowFile"
   before_destroy :drop_files
-  before_save :validate_fields, :validate_conditions
-
-  validate :validate_permissions
+  before_save :validate_fields, :validate_conditions, :validate_permissions
 
   def validate_permissions
     errors.add(:base, l(:label_docflow_permissions_cant_save_document)) unless User.current.edit_docflows? || User.current.edit_docflows_in_category?(docflow.docflow_category_id)
-    # errors.add(:base, l(:label_docflow_permissions_cant_save_document_in_category)) unless User.current.edit_docflows_in_category?(docflow.docflow_category_id)    
+    return false if errors.any?   
   end
 
   def validate_fields
@@ -89,54 +87,179 @@ class DocflowVersion < ActiveRecord::Base
   # todo: only actual and current versions should be selected
   # todo: profile of sql query in mysql
   def self.unread
-    sql = "SELECT v.* FROM docflow_versions v
-          INNER JOIN
-              (SELECT dc.docflow_version_id FROM users u
-                   INNER JOIN docflow_checklists dc ON
+    sql = "SELECT v.* FROM #{DocflowVersion.table_name} v
+              INNER JOIN
+                  (SELECT dc.docflow_version_id FROM #{User.table_name} u
+                       INNER JOIN #{DocflowChecklist.table_name} dc ON
+                         ((dc.user_id IS NOT NULL AND u.id = dc.user_id) OR
+                          (dc.all_users='y' AND dc.user_department_id IS NULL AND dc.user_title_id IS NULL) OR
+                          (dc.user_department_id IS NOT NULL AND dc.user_title_id IS NOT NULL AND dc.user_title_id=u.user_title_id AND dc.user_department_id=u.user_department_id AND dc.all_users IS NULL) OR
+                          (dc.user_department_id IS NOT NULL AND dc.user_department_id=u.user_department_id AND dc.user_title_id IS NULL))
+                    WHERE u.id=#{User.current.id}
+                    GROUP BY dc.docflow_version_id) vids
+              ON vids.docflow_version_id=v.id
+
+              INNER JOIN (SELECT docflow_id, MAX(id) AS id FROM #{DocflowVersion.table_name} GROUP BY docflow_id) last_version 
+              ON last_version.docflow_id=v.docflow_id              
+              INNER JOIN (SELECT docflow_status_id, id FROM #{DocflowVersion.table_name}) last_status 
+              ON last_status.id=last_version.id
+
+          LEFT JOIN #{DocflowFamiliarization.table_name} df ON df.docflow_version_id=v.id AND df.user_id=#{User.current.id}
+          WHERE v.docflow_status_id=3 AND df.done_date IS NULL AND last_status.docflow_status_id<4"
+    find_by_sql(sql)
+  end
+
+  def self.unread_for_user
+    sql = "SELECT v.* FROM #{DocflowVersion.table_name} v
+              INNER JOIN
+                  (SELECT * FROM 
+                      (SELECT MAX(id) AS id, docflow_id FROM #{DocflowVersion.table_name} WHERE docflow_status_id=3 GROUP BY docflow_id
+                        UNION
+                       SELECT MAX(id) AS id, docflow_id FROM #{DocflowVersion.table_name} WHERE docflow_status_id=3 AND actual_date<NOW() GROUP BY docflow_id) two_or_one 
+                  GROUP BY id,docflow_id) to_read
+              ON to_read.id=v.id
+
+              INNER JOIN
+                  (SELECT dc.docflow_version_id FROM #{User.table_name} u
+                       INNER JOIN #{DocflowChecklist.table_name} dc ON
+                         ((dc.user_id IS NOT NULL AND u.id = dc.user_id) OR
+                          (dc.all_users='y' AND dc.user_department_id IS NULL AND dc.user_title_id IS NULL) OR
+                          (dc.user_department_id IS NOT NULL AND dc.user_title_id IS NOT NULL AND dc.user_title_id=u.user_title_id AND dc.user_department_id=u.user_department_id AND dc.all_users IS NULL) OR
+                          (dc.user_department_id IS NOT NULL AND dc.user_department_id=u.user_department_id AND dc.user_title_id IS NULL))
+                    WHERE u.id=#{User.current.id}
+                    GROUP BY dc.docflow_version_id) with_checklist
+              ON with_checklist.docflow_version_id=v.id
+
+              INNER JOIN (SELECT docflow_id, MAX(id) AS id FROM #{DocflowVersion.table_name} GROUP BY docflow_id) last_version 
+              ON last_version.docflow_id=v.docflow_id              
+              INNER JOIN (SELECT docflow_status_id, id FROM #{DocflowVersion.table_name}) last_status 
+              ON last_status.id=last_version.id
+
+              LEFT JOIN #{DocflowFamiliarization.table_name} df ON df.docflow_version_id=v.id AND df.user_id=#{User.current.id}
+           WHERE v.docflow_status_id=3 AND df.done_date IS NULL AND last_status.docflow_status_id<4"
+
+    find_by_sql(sql)
+  end
+
+  # 
+  def self.unread_actual
+    sql = "SELECT v.* FROM #{DocflowVersion.table_name} v
+              INNER JOIN
+                  (SELECT dc.docflow_version_id FROM #{User.table_name} u
+                       INNER JOIN #{DocflowChecklist.table_name} dc ON
+                         ((dc.user_id IS NOT NULL AND u.id = dc.user_id) OR
+                          (dc.all_users='y' AND dc.user_department_id IS NULL AND dc.user_title_id IS NULL) OR
+                          (dc.user_department_id IS NOT NULL AND dc.user_title_id IS NOT NULL AND dc.user_title_id=u.user_title_id AND dc.user_department_id=u.user_department_id AND dc.all_users IS NULL) OR
+                          (dc.user_department_id IS NOT NULL AND dc.user_department_id=u.user_department_id AND dc.user_title_id IS NULL))
+                    WHERE u.id=#{User.current.id}
+                    GROUP BY dc.docflow_version_id) vids
+              ON vids.docflow_version_id=v.id    
+              LEFT JOIN #{DocflowFamiliarization.table_name} df ON df.docflow_version_id=v.id AND df.user_id=#{User.current.id}
+
+              INNER JOIN 
+                (SELECT dv.docflow_id, MAX(dc.docflow_version_id) AS id FROM #{User.table_name} u
+                    INNER JOIN #{DocflowChecklist.table_name} dc ON
                      ((dc.user_id IS NOT NULL AND u.id = dc.user_id) OR
                       (dc.all_users='y' AND dc.user_department_id IS NULL AND dc.user_title_id IS NULL) OR
                       (dc.user_department_id IS NOT NULL AND dc.user_title_id IS NOT NULL AND dc.user_title_id=u.user_title_id AND dc.user_department_id=u.user_department_id AND dc.all_users IS NULL) OR
                       (dc.user_department_id IS NOT NULL AND dc.user_department_id=u.user_department_id AND dc.user_title_id IS NULL))
-                WHERE u.id=#{User.current.id}
-                GROUP BY dc.docflow_version_id) vids
-          ON vids.docflow_version_id=v.id
-          LEFT JOIN docflow_familiarizations df ON df.docflow_version_id=v.id AND df.user_id=#{User.current.id}
-          WHERE v.docflow_status_id=3 AND df.done_date IS NULL"
+                    INNER JOIN #{DocflowVersion.table_name} dv ON dv.id=dc.docflow_version_id AND dv.docflow_status_id>2
+                  WHERE u.id=#{User.current.id}
+                  GROUP BY dv.docflow_id) last_approved_checklist_version 
+              ON last_approved_checklist_version.docflow_id=v.docflow_id
+
+              INNER JOIN (SELECT docflow_id, MAX(id) AS id FROM #{DocflowVersion.table_name} GROUP BY docflow_id) last_version 
+              ON last_version.docflow_id=v.docflow_id
+              INNER JOIN (SELECT docflow_status_id, MAX(id) AS id FROM #{DocflowVersion.table_name} GROUP BY docflow_id) last_status 
+              ON last_status.id=last_version.id
+
+              INNER JOIN (SELECT docflow_id, MAX(id) AS id FROM #{DocflowVersion.table_name} WHERE docflow_status_id=3 AND actual_date <= NOW() GROUP BY docflow_id) current_version 
+              ON current_version.docflow_id=v.docflow_id 
+              
+            WHERE v.docflow_status_id=3 AND last_status.docflow_status_id<4 AND (last_approved_checklist_version.id=v.id OR current_version.id=v.id) AND df.done_date IS NULL"
     find_by_sql(sql)
   end
 
-  # selects only last accepted version if document was not canceled
+  # selects only last accepted by user version if document was not canceled
   def self.actual
-    sql = "SELECT v.* FROM docflow_versions v
+    sql = "SELECT v.* FROM #{DocflowVersion.table_name} v
               INNER JOIN
-                (SELECT ver.docflow_id, MAX(ver.id) AS last_fam_id FROM docflow_versions ver 
-                  INNER JOIN docflow_familiarizations fam ON fam.docflow_version_id=ver.id AND fam.user_id=#{User.current.id}
+                (SELECT ver.docflow_id, MAX(ver.id) AS last_fam_id FROM #{DocflowVersion.table_name} ver 
+                  INNER JOIN #{DocflowFamiliarization.table_name} fam ON fam.docflow_version_id=ver.id AND fam.user_id=#{User.current.id}
                  GROUP BY ver.docflow_id) ver_last ON ver_last.last_fam_id=v.id
-              INNER JOIN (SELECT docflow_id, MAX(docflow_status_id) as stat FROM docflow_versions GROUP BY docflow_id) last_stat ON last_stat.docflow_id=v.docflow_id
+              INNER JOIN (SELECT docflow_id, MAX(docflow_status_id) as stat FROM #{DocflowVersion.table_name} GROUP BY docflow_id) last_stat ON last_stat.docflow_id=v.docflow_id
             WHERE v.docflow_status_id=3 AND last_stat.stat<4"
     find_by_sql(sql)
   end
 
   # selects only last accepted version if document was not canceled and no any new approved unaccepted version
   def self.actual_for_user
-    sql = "SELECT v.* FROM docflow_versions v
+    sql = "SELECT v.* FROM #{DocflowVersion.table_name} v
               INNER JOIN
-                (SELECT docflow_id, MAX(id) AS id FROM docflow_versions WHERE docflow_status_id=3 AND actual_date<NOW() GROUP BY docflow_id) last_actual 
+                (SELECT docflow_id, MAX(id) AS id FROM #{DocflowVersion.table_name} WHERE docflow_status_id=3 AND actual_date<NOW() GROUP BY docflow_id) last_actual 
               ON last_actual.id=v.id
-                 INNER JOIN docflow_familiarizations fam ON fam.docflow_version_id=last_actual.id AND fam.user_id=#{User.current.id}
-              
-              INNER JOIN (SELECT docflow_id, MAX(docflow_status_id) as stat FROM docflow_versions GROUP BY docflow_id) last_stat 
+                  INNER JOIN #{DocflowFamiliarization.table_name} fam 
+                  ON fam.docflow_version_id=last_actual.id AND fam.user_id=#{User.current.id}              
+              INNER JOIN (SELECT docflow_id, MAX(docflow_status_id) AS stat FROM #{DocflowVersion.table_name} GROUP BY docflow_id) last_stat 
               ON last_stat.docflow_id=v.docflow_id
             WHERE v.docflow_status_id=3 AND last_stat.stat<4"
     find_by_sql(sql)
   end  
 
-  # actual versions with familiarization for user
+  # selects only last accepted version where document was canceled (last version canceled)
+  def self.canceled
+    sql = "SELECT v.* FROM #{DocflowVersion.table_name} v
+              INNER JOIN
+                (SELECT ver.docflow_id, MAX(ver.id) AS last_fam_id FROM #{DocflowVersion.table_name} ver 
+                  INNER JOIN #{DocflowFamiliarization.table_name} fam ON fam.docflow_version_id=ver.id AND fam.user_id=#{User.current.id}
+                 GROUP BY ver.docflow_id) ver_last ON ver_last.last_fam_id=v.id
+              INNER JOIN (SELECT docflow_id, MAX(docflow_status_id) AS stat FROM #{DocflowVersion.table_name} GROUP BY docflow_id) last_stat ON last_stat.docflow_id=v.docflow_id
+            WHERE v.docflow_status_id>2 AND last_stat.stat=4"
+    find_by_sql(sql)
+  end
+
+  # if document canceled or user not in last fam-list
+  # Выбрать последнюю (одну) версию с которой ознакомился
+  # где самая последняя версия отменена
+  # или есть еще более новая версия со статусом > 2 после версии с которой ознакомился, где пользователь не в листе на ознакомление
+  def self.canceled_for_user
+    sql = "SELECT v.* FROM #{DocflowVersion.table_name} v
+              INNER JOIN
+                (SELECT ver.docflow_id, MAX(ver.id) AS id FROM #{DocflowVersion.table_name} ver 
+                  INNER JOIN #{DocflowFamiliarization.table_name} fam ON fam.docflow_version_id=ver.id AND fam.user_id=#{User.current.id}
+                 GROUP BY ver.docflow_id) last_fam 
+              ON last_fam.id=v.id
+
+              INNER JOIN 
+                (SELECT dv.docflow_id, MAX(dc.docflow_version_id) AS id FROM #{User.table_name} u
+                    INNER JOIN #{DocflowChecklist.table_name} dc ON
+                     ((dc.user_id IS NOT NULL AND u.id = dc.user_id) OR
+                      (dc.all_users='y' AND dc.user_department_id IS NULL AND dc.user_title_id IS NULL) OR
+                      (dc.user_department_id IS NOT NULL AND dc.user_title_id IS NOT NULL AND dc.user_title_id=u.user_title_id AND dc.user_department_id=u.user_department_id AND dc.all_users IS NULL) OR
+                      (dc.user_department_id IS NOT NULL AND dc.user_department_id=u.user_department_id AND dc.user_title_id IS NULL))
+                    INNER JOIN #{DocflowVersion.table_name} dv ON dv.id=dc.docflow_version_id AND dv.docflow_status_id>2
+                  WHERE u.id=#{User.current.id}
+                  GROUP BY dv.docflow_id) last_checklist_version 
+              ON last_checklist_version.docflow_id=v.docflow_id
+
+              INNER JOIN (SELECT docflow_id, MAX(id) AS id FROM #{DocflowVersion.table_name} GROUP BY docflow_id) last_version 
+              ON last_version.docflow_id=v.docflow_id
+
+              INNER JOIN (SELECT docflow_status_id, id FROM #{DocflowVersion.table_name}) last_status 
+              ON last_status.id=last_version.id
+              
+            WHERE last_status.docflow_status_id=4 OR last_checklist_version.id<last_version.id"
+    find_by_sql(sql)
+  end  
+
+ 
+
+  # approved versions with familiarization for user
   def self.for_familiarization
-    sql = "SELECT v.* FROM docflow_versions v
+    sql = "SELECT v.* FROM #{DocflowVersion.table_name} v
           INNER JOIN
-              (SELECT dc.docflow_version_id FROM users u
-                   INNER JOIN docflow_checklists dc ON
+              (SELECT dc.docflow_version_id FROM #{User.table_name} u
+                   INNER JOIN #{DocflowChecklist.table_name} dc ON
                      ((dc.user_id IS NOT NULL AND u.id = dc.user_id) OR
                       (dc.all_users='y' AND dc.user_department_id IS NULL AND dc.user_title_id IS NULL) OR
                       (dc.user_department_id IS NOT NULL AND dc.user_title_id IS NOT NULL AND dc.user_title_id=u.user_title_id AND dc.user_department_id=u.user_department_id AND dc.all_users IS NULL) OR
@@ -144,63 +267,44 @@ class DocflowVersion < ActiveRecord::Base
                 WHERE u.id=#{User.current.id}
                 GROUP BY dc.docflow_version_id) vids
           ON vids.docflow_version_id=v.id
-          INNER JOIN docflow_familiarizations df ON df.docflow_version_id=v.id AND df.user_id=#{User.current.id}
+          INNER JOIN #{DocflowFamiliarization.table_name} df ON df.docflow_version_id=v.id AND df.user_id=#{User.current.id}
           WHERE v.docflow_status_id=3"
     find_by_sql(sql)
   end 
 
-  # selects only last accepted version where document was canceled (last version canceled)
-  def self.canceled
-    sql = "SELECT v.* FROM docflow_versions v
-              INNER JOIN
-                (SELECT ver.docflow_id, MAX(ver.id) AS last_fam_id FROM docflow_versions ver 
-                  INNER JOIN docflow_familiarizations fam ON fam.docflow_version_id=ver.id AND fam.user_id=#{User.current.id}
-                 GROUP BY ver.docflow_id) ver_last ON ver_last.last_fam_id=v.id
-              INNER JOIN (SELECT docflow_id, MAX(docflow_status_id) as stat FROM docflow_versions GROUP BY docflow_id) last_stat ON last_stat.docflow_id=v.docflow_id
-            WHERE v.docflow_status_id>2 AND last_stat.stat=4"
-    find_by_sql(sql)
-  end
-
-  # if document canceled or user not in last fam-list
-  def self.canceled_for_user
-    sql = "SELECT v.* FROM docflow_versions v
-              INNER JOIN
-                (SELECT ver.docflow_id, MAX(ver.id) AS last_fam_id FROM docflow_versions ver 
-                  INNER JOIN docflow_familiarizations fam ON fam.docflow_version_id=ver.id AND fam.user_id=#{User.current.id}
-                 GROUP BY ver.docflow_id) ver_last ON ver_last.last_fam_id=v.id
-              INNER JOIN (SELECT docflow_id, MAX(docflow_status_id) as stat FROM docflow_versions GROUP BY docflow_id) last_stat ON last_stat.docflow_id=v.docflow_id
-            WHERE v.docflow_status_id>2 AND last_stat.stat=4"
-    find_by_sql(sql)
-  end
-
   def familiarization_list
-    sql = "SELECT users.* FROM users
+    sql = "SELECT #{User.table_name}.* FROM #{User.table_name}
               INNER JOIN
-              (SELECT u.id FROM users u
-               INNER JOIN docflow_checklists dc ON dc.docflow_version_id=#{self.id} AND
+              (SELECT u.id FROM #{User.table_name} u
+               INNER JOIN #{DocflowChecklist.table_name} dc ON dc.docflow_version_id=#{self.id} AND
                  ((dc.user_id IS NOT NULL AND u.id = dc.user_id) OR
                   (dc.all_users='y' AND dc.user_department_id IS NULL AND dc.user_title_id IS NULL) OR
                   (dc.user_department_id IS NOT NULL AND dc.user_title_id IS NOT NULL AND
                     dc.user_title_id=u.user_title_id AND dc.user_department_id=u.user_department_id) OR
                   (dc.user_department_id IS NOT NULL AND dc.user_department_id=u.user_department_id AND dc.user_title_id IS NULL))
-              GROUP BY u.id) uids ON uids.id=users.id
-           WHERE users.type='User'"
+              GROUP BY u.id) uids ON uids.id=#{User.table_name}.id
+           WHERE #{User.table_name}.type='User'"
     User.find_by_sql(sql)
   end
 
   def user_in_checklist?(uid)
-    sql = "SELECT users.* FROM users
+    sql = "SELECT #{User.table_name}.* FROM #{User.table_name}
               INNER JOIN
-              (SELECT u.id FROM users u
-               INNER JOIN docflow_checklists dc ON dc.docflow_version_id=#{self.id} AND
+              (SELECT u.id FROM #{User.table_name} u
+               INNER JOIN #{DocflowChecklist.table_name} dc ON dc.docflow_version_id=#{self.id} AND
                  ((dc.user_id IS NOT NULL AND u.id = dc.user_id) OR
                   (dc.all_users='y' AND dc.user_department_id IS NULL AND dc.user_title_id IS NULL) OR
                   (dc.user_department_id IS NOT NULL AND dc.user_title_id IS NOT NULL AND
                     dc.user_title_id=u.user_title_id AND dc.user_department_id=u.user_department_id) OR
                   (dc.user_department_id IS NOT NULL AND dc.user_department_id=u.user_department_id AND dc.user_title_id IS NULL))
-              GROUP BY u.id) uids ON uids.id=users.id
-           WHERE users.type='User' AND users.id=#{uid}"
-    !User.find_by_sql(sql).first.nil? && User.find_by_sql(sql).first.id == uid
+              GROUP BY u.id) uids ON uids.id=#{User.table_name}.id
+           WHERE #{User.table_name}.type='User' AND #{User.table_name}.id=#{uid}"
+    !User.find_by_sql(sql).first.nil?
+    # && User.find_by_sql(sql).first.id == uid
+  end
+
+  def last?
+    id == docflow.last_version.id
   end
 
   attr_accessor :saved_files

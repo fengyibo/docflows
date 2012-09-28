@@ -12,12 +12,22 @@
         <%= label_tag l(:label_docflow_version) %>
         <%= '#'+ @version.version.to_s %>
       </p>
+      <!-- <p> -->
+        <!-- <%= label_tag l(:label_docflow_additional) %> -->
+        <!-- <%#= check_box_tag("inherit_know_list", 'y') + l(:label_docflow_inherit_know_list) %> -->
+        <!--  -->
+        <!-- <%#= check_box_tag("inherit_approver", 'y') + l(:label_docflow_inherit_approver) %> -->
+      <!-- </p> -->
       <p>
-        <%= label_tag l(:label_docflow_additional) %>
-        <%= check_box_tag("inherit_know_list", 'y') + l(:label_docflow_inherit_know_list) %>
-        <br />
-        <%= check_box_tag("inherit_approver", 'y') + l(:label_docflow_inherit_approver) %>
-      </p>
+        <% approvers = Group.find(Setting.plugin_docflows['approve_allowed_to']) %>
+        <%= f.label l(:label_docflow_approver)+":" %>
+        <%= f.collection_select(:approver_id, approvers.users.sort_by{|user| user.name}, :id, :name) %>
+      </p>      
+      <p>
+        <%= f.label l(:label_docflow_actual_from)+":" %>
+        <%= f.text_field(:actual_date, {:value => @version.actual_date ? @version.actual_date.utc.getlocal.to_date : "", :size => "10"}) %>
+        <%= calendar_for('docflow_version_actual_date') %>
+      </p>      
       <%= f.hidden_field :docflow_id %>
       <%= f.hidden_field :version %>
       <%= f.hidden_field :author_id %>

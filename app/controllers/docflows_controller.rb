@@ -42,7 +42,7 @@ class DocflowsController < ApplicationController
   def index
     # todo:
     # Show 3 blocks at one: Waiting for my approvial, In work and unread
-    @unread = DocflowVersion.unread
+    @unread = DocflowVersion.unread_for_user
     @waiting = DocflowVersion.waiting_for_my_approvial
     @in_work = DocflowVersion.in_work
     render 'important_versions'
@@ -60,7 +60,7 @@ class DocflowsController < ApplicationController
   # Versions which shoud be accepted by User
   # todo: exclude read versions
   def unread
-    @versions = DocflowVersion.unread
+    @versions = DocflowVersion.unread_for_user
     @page_title = l(:label_docflows_actual)
     render 'versions_list'
   end
@@ -113,7 +113,7 @@ class DocflowsController < ApplicationController
 
   # Canceled documents which was read and accepted by user
   def canceled
-    @versions = DocflowVersion.canceled
+    @versions = DocflowVersion.canceled_for_user
     @page_title = l(:label_docflows_canceled)
     render 'canceled_versions'
   end

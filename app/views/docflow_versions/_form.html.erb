@@ -2,23 +2,23 @@
 
 <%= fields_for @version do |ff|%>
   <p>
-    <%= label_tag l(:label_docflow_version_of_document) %>
+    <%= label_tag l(:label_docflow_version_of_document)+":" %>
     <%= @version.docflow.title %>
   </p>
 
   <p>
-    <%= label_tag l(:label_docflow_version) %>
+    <%= label_tag l(:label_docflow_version)+":" %>
     <%= link_to_version(@version) %>
   </p>
 
   <p>
     <% approvers = Group.find(Setting.plugin_docflows['approve_allowed_to']) %>
-    <%= ff.label l(:label_docflow_approver) %>
+    <%= ff.label l(:label_docflow_approver)+":" %>
     <%= ff.collection_select(:approver_id, approvers.users.sort_by{|user| user.name}, :id, :name) %>
   </p>
 
   <p>
-    <%= ff.label l(:label_docflow_actual_from) %>
+    <%= ff.label l(:label_docflow_actual_from)+":" %>
     <%= ff.text_field(:actual_date, {:value => @version.actual_date ? @version.actual_date.utc.getlocal.to_date : "", :size => "10"}) %>
     <%= calendar_for('docflow_version_actual_date') %>
   </p>

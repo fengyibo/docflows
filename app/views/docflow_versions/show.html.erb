@@ -95,22 +95,33 @@
     <br>
   <% end %>
   <hr>
+  <% rowspan = (@version.last? && @version.docflow.canceled?) ? "5" : "4" %>
   <div id="version_detail">
       <table class="invisi-table">
       <tbody><tr>
           <th><%= l(:label_docflow_approver)%>:</th>
-          <td><%= link_to( @version.approver.name,@version.approver ) unless @version.approver.nil? %></td>
-          <th rowspan=3><%= l(:label_docflow_check_list) %>:</th>
-          <td rowspan=3><%= render 'docflow_checklists/selected_rules', :compact => 'y' %></td>
+          <td><%= (@version.approver.nil?) ? "-" : link_to_user( @version.approver ) %></td>
+          <th rowspan="<%= rowspan %>"><%= l(:label_docflow_check_list) %>:</th>
+          <td rowspan="<%= rowspan %>"><%= render 'docflow_checklists/selected_rules', :compact => 'y' %></td>
       </tr>
       <tr>
           <th><%= l(:label_docflow_approved_date) %>:</th>
-          <td><%= format_date(@version.approve_date.utc.getlocal) unless @version.approve_date.nil? %></td>
+          <td><%= (@version.approve_date.nil?) ? "-" : format_date(@version.approve_date.utc.getlocal) %></td>
       </tr>
       <tr>
           <th><%= l(:label_docflow_responsible) %>:</th>
-          <td><%= link_to @version.docflow.responsible.name, @version.docflow.responsible %></td>
+          <td><%= (@version.docflow.responsible.nil?) ? "-" : link_to_user( @version.docflow.responsible )%></td>
       </tr>
+      <tr>
+          <th><%= l(:label_docflow_created) %>:</th>
+          <td><%= (@version.created_at.nil?) ? "-" : format_date(@version.created_at.utc.getlocal) %></td>
+      </tr>
+      <% if rowspan == "5" %>
+        <tr>
+            <th><%= l(:label_docflow_version_canceled) %>:</th>
+            <td><%= (@version.updated_at.nil?) ? "-" : format_date(@version.updated_at.utc.getlocal) %></td>
+        </tr>      
+      <% end %>      
       </tbody></table>
   </div>
 </div>

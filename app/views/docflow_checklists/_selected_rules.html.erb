@@ -27,6 +27,8 @@
   <% users.sort_by{|el| el.display_name}.each do |rec| %>
     <%= local_assigns[:compact] ? content_tag(:li,rec.display_name) : link_to_remove_checklist_record(rec) %>
   <% end %>
+
+  <%= content_tag(:span, l(:label_docflow_check_list_empty)) if @version.checklists.first.nil? && local_assigns[:compact] %>
   <br>
   <%= link_to( content_tag(:span,l(:label_docflow_edit_button)),
                {:controller => 'docflow_versions', :action => 'checklist'},

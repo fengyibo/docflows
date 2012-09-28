@@ -87,7 +87,7 @@ class DocflowVersionsController < ApplicationController
         @version.save_files(params[:new_files])
         flash[:warning] = (l(:label_docflow_files_not_saved, :num_files => @version.failed_files.size.to_s)+"<br>").html_safe if @version.failed_files.size > 0
         flash[:warning] +=  @version.errors_msgs.join("<br>").html_safe if @version.errors_msgs.any?
-        format.html { redirect_to(@version, :notice => l(:label_docflow_version_saved)) }
+        format.html { redirect_to(@version, :notice => ((flash[:warning].nil? || flash[:warning] == "") ? nil : l(:label_docflow_version_saved)) ) }
         format.xml  { render :xml => @version, :status => :created, :location => @version }
       else
         flash[:warning] = l(:label_docflow_request_failed)
@@ -112,7 +112,7 @@ class DocflowVersionsController < ApplicationController
         @version.save_files(params[:new_files])
         flash[:warning] = (l(:label_docflow_files_not_saved, :num_files => @version.failed_files.size.to_s)+"<br>").html_safe if @version.failed_files.size > 0
         flash[:warning] +=  @version.errors_msgs.join("<br>").html_safe if @version.errors_msgs.any?
-        format.html { redirect_to(@version, :notice => l(:label_docflow_version_saved)) }
+        format.html { redirect_to(@version, :notice => ((flash[:warning].nil? || flash[:warning] == "") ? nil : l(:label_docflow_version_saved)) ) }
         format.xml  { head :ok }
       else
         @files = @version.files

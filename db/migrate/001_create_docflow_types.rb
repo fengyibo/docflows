@@ -8,5 +8,6 @@ class CreateDocflowTypes < ActiveRecord::Migration
     DocflowType.create(:name => "Инструкция")
     DocflowType.create(:name => "Приказ")
     DocflowType.create(:name => "Регламент")
+    DocflowType.create(:name => "Положение")
   end
 end
