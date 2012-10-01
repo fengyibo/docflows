@@ -32,7 +32,9 @@
   </p>
 
   <p>
-    <% responsibles = Group.find(Setting.plugin_docflows['responsibile_users']) %>
+    <% responsibles = Group.find(Setting.plugin_docflows['responsibile_users']) 
+       responsibles.users.unshift(@doc.responsible) unless @doc.responsible_id.nil? || responsibles.users.exists?(@doc.responsible_id) %>
+
     <%= ff.label l(:label_docflow_responsible) %>
     <%= ff.collection_select(:responsible_id, responsibles.users.sort_by{|user| user.name}, :id, :name) %>
   </p>

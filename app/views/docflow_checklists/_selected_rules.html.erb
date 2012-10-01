@@ -28,8 +28,14 @@
     <%= local_assigns[:compact] ? content_tag(:li,rec.display_name) : link_to_remove_checklist_record(rec) %>
   <% end %>
 
-  <%= content_tag(:span, l(:label_docflow_check_list_empty)) if @version.checklists.first.nil? && local_assigns[:compact] %>
+  <%= content_tag(:span, l(:label_docflow_check_list_empty)) if @version.checklists.first.nil? %>
   <br>
+  <% if @version.checklists.first.nil? && @version.status.id == 1 %>
+    <%= link_to( content_tag(:span,l(:label_docflow_copy_know_list)),
+                 {:controller => 'docflow_versions', :action => 'copy_checklist', :vid => @version.prev_version.id},
+                 :class => "") %>
+    <br>
+  <% end %>
   <%= link_to( content_tag(:span,l(:label_docflow_edit_button)),
                {:controller => 'docflow_versions', :action => 'checklist'},
                :class => "") if @version.status.id == 1 && local_assigns[:compact] %>

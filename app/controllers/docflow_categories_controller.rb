@@ -9,8 +9,6 @@ class DocflowCategoriesController < ApplicationController
   end
 
   def authorize
-    return true if User.current.admin?
-    
     render_403 unless User.current.edit_docflows_categories?
   end
 

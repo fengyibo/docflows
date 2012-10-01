@@ -74,24 +74,26 @@ class DocflowVersionsController < ApplicationController
     @version.version = Docflow.find(params[:docflow_id]).last_version.version+1
     @version.author_id = User.current.id
     @version.docflow_status_id = DocflowStatus::DOCFLOW_STATUS_NEW
+    # only approver_id transfer but not any changes in view to select same user
+    # because approver should be selected only from target group while new version creation
+    @version.approver_id = @version.docflow.last_version.approver_id unless @version.docflow.last_version.nil?
   end
 
   def create
     @version = DocflowVersion.new(params[:docflow_version])
-    @version.approver_id = @version.docflow.last_version.approver_id if params[:inherit_approver] == 'y'
-
-    # todo: inherit know-list
+    # @version.approver_id = @version.docflow.last_version.approver_id if params[:inherit_approver] == 'y'
+    last_version = @version.docflow.last_version
 
     respond_to do |format|
-      if @version.save
+      if @version.save        
+        @version.copy_checklist(last_version) if params[:inherit_know_list] == 'y'
+
         @version.save_files(params[:new_files])
         flash[:warning] = (l(:label_docflow_files_not_saved, :num_files => @version.failed_files.size.to_s)+"<br>").html_safe if @version.failed_files.size > 0
         flash[:warning] +=  @version.errors_msgs.join("<br>").html_safe if @version.errors_msgs.any?
-        format.html { redirect_to(@version, :notice => ((flash[:warning].nil? || flash[:warning] == "") ? nil : l(:label_docflow_version_saved)) ) }
+        format.html { redirect_to(@version, :notice => ((flash[:warning].nil? || flash[:warning] == "") ? l(:label_docflow_version_saved) : nil) ) }
         format.xml  { render :xml => @version, :status => :created, :location => @version }
       else
-        flash[:warning] = l(:label_docflow_request_failed)
-        flash[:warning] += @version.errors.full_messages.join(" ") if @version.errors.any?
         format.html { render :action => "new" }
         format.xml  { render :xml => @version.errors, :status => :unprocessable_entity }
       end
@@ -112,7 +114,7 @@ class DocflowVersionsController < ApplicationController
         @version.save_files(params[:new_files])
         flash[:warning] = (l(:label_docflow_files_not_saved, :num_files => @version.failed_files.size.to_s)+"<br>").html_safe if @version.failed_files.size > 0
         flash[:warning] +=  @version.errors_msgs.join("<br>").html_safe if @version.errors_msgs.any?
-        format.html { redirect_to(@version, :notice => ((flash[:warning].nil? || flash[:warning] == "") ? nil : l(:label_docflow_version_saved)) ) }
+        format.html { redirect_to(@version, :notice => ((flash[:warning].nil? || flash[:warning] == "") ? l(:label_docflow_version_saved) : nil) ) }
         format.xml  { head :ok }
       else
         @files = @version.files
@@ -146,6 +148,14 @@ class DocflowVersionsController < ApplicationController
     @user_titles = UserTitle.all
     render 'docflow_checklists/checklist'
   end
+
+  def copy_checklist
+    @version = DocflowVersion.find(params[:id])
+    from_version = DocflowVersion.find(params[:vid])
+
+    @version.copy_checklist(from_version)
+    redirect_to(@version)
+  end  
 
   def add_checklists
     @version = DocflowVersion.find(params[:id])

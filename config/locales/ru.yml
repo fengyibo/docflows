@@ -2,6 +2,7 @@
 ru:
   label_docflow_enable_plugin: "Разрешить плагин"
   label_docflow: "Документооборот"
+  label_docflow_administration: "Администрирование"
   label_docflow_new: "Новый документ"
   label_docflow_edit: "Правка документа"
   label_docflow_new_version: "Новая версия"
@@ -35,6 +36,12 @@ ru:
 
   label_docflow_version_canceled: "Отменен"
 
+  label_docflow_cant_delete_type_while_docflows_exists: "Невозможно удалить указанный тип документа, пока существуют документы данного типа!"
+  label_docflow_type_saved: "Тип документа сохранен"
+  label_docflow_add_type: "Добавить тип"
+  label_docflow_types: "Типы документов"
+  label_docflow_delete_type_confirm: "Действительно удалить тип документа?"
+
   label_docflow_confirm_accept_document: "Подтверждаете, что ознакомились с документом?"
   label_docflow_confirm_cancel_document: "Действительно хотите отменить действие документа?"
   label_docflow_confirm_delete_file: "Действительно хотите удалить файл?"
@@ -50,6 +57,7 @@ ru:
   label_docflow_responsible_undefined: "Необходимо выбрать ответсвенного сотрудника"
   label_docflow_title_undefined: "Заголовок документа не может быть пустым!"
   label_docflow_only_new_possible_on_create: "Создаваемая версия может находиться только в статусе НОВАЯ!"
+  label_docflow_actual_date_should_be_new_than_previous: "Дата действия создаваемой версии может быть только новее, чем даты вступления в силу предыдущих версий документа"
   label_docflow_cant_create_new_while_previous: "Невозможно создать новую версию документа пока предыдущая не была утверждена или отменена!"
   label_docflow_cant_edit_unless_last: "Только последняя версия документа доступна для редактирования!"
   label_docflow_only_new_can_be_sent_to_approvial: "Только версию в статусе НОВАЯ возможно отправить на утверждение"
@@ -106,6 +114,7 @@ ru:
   label_docflow_new_version_for: "Новая версия для"
   label_docflow_version_of_document: "Версия документа"
   label_docflow_edit_version: "Изменть версию"
+  label_docflow_copy_know_list: "Копировать с предыдущей версии"
   label_docflow_inherit_know_list: "Наследовать лист ознакомления"
   label_docflow_inherit_approver: "Наследовать утверждающего"
   label_docflow_additional: "Дополнительно"

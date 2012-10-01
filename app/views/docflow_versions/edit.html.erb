@@ -1,3 +1,14 @@
+<% if @version.errors.any? %>
+  <div id="error_explanation" class="flash error">
+    <h4><%= pluralize(@version.errors.count, "error")+l(:label_docflow_errors_found) %> </h4>
+    <ul>
+    <% @version.errors.full_messages.each do |msg| %>
+      <li><%= msg %></li>
+    <% end %>
+    </ul>
+  </div>
+<% end %>
+
 <h2><%= l(:label_docflow_edit_version) %></h2>
 <%= form_for(@version, :html => {:multipart => true}) do |f| %>
   <div class="box tabular">

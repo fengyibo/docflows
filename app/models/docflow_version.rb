@@ -18,22 +18,25 @@ class DocflowVersion < ActiveRecord::Base
 
   def validate_permissions
     errors.add(:base, l(:label_docflow_permissions_cant_save_document)) unless User.current.edit_docflows? || User.current.edit_docflows_in_category?(docflow.docflow_category_id)
-    return false if errors.any?   
+    errors.blank?
   end
 
   def validate_fields
     errors.add(:author_id, l(:label_docflow_category_undefined)) if author_id.nil? || User.find(author_id).nil?
     #errors.add(:approver_id, "Approver should be defined!") if approver_id.nil? || User.find(approver_id).nil?
     errors.add(:docflow_status_id, l(:label_docflow_type_undefined)) if docflow_status_id.nil? || DocflowStatus.find(docflow_status_id).nil?
-    return false if errors.any?
+    errors.blank?
   end
 
   def validate_conditions
+    df = Docflow.find(self.docflow_id)    
+
     if self.new_record?
-      errors.add(:base, l(:label_docflow_only_new_possible_on_create)) unless self.docflow_status_id == 1
-      df = Docflow.find(self.docflow_id)
+      errors.add(:base, l(:label_docflow_actual_date_should_be_new_than_previous)) if !self.actual_date.nil? && df.versions.exists?(['actual_date >= ?', "#{self.actual_date}"])
+      errors.add(:base, l(:label_docflow_only_new_possible_on_create)) unless self.docflow_status_id == 1      
       errors.add(:base, l(:label_docflow_cant_create_new_while_previous)) unless df.last_version.nil? || df.last_version.status.id == 3 || df.last_version.status.id == 4
     else
+      errors.add(:base, l(:label_docflow_actual_date_should_be_new_than_previous)) if !self.actual_date.nil? && df.versions.where("id<>?",self.id).exists?(['actual_date >= ?', "#{self.actual_date}"])
       prev_state = DocflowVersion.find(self.id)
       errors.add(:base, l(:label_docflow_cant_edit_unless_last)) if self.id != self.docflow.last_version.id
       if docflow_status_id == 2
@@ -46,11 +49,11 @@ class DocflowVersion < ActiveRecord::Base
         errors.add(:base, l(:label_docflow_cant_approve_if_not_on_approvial)) if !prev_state.nil? && prev_state.docflow_status_id != 2
       end
     end
-    return false if errors.any?
+    errors.blank?
   end
 
   def vailidate_files_and_users
-      errors.add(:base, l(:label_docflow_no_files_attached)) unless self.files.any?
+      errors.add(:base, l(:label_docflow_no_files_attached)) unless self.files.exists?(:filetype => "src_file") && self.files.exists?(:filetype => "pub_file")
       errors.add(:base, l(:label_docflow_no_users_attached)) unless self.checklists.any?
   end
 
@@ -307,6 +310,10 @@ class DocflowVersion < ActiveRecord::Base
     id == docflow.last_version.id
   end
 
+  def prev_version
+    docflow.versions.where("id<?",self.id).order(:id).last
+  end  
+
   attr_accessor :saved_files
   attr_accessor :failed_files
   attr_accessor :errors_msgs
@@ -405,6 +412,20 @@ class DocflowVersion < ActiveRecord::Base
                                      :type => "Department",
                                      :docflow_version_id => self.id,
                                      :err => ((rec.new_record?) ? "Exists" : "") }
+    end
+  end
+
+  def copy_checklist(from_version)
+    # ordered by id due unsorted selection may cause of all_users will be selected 
+    # before personal and next recods would not be saved
+    unless self.new_record? || from_version.nil?
+      from_version.checklists.order(:id).each do |rec|
+        DocflowChecklist.create( :docflow_version_id => self.id,
+                                 :user_id => rec.user_id,
+                                 :user_title_id => rec.user_title_id,
+                                 :user_department_id => rec.user_department_id,
+                                 :all_users => rec.all_users )
+      end
     end
   end
 

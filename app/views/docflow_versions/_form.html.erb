@@ -12,7 +12,9 @@
   </p>
 
   <p>
-    <% approvers = Group.find(Setting.plugin_docflows['approve_allowed_to']) %>
+    <% approvers = Group.find(Setting.plugin_docflows['approve_allowed_to']) 
+       approvers.users.unshift(@version.approver) unless @version.approver_id.nil? || approvers.users.exists?(@version.approver_id) %>
+       
     <%= ff.label l(:label_docflow_approver)+":" %>
     <%= ff.collection_select(:approver_id, approvers.users.sort_by{|user| user.name}, :id, :name) %>
   </p>

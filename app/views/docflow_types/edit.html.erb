@@ -1,6 +1,6 @@
-<h2><%= l(:label_docflow) %> / <%= l(:label_docflow_categories) %> </h2>
+<h2><%= l(:label_docflow) %> / <%= l(:label_docflow_types) %> </h2>
 
-<%= form_for @category do |f| %>
+<%= form_for @type do |f| %>
   <div class="box tabular">
     <div id="all_attributes">
       <%= render 'form' %>
@@ -8,5 +8,7 @@
   </div>
   <%= f.submit l(:button_update), :class => 'btn-def' %>
 <% end %>
+
+<%= javascript_tag "Form.Element.focus('docflow_type_name');" %>
 
 <%= link_to l(:label_docflow_back), docflow_categories_path, :class => 'btn-def' %>

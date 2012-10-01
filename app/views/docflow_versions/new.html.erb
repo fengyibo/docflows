@@ -1,5 +1,16 @@
 <%= render :partial => 'docflows/head' %>
 
+<% if @version.errors.any? %>
+  <div id="error_explanation" class="flash error">
+    <h4><%= pluralize(@version.errors.count, "error")+l(:label_docflow_errors_found) %> </h4>
+    <ul>
+    <% @version.errors.full_messages.each do |msg| %>
+      <li><%= msg %></li>
+    <% end %>
+    </ul>
+  </div>
+<% end %>
+
 <h2><%= l(:label_docflow_new_version) %></h2>
 <%= form_for(@version, :html => {:multipart => true}) do |f| %>
   <div class="box tabular">
@@ -12,12 +23,11 @@
         <%= label_tag l(:label_docflow_version) %>
         <%= '#'+ @version.version.to_s %>
       </p>
-      <!-- <p> -->
-        <!-- <%= label_tag l(:label_docflow_additional) %> -->
-        <!-- <%#= check_box_tag("inherit_know_list", 'y') + l(:label_docflow_inherit_know_list) %> -->
-        <!--  -->
-        <!-- <%#= check_box_tag("inherit_approver", 'y') + l(:label_docflow_inherit_approver) %> -->
-      <!-- </p> -->
+      <p>
+        <%= label_tag l(:label_docflow_additional) %>
+        <%= check_box_tag("inherit_know_list", 'y') + l(:label_docflow_inherit_know_list) %>
+        <%#= check_box_tag("inherit_approver", 'y') + l(:label_docflow_inherit_approver) %>
+      </p>
       <p>
         <% approvers = Group.find(Setting.plugin_docflows['approve_allowed_to']) %>
         <%= f.label l(:label_docflow_approver)+":" %>

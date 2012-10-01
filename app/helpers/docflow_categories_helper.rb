@@ -50,7 +50,7 @@ module DocflowCategoriesHelper
                     link_to('&nbsp;'.html_safe, new_docflow_category_path(:parent_id => n.id),:class => 'icon-add icon-only')+" "+
                     link_to('&nbsp;'.html_safe, docflow_category_path(n), :confirm => l(:label_docflow_delete_category_confirm),
                         :method => :delete, :action => :destory, :class => 'icon-del icon-only'),
-                  :style => "width:40px")
+                  :class => "button_area")
       result += "</tr></table></div>"
 
       lft,rgt = n.lft,n.rgt

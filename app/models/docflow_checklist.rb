@@ -14,12 +14,11 @@ class DocflowChecklist < ActiveRecord::Base
   end
 
   def extended_records
-    DocflowChecklist.where(
-                      "docflow_version_id=? AND
-                       ( all_users='y' OR user_id=? OR
-                         (user_department_id=? AND user_title_id IS NULL) OR
-                         (user_department_id IS NULL AND user_title_id=?) )",
-                      docflow_version_id,user_id,user_department_id,user_title_id)
+    DocflowChecklist.where( "docflow_version_id=? AND
+                             ( all_users='y' OR user_id=? OR
+                               (user_department_id=? AND user_title_id IS NULL) OR
+                               (user_department_id IS NULL AND user_title_id=?) )",
+                            docflow_version_id,user_id,user_department_id,user_title_id )
   end
 
   def display_name
