@@ -6,9 +6,13 @@
   docflows_storage_path = @settings[:storage_path] || File.join(Rails.root, "files")
   empty_group = Group.new()
 
-  if @settings[:cancel_allowed_to].empty? || @settings[:approve_allowed_to].empty? ||
-    @settings[:edit_documents_allowed_to].empty? || @settings[:edit_categories_allowed_to].empty? ||
-    @settings[:responsibile_users].empty?
+  if !( @settings[:cancel_allowed_to].nil? || @settings[:approve_allowed_to].nil? ||
+        @settings[:edit_documents_allowed_to].nil? || @settings[:edit_categories_allowed_to].nil? ||
+        @settings[:responsibile_users].nil? ) &&
+      ( @settings[:cancel_allowed_to].empty? || @settings[:approve_allowed_to].empty? ||
+        @settings[:edit_documents_allowed_to].empty? || @settings[:edit_categories_allowed_to].empty? ||
+        @settings[:responsibile_users].empty? )
+
     flash[:warning] = l(:label_docflow_settings_groups_was_not_selected)
   end
 %>

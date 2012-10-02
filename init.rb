@@ -11,7 +11,7 @@ Redmine::Plugin.register :docflows do
   settings  :partial => 'settings/docflows_settings',
             :default => { "docflows_max_file_size" => "5196",
                           "docflows_max_files" => "7",
-                          "docflows_enabled_extensions" => "docx;pdf;jpg;jpeg;gif;txt;doc;xls;xlsx",
+                          "docflows_enabled_extensions" => "docx,pdf,jpg,jpeg,gif,txt,doc,xls,xlsx,png",
                           "docflows_storage_path" => File.join(Rails.root, "files") }
 
   menu :top_menu, :docflow, { :controller => 'docflows', :action => 'index' }, :caption => Proc.new {User.current.df_top_menu_link}, :if => Proc.new { Setting.plugin_docflows['enable_plugin'] && User.current.logged? }
