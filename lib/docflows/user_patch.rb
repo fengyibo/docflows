@@ -69,7 +69,7 @@ module Docflows
         unread = DocflowVersion.unread_for_user.count
         waiting = DocflowVersion.waiting_for_my_approvial.count
         top_indicator = " ("+unread.to_s + ((waiting == 0) ? "" : ("/"+waiting.to_s)) + ")"
-        ("<span>"+l(:label_docflow)+top_indicator+"</span>").html_safe
+        ("<span>"+l(:label_docflow_top_title)+top_indicator+"</span>").html_safe
       end
 
     end
