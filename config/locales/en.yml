@@ -5,8 +5,6 @@ en:
   label_docflow_administration: "Administration"
   label_docflow_new: "New document"
   label_docflow_edit: "Edit document"
-  label_docflow_new_version: "New version"
-  label_docflow_edit_version: "Edit version"
   label_docflow_categories: "Categories"
   label_docflow_add_category: "Add category"
   label_docflow_delete_category_confirm: "Are you shure of deleting category?"

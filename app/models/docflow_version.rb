@@ -46,15 +46,16 @@ class DocflowVersion < ActiveRecord::Base
         vailidate_files_and_users
         errors.add(:base, l(:label_docflow_no_date_entry)) if self.actual_date.nil? || self.actual_date == ""
         errors.add(:base, l(:label_docflow_no_date_approvial)) if self.approve_date.nil? || self.approve_date == ""
-        errors.add(:base, l(:label_docflow_cant_approve_if_not_on_approvial)) if !prev_state.nil? && prev_state.docflow_status_id != 2
+        # validation removed due issue #3565
+        # errors.add(:base, l(:label_docflow_cant_approve_if_not_on_approvial)) if !prev_state.nil? && prev_state.docflow_status_id != 2
       end
     end
     errors.blank?
   end
 
   def vailidate_files_and_users
-      errors.add(:base, l(:label_docflow_no_files_attached)) unless self.files.exists?(:filetype => "src_file") && self.files.exists?(:filetype => "pub_file")
-      errors.add(:base, l(:label_docflow_no_users_attached)) unless self.checklists.any?
+      errors.add(:base, l(:label_docflow_no_files_attached)+(" <a href='#{self.id}/edit'>"+l(:label_docflow_edit_version)+"</a><br>").html_safe ) unless self.files.exists?(:filetype => "src_file") && self.files.exists?(:filetype => "pub_file")
+      errors.add(:base, l(:label_docflow_no_users_attached)+(" <a href='#{self.id}/checklists'>"+l(:label_docflow_edit_check_list)+"</a><br>").html_safe ) unless self.checklists.any?
   end
 
   def visible_for_user?
@@ -314,7 +315,6 @@ class DocflowVersion < ActiveRecord::Base
     docflow.versions.where("id<?",self.id).order(:id).last
   end  
 
-  # attr_accessor :saved_files
   # attr_accessor :failed_files
   attr_accessor :errors_msgs
   attr_accessor :processed_checklists
@@ -323,7 +323,7 @@ class DocflowVersion < ActiveRecord::Base
   # Filling file info via DocflowFile.file= method, then creates new file on disk
 
   def save_files(new_files)
-    saved_files,failed_files,self.errors_msgs = [],[],[]
+    failed_files,self.errors_msgs = [],[]
     docfile = nil
     num_files = 0
     new_files = new_files.values if new_files.is_a?(Hash)
@@ -363,8 +363,6 @@ class DocflowVersion < ActiveRecord::Base
 
           if docfile.new_record?
             failed_files << new_file
-          else
-            saved_files << new_file
           end
         end
       end
