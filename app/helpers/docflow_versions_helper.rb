@@ -68,7 +68,7 @@ module DocflowVersionsHelper
 
 
   def docflow_version_edit_button
-    if @version.status.id == 1 && (User.current.admin? || (User.current.edit_docflows? || User.current.edit_docflows_in_category?(@version.docflow.docflow_category_id)))
+    if @version.status.id == 1 && (User.current.edit_docflows? || User.current.edit_docflows_in_category?(@version.docflow.docflow_category_id))
       link_to( image_tag("edit.png", :class=>'img-b')+' '+content_tag(:span,l(:label_docflow_edit_version), :class => "line_link"),
                edit_docflow_version_path(@version),
                :class => "btn btn-right") 
@@ -76,7 +76,7 @@ module DocflowVersionsHelper
   end
 
   def docflow_version_new_button      
-    if @version.docflow.last_version.status.id == 3 && (User.current.admin? || (User.current.edit_docflows? || User.current.edit_docflows_in_category?(@version.docflow.docflow_category_id)))
+    if @version.docflow.last_version.status.id == 3 && (User.current.edit_docflows? || User.current.edit_docflows_in_category?(@version.docflow.docflow_category_id))
       link_to( image_tag("add.png", :class=>'img-b')+' '+content_tag(:span,l(:label_docflow_new_version), :class => "line_link"),
                {:controller => 'docflow_versions', :action => 'new', :docflow_id => @version.docflow_id},
                :class => "btn btn-right") 
@@ -84,7 +84,7 @@ module DocflowVersionsHelper
   end
 
   def docflow_version_checklist_button
-    if @version.status.id == 1 && (User.current.admin? || (User.current.edit_docflows? || User.current.edit_docflows_in_category?(@version.docflow.docflow_category_id)))
+    if @version.status.id == 1 && (User.current.edit_docflows? || User.current.edit_docflows_in_category?(@version.docflow.docflow_category_id))
       link_to( image_tag("group.png", :class=>'img-b')+' '+content_tag(:span,l(:label_docflow_check_list), :class => "line_link"),
                 {:controller => 'docflow_versions', :action => 'checklist'},
                  :class => "btn btn-right") 
@@ -92,7 +92,7 @@ module DocflowVersionsHelper
   end
 
   def docflow_version_delete_button
-    if @version.status.id == 1 && (User.current.admin? || (User.current.edit_docflows? || User.current.edit_docflows_in_category?(@version.docflow.docflow_category_id)))
+    if @version.status.id == 1 && (User.current.edit_docflows? || User.current.edit_docflows_in_category?(@version.docflow.docflow_category_id))
       link_to( image_tag("delete.png", :class=>'img-b')+' '+content_tag(:span, l(:label_docflow_version_delete), :class => "line_link"),
                docflow_version_path(@version),
                :confirm => l(:label_docflow_delete_confirm),

@@ -30,7 +30,7 @@
 
   <%= content_tag(:span, l(:label_docflow_check_list_empty)) if @version.checklists.first.nil? %>
   <br>
-  <% if @version.checklists.first.nil? && @version.status.id == 1 %>
+  <% if @version.checklists.blank? && @version.docflow_status_id == 1 && local_assigns[:compact] && !@version.prev_version.nil? %>
     <%= link_to( content_tag(:span,l(:label_docflow_copy_know_list)),
                  {:controller => 'docflow_versions', :action => 'copy_checklist', :vid => @version.prev_version.id},
                  :class => "") %>

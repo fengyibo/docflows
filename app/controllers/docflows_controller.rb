@@ -7,7 +7,7 @@ class DocflowsController < ApplicationController
   before_filter :authorize, :only => [:new,:edit,:destory] # :create,:update, - need not due model validation
 
   def check_settings
-    flash[:warning] = "Setup Plugin! Groups was not selected" if Setting.plugin_docflows['approve_allowed_to'].nil?
+    flash[:error] = "Setup Plugin! Groups was not selected" if Setting.plugin_docflows['approve_allowed_to'].nil?
     redirect_to "/docflows/plugin_disabled" unless Setting.plugin_docflows['enable_plugin']
   end
 
@@ -30,7 +30,7 @@ class DocflowsController < ApplicationController
     cur_doc = Docflow.find(params[:id]) unless params[:id].nil? || params[:id] == ""
 
     if !cur_doc.nil? && cur_doc.versions.count > 1 || (cur_doc.versions.count == 1 && cur_doc.last_version.status.id != 1)
-      flash[:warning] = l(:label_docflow_request_failed)+' '+l(:label_docflow_removial_not_allowed)
+      flash[:error] = l(:label_docflow_request_failed)+' '+l(:label_docflow_removial_not_allowed)
       redirect_to cur_doc.last_version
     end
   end
@@ -132,17 +132,14 @@ class DocflowsController < ApplicationController
     @doc.versions.first.author_id = User.current.id
     @doc.versions.first.docflow_status_id = DocflowStatus::DOCFLOW_STATUS_NEW
 
-    @doc.editable_version = @doc.versions.first
-
     respond_to do |format|
       if @doc.save
-        @doc.editable_version.save_files(params[:new_files])
-        flash[:warning] = (l(:label_docflow_files_not_saved, :num_files => @doc.editable_version.failed_files.size.to_s)+"<br>").html_safe if @doc.editable_version.failed_files.size > 0
-        flash[:warning] +=  @doc.editable_version.errors_msgs.join("<br>".html_safe) if@doc.editable_version.errors_msgs.any?
-        format.html { redirect_to(:controller => "docflow_versions",:action => "checklist", :id => @doc.last_version.id) }
+        @doc.versions.first.save_files(params[:new_files])
+        flash[:error] = @doc.versions.first.errors_msgs.join("<br>".html_safe) if @doc.versions.first.errors_msgs.any?
+        format.html { redirect_to(:controller => "docflow_versions",:action => "checklist", :id => @doc.versions.first.id) }
         format.xml  { render :xml => @doc, :status => :created, :location => @doc }
       else
-        flash[:warning] = l(:label_docflow_doc_failed)
+        # flash[:error] = l(:label_docflow_doc_failed) 
         format.html { render :action => "new" }
         format.xml  { render :xml => @doc.errors, :status => :unprocessable_entity }
       end
@@ -154,7 +151,7 @@ class DocflowsController < ApplicationController
 
     respond_to do |format|
       if @doc.update_attributes(params[:docflow])
-        format.html { redirect_to(:controller => "docflow_versions",:action => "show", :id => @doc.last_version.id) }
+        format.html { redirect_to(@doc.last_version) }
         format.xml  { head :ok }
       else
         format.html { render :action => "edit" }

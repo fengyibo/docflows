@@ -1,3 +1,14 @@
+<% if @doc.errors.any? %>
+  <div id="error_explanation" class="flash error">
+    <h4><%= pluralize(@doc.errors.count, "error")+l(:label_docflow_errors_found) %> </h4>
+    <ul>
+    <% @doc.errors.full_messages.each do |msg| %>
+      <li><%= msg %></li>
+    <% end %>
+    </ul>
+  </div>
+<% end %>
+
 <h2><%= l(:label_docflow_new) %></h2>
 
 <%= form_for(@doc,:html => {:multipart => true}) do |f| %>

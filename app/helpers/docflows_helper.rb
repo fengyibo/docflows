@@ -18,7 +18,6 @@ module DocflowsHelper
   def docflow_edit_button
     @doc = @version.docflow if @doc.nil?
     if @version.docflow.last_version.status.id  < 4 && (User.current.edit_docflows? || User.current.edit_docflows_in_category?(@doc.docflow_category_id))
-
       link_to l(:label_docflow_edit), edit_docflow_path(@doc), :class=>"icon icon-edit" 
     end    
   end  

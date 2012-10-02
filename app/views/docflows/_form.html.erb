@@ -1,16 +1,5 @@
 <%= render :partial => 'docflows/head' %>
 
-<% if @doc.errors.any? %>
-  <div id="error_explanation" class="flash error">
-    <h4><%= pluralize(@doc.errors.count, "error")+l(:label_docflow_errors_found) %> </h4>
-    <ul>
-    <% @doc.errors.full_messages.each do |msg| %>
-      <li><%= msg %></li>
-    <% end %>
-    </ul>
-  </div>
-<% end %>
-
 <%= fields_for @doc do |ff|%>
 
   <p>

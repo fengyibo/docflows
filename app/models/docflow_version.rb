@@ -314,17 +314,16 @@ class DocflowVersion < ActiveRecord::Base
     docflow.versions.where("id<?",self.id).order(:id).last
   end  
 
-  attr_accessor :saved_files
-  attr_accessor :failed_files
+  # attr_accessor :saved_files
+  # attr_accessor :failed_files
   attr_accessor :errors_msgs
-
   attr_accessor :processed_checklists
 
   # Prepearing NEW files to save.
   # Filling file info via DocflowFile.file= method, then creates new file on disk
 
   def save_files(new_files)
-    self.saved_files,self.failed_files,self.errors_msgs = [],[],[]
+    saved_files,failed_files,self.errors_msgs = [],[],[]
     docfile = nil
     num_files = 0
     new_files = new_files.values if new_files.is_a?(Hash)
@@ -333,36 +332,48 @@ class DocflowVersion < ActiveRecord::Base
       new_files.each do |new_file|
         if new_file['file'].respond_to?(:original_filename)
           num_files += 1
-          err = ""
+          err = false
 
           docfile = DocflowFile.new( :file => new_file['file'],
                                      :docflow_version_id => self.id,
                                      :description => new_file['description'],
                                      :filetype => new_file['filetype'] )
 
-          err = ("<br>"+l(:label_docflow_file_not_pdf)).html_safe if docfile.filetype == "pub_file" && !docfile.pdf?
-          err += ("<br>"+l(:label_docflow_file_not_docx)).html_safe if docfile.filetype == "src_file" && !docfile.docx?
-          err += ("<br>"+l(:label_docflow_file_type_not_allowed)+docfile.filename).html_safe unless docfile.allowed_type?
-          err += ("<br>"+l(:label_docflow_file_more_than_allowed_files, 
-                           :max_files => Setting.plugin_docflows['max_files'].to_s, 
-                           :fname => docfile.filename)).html_safe if num_files > files_left
+          if docfile.filetype == "pub_file" && !docfile.pdf?
+            self.errors_msgs << l(:label_docflow_file_not_pdf)
+            err = true
+          elsif docfile.filetype == "src_file" && !docfile.docx?
+            self.errors_msgs << l(:label_docflow_file_not_docx)
+            err = true
+          end
 
-          docfile.save if err == ""
+          unless docfile.allowed_type?
+            self.errors_msgs << l(:label_docflow_file_type_not_allowed)
+            err = true
+          end
+
+          if num_files > files_left
+            self.errors_msgs << l( :label_docflow_file_more_than_allowed_files, 
+                                   :max_files => Setting.plugin_docflows['max_files'].to_s, 
+                                   :fname => docfile.filename )
+            err = true
+          end
+
+          docfile.save unless err
 
           if docfile.new_record?
-            self.failed_files << new_file
-            self.errors_msgs << err
+            failed_files << new_file
           else
-            self.saved_files << new_file
+            saved_files << new_file
           end
         end
       end
+      self.errors_msgs << l(:label_docflow_files_not_saved, :num_files => failed_files.size.to_s) if failed_files.size > 0
     end
   end
 
-  # todo: check if record exists in checklists model before save
   def save_checklists(is_all, users, titles, department)
-    self.processed_checklists = []
+    self.processed_checklists,self.errors_msgs = [],[]
     rec = nil
     deleted = ""
 
@@ -373,23 +384,23 @@ class DocflowVersion < ActiveRecord::Base
     # Case:  ALL | Users | Titel+Department | Title | Department
     if !is_all.nil? && is_all == 'y'
       rec = DocflowChecklist.create( :docflow_version_id => self.id,
-                                     :all_users => 'y' )
+                                     :all_users => 'y' )      
 
       self.processed_checklists << { :name => l(:label_docflows_all_users),
                                      :id => rec.id,
-                                     :type => "all",
-                                     :docflow_version_id => self.id,
-                                     :err => ((rec.new_record?) ? "Exists" : "") }
+                                     :type => "all" } unless rec.new_record?
+
+      self.errors_msgs << l(:label_docflows_all_users) if rec.new_record?
     elsif users.is_a?(Array)
       users.each do |uid|
         rec = DocflowChecklist.create( :docflow_version_id => self.id,
-                                       :user_id => uid ) #if uid.is_a?(Numeric)
+                                       :user_id => uid )
 
         self.processed_checklists << { :name => rec.user.name,
                                        :id => rec.id,
-                                       :type => "User",
-                                       :docflow_version_id => self.id,
-                                       :err => ((rec.new_record?) ? "Exists" : "") }
+                                       :type => "User" } unless rec.new_record?
+
+        self.errors_msgs << rec.user.name if rec.new_record?
       end
     elsif titles.is_a?(Array)
       titles.each do |tid|
@@ -397,11 +408,12 @@ class DocflowVersion < ActiveRecord::Base
                                        :user_title_id => tid,
                                        :user_department_id => ((department.nil?) ? nil : department) )
 
-        self.processed_checklists << { :name => ( rec.department.nil? ? "" : (rec.department.name + ", ")) + rec.title.name,
+        name = ( rec.department.nil? ? "" : (rec.department.name + ", ")) + rec.title.name
+        self.processed_checklists << { :name => name,
                                        :id => rec.id,
-                                       :type => "UserTitle",
-                                       :docflow_version_id => self.id,
-                                       :err => ((rec.new_record?) ? "Exists" : "") }
+                                       :type => "UserTitle" } unless rec.new_record?
+
+        self.errors_msgs << name if rec.new_record?
       end
     elsif !department.nil? && department != ""
       rec = DocflowChecklist.create( :docflow_version_id => self.id,
@@ -409,10 +421,11 @@ class DocflowVersion < ActiveRecord::Base
 
       self.processed_checklists << { :name => rec.department.name,
                                      :id => rec.id,
-                                     :type => "Department",
-                                     :docflow_version_id => self.id,
-                                     :err => ((rec.new_record?) ? "Exists" : "") }
+                                     :type => "Department" } unless rec.new_record?
+
+      self.errors_msgs << rec.department.name if rec.new_record?
     end
+    self.errors_msgs.unshift(l(:label_docflow_check_list_similar_records)) if self.errors_msgs.any?
   end
 
   def copy_checklist(from_version)
@@ -433,8 +446,8 @@ class DocflowVersion < ActiveRecord::Base
   # Collects number of fails during DocflowFile.destoy
 
   def drop_files
-    self.saved_files,self.failed_files = [],[]
-    files.each {|attached_file| self.failed_files << attached_file unless attached_file.destroy}
+    failed_files = []
+    files.each {|attached_file| failed_files << attached_file unless attached_file.destroy}
   end
 
 end

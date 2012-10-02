@@ -12,7 +12,7 @@ class DocflowVersionsController < ApplicationController
   
 
   def check_settings
-    flash[:warning] = "Setup Plugin! Groups was not selected" if Setting.plugin_docflows['approve_allowed_to'].nil?
+    flash[:error] = "Setup Plugin! Groups was not selected" if Setting.plugin_docflows['approve_allowed_to'].nil?
     redirect_to "/docflows/plugin_disabled" unless Setting.plugin_docflows['enable_plugin']
   end
 
@@ -41,7 +41,7 @@ class DocflowVersionsController < ApplicationController
     unless cur_version.id == cur_version.docflow.last_version.id && cur_version.docflow_status_id == 1
       respond_to do |format|
         format.html do
-          flash[:warning] = l(:label_docflow_request_failed) + l(:label_docflow_only_last_and_new_editable)
+          flash[:error] = l(:label_docflow_request_failed) + l(:label_docflow_only_last_and_new_editable)
           redirect_to cur_version
         end
         format.json { render :json =>{:result => "fail", :msg => l(:label_docflow_only_last_and_new_editable)} }
@@ -54,11 +54,11 @@ class DocflowVersionsController < ApplicationController
     doc = Docflow.find(params[:docflow_version][:docflow_id]) unless params[:docflow_version].nil?
 
     if doc.nil?
-      flash[:warning] = l(:label_docflow_document_not_found)
+      flash[:error] = l(:label_docflow_document_not_found)
       redirect_to 'docflows#index'
     end
     unless doc.last_version.status.id == 3 || doc.last_version.status.id == 4
-      flash[:warning] = l(:label_docflow_cant_create_new_version)
+      flash[:error] = l(:label_docflow_cant_create_new_version)
       redirect_to doc.last_version
     end
   end
@@ -74,8 +74,8 @@ class DocflowVersionsController < ApplicationController
     @version.version = Docflow.find(params[:docflow_id]).last_version.version+1
     @version.author_id = User.current.id
     @version.docflow_status_id = DocflowStatus::DOCFLOW_STATUS_NEW
-    # only approver_id transfer but not any changes in view to select same user
-    # because approver should be selected only from target group while new version creation
+    # only approver_id transfer but not any changes in view to select approver from prev version
+    # because approver should be selected only from target group while new version of document creation
     @version.approver_id = @version.docflow.last_version.approver_id unless @version.docflow.last_version.nil?
   end
 
@@ -88,10 +88,9 @@ class DocflowVersionsController < ApplicationController
       if @version.save        
         @version.copy_checklist(last_version) if params[:inherit_know_list] == 'y'
 
-        @version.save_files(params[:new_files])
-        flash[:warning] = (l(:label_docflow_files_not_saved, :num_files => @version.failed_files.size.to_s)+"<br>").html_safe if @version.failed_files.size > 0
-        flash[:warning] +=  @version.errors_msgs.join("<br>").html_safe if @version.errors_msgs.any?
-        format.html { redirect_to(@version, :notice => ((flash[:warning].nil? || flash[:warning] == "") ? l(:label_docflow_version_saved) : nil) ) }
+        @version.save_files(params[:new_files])        
+        flash[:error] = @version.errors_msgs.join("<br>").html_safe if @version.errors_msgs.any?
+        format.html { redirect_to(@version, :notice => ((flash[:error].nil? || flash[:error] == "") ? l(:label_docflow_version_saved) : nil) ) }
         format.xml  { render :xml => @version, :status => :created, :location => @version }
       else
         format.html { render :action => "new" }
@@ -111,10 +110,9 @@ class DocflowVersionsController < ApplicationController
 
     respond_to do |format|
       if @version.update_attributes(params[:docflow_version])
-        @version.save_files(params[:new_files])
-        flash[:warning] = (l(:label_docflow_files_not_saved, :num_files => @version.failed_files.size.to_s)+"<br>").html_safe if @version.failed_files.size > 0
-        flash[:warning] +=  @version.errors_msgs.join("<br>").html_safe if @version.errors_msgs.any?
-        format.html { redirect_to(@version, :notice => ((flash[:warning].nil? || flash[:warning] == "") ? l(:label_docflow_version_saved) : nil) ) }
+        @version.save_files(params[:new_files])        
+        flash[:error] = @version.errors_msgs.join("<br>").html_safe if @version.errors_msgs.any?
+        format.html { redirect_to(@version, :notice => ((flash[:error].nil? || flash[:error] == "") ? l(:label_docflow_version_saved) : nil) ) }
         format.xml  { head :ok }
       else
         @files = @version.files
@@ -130,11 +128,11 @@ class DocflowVersionsController < ApplicationController
     @version = DocflowVersion.find(params[:id])
     respond_to do |format|
       if @version.docflow.first_version.id != @version.id && @version.destroy
-        flash[:warning] = @version.errors.full_messages.join("<br>".html_safe) if @version.errors.any?
+        flash[:error] = @version.errors.full_messages.join("<br>".html_safe) if @version.errors.any?
         format.html { redirect_to(@version.docflow.last_version, :notice => l(:label_docflow_version_deleted)) }
         format.xml  { head :ok }
       else
-        flash[:warning] = l(:label_docflow_version_delete_failed)
+        flash[:error] = l(:label_docflow_version_delete_failed)
         format.html { redirect_to(@version.docflow.last_version) }
         format.xml  { render :xml => @version.errors, :status => :unprocessable_entity }
       end
@@ -157,21 +155,20 @@ class DocflowVersionsController < ApplicationController
     redirect_to(@version)
   end  
 
+  # todo: change JS on async list generation
   def add_checklists
     @version = DocflowVersion.find(params[:id])
     @version.save_checklists(params[:all_users], params[:users], params[:titles],params[:department_id])
 
     respond_to do |format|
       if @version.processed_checklists.any?
-        err = ""
-        @version.processed_checklists.each { |r|  err += (r[:name]+"<br>").html_safe if r[:err] != "" }
-        flash[:warning] = (l(:label_docflow_check_list_similar_records)+"<br>" + err).html_safe unless err == ""
+        flash[:error] = @version.errors_msgs.join("<br>").html_safe if @version.errors_msgs.any?
         format.html { redirect_to(:action => "checklist")}
-        format.json { render :json => {:result => "ok", :msg => "", :saved => @version.processed_checklists}.to_json }
+        format.json { render :json => {:result => "ok", :msg => flash[:error].gsub("<br>","\n"), :saved => @version.processed_checklists}.to_json }
       else
-        flash[:warning] = l(:label_docflow_check_list_error_db)
+        flash[:error] = l(:label_docflow_check_list_error_db)
         format.html { redirect_to(:action => "checklist")}
-        format.json { render :json =>{:result => "fail", :msg => l(:label_docflow_check_list_error_db)} }
+        format.json { render :json =>{:result => "fail", :msg => flash[:error]} }
       end
     end
   end
@@ -219,7 +216,7 @@ class DocflowVersionsController < ApplicationController
                                       :docflow_version_id => params[:id],
                                       :done_date => Time.now)
     unless @fam.save
-      flash[:warning] = @fam.errors.full_messages.join(" ") if @fam.errors.any?
+      flash[:error] = @fam.errors.full_messages.join(" ") if @fam.errors.any?
     end
     redirect_to(@version)
   end
@@ -228,22 +225,22 @@ class DocflowVersionsController < ApplicationController
   # todo: insert version status: old/archive - to improve know-list queries
   # todo: investigate of rejection status table and bring status to version model
   def to_approvial
-    change_status 2
+    change_status DocflowStatus::DOCFLOW_STATUS_TO_APPROVIAL
   end
 
   def approve
     @version = DocflowVersion.find(params[:id])
     @version.actual_date = Date.parse(params[:actual_date]).to_date unless params[:actual_date].nil?
     @version.approve_date = Time.now
-    change_status 3
+    change_status DocflowStatus::DOCFLOW_STATUS_APPROVED
   end
 
   def postpone
-    change_status 1
+    change_status DocflowStatus::DOCFLOW_STATUS_NEW
   end
 
   def cancel
-    change_status 4
+    change_status DocflowStatus::DOCFLOW_STATUS_CANCELED
   end
 
   def change_status (status)
@@ -251,7 +248,7 @@ class DocflowVersionsController < ApplicationController
     @version.docflow_status_id = status
 
     unless @version.save
-      flash[:warning] = @version.errors.full_messages.join(" ") if @version.errors.any?
+      flash[:error] = @version.errors.full_messages.join(" ") if @version.errors.any?
     end
     redirect_to(@version)
   end

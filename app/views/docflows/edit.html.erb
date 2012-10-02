@@ -1,3 +1,14 @@
+<% if @doc.errors.any? %>
+  <div id="error_explanation" class="flash error">
+    <h4><%= pluralize(@doc.errors.count, "error")+l(:label_docflow_errors_found) %> </h4>
+    <ul>
+    <% @doc.errors.full_messages.each do |msg| %>
+      <li><%= msg %></li>
+    <% end %>
+    </ul>
+  </div>
+<% end %>
+
 <div class="contextual">
   <%= docflow_delete_button %>
 </div>
