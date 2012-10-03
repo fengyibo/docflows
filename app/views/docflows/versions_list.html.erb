@@ -1,6 +1,7 @@
 <%= render :partial => 'docflows/head' %>
 <div class="contextual">
   <%= docflow_new_button %>
+  <%= link_to("Tree view",{:controller => "docflows", :action => "created_by_me", :as_tree => "y"}) %>
 </div>
 
 <h2><%= content_tag(:span,@page_title)  %></h2>
@@ -11,7 +12,6 @@
       <th colspan=2 style="text-align:center; background-color: #D1BDBD;"> <%= l(:label_docflow_current_version) %> </th>      
     </tr>    
     <tr>
-      <th> <%= l(:label_docflow_type) %> </th>      
       <th> <%= l(:label_docflow_title) %> </th>      
       <th> <%= l(:label_docflow_version) %> </th>
       <th> <%= l(:label_docflow_category) %> </th>
@@ -30,8 +30,7 @@
       end 
     %>
     <tr>
-      <td> <%= ver.docflow.type.name %> </td>  
-      <td> <%= link_to ver.docflow.title, ver %> </td>      
+      <td> <%= ver.docflow.type.name %>: <%= link_to ver.docflow.title, ver %> </td>      
       <td> <%= link_to_version(ver) %> </td>
       <td> <%= ver.docflow.category.name %> </td>
       <td> <%= txt_ver %> </td>

@@ -2,6 +2,7 @@ class DocflowsController < ApplicationController
   unloadable
 
   helper :docflow_versions
+  helper :docflow_categories
 
   before_filter :check_settings
   before_filter :authorize, :only => [:new,:edit,:destory] # :create,:update, - need not due model validation
@@ -82,7 +83,7 @@ class DocflowsController < ApplicationController
   def created_by_me
     @versions = DocflowVersion.created_by_me
     @page_title = l(:label_docflows_created_by_me)
-    render 'versions_list'
+    render ( params[:as_tree] == "y") ? 'tree_versions_list' : 'versions_list'
   end
 
   #

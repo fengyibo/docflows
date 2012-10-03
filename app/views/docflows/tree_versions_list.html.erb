@@ -1,0 +1,34 @@
+<%= render :partial => 'docflows/head' %>
+<div class="contextual">
+  <%= docflow_new_button %>
+  <%= link_to("Tree view",{:controller => "docflows", :action => "created_by_me", :as_tree => "y"}) %>
+</div>
+
+<h2><%= content_tag(:span,@page_title)  %></h2>
+<div id="docs_tree">
+  <% unless @versions.empty? %>
+    <% categories = DocflowCategory.order("lft")  %>
+    <%= li_tree(categories) do |category| %>
+      <%
+         category_versions = @versions.inject([]){|cv,version| (version.docflow.docflow_category_id == category.id) ? cv.push(version) : cv }
+         category_versions.inject(""){ |html,cv| html << "<li>"+cv.docflow.type.name+": "+cv.docflow.title+" "+link_to_version(cv)+"</li>" }
+      %>  
+    <% end %>
+  <% end %>
+</div>
+<script type="text/javascript">
+  jQuery(document).ready(function(){
+    jQuery('#docs_tree')
+      .jstree({
+            // the `plugins` array allows you to configure the active plugins on this instance
+            "plugins" : ["themes","html_data","ui","crrm","hotkeys"],
+            // each plugin you have included can have its own config object
+            "core" : { "initially_open" : [ "phtml_1" ] }
+            // it makes sense to configure a plugin only if overriding the defaults
+        })
+  });
+</script>
+
+<% content_for :sidebar do %>
+  <%= render :partial => 'docflows/sidebar' %>
+<% end %>

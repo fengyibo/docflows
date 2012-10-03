@@ -1,5 +1,6 @@
 <%# javascript_include_tag('jquery.min.js') +
     javascript_tag('jQuery.noConflict();') %>
+<%= javascript_include_tag('jstree.min.js', :plugin => :docflows) %>    
 <%= javascript_include_tag :docflows, :plugin => :docflows %>
 
 <%= stylesheet_link_tag 'docflows', :plugin => 'docflows' %>
