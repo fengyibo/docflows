@@ -2,3 +2,4 @@
 *.sublime*
 todo.txt
 sftp-config.json
+.gitattributes

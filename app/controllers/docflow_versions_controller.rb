@@ -2,7 +2,7 @@ class DocflowVersionsController < ApplicationController
   unloadable
 
   helper :docflows
-  # helper :docflow_files
+  helper :docflow_categories
 
   before_filter :check_settings
   before_filter :modification_allowed?, :only => [:add_checklists, :remove_checklist, :remove_file, :checklist, :edit, :update, :destroy]
