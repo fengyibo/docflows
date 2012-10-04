@@ -230,7 +230,7 @@ class DocflowVersionsController < ApplicationController
 
   def approve
     @version = DocflowVersion.find(params[:id])
-    @version.actual_date = Date.parse(params[:actual_date]).to_date unless params[:actual_date].nil?
+    @version.actual_date = Date.parse(params[:actual_date]).to_date unless params[:actual_date].nil? || params[:actual_date] == ""
     @version.approve_date = Time.now
     change_status DocflowStatus::DOCFLOW_STATUS_APPROVED
   end

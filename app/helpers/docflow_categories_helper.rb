@@ -11,11 +11,11 @@ module DocflowCategoriesHelper
         result << "</li>" if rgt+1 == node.lft # neighbours - same level
         result << "</li></ul>"*(node.lft-rgt-1) if (node.lft-rgt) > 1 # level(s) up
       else # node.lft == lft+1
-        result << "<ul>"
+        result << "<ul class='tree_container'>"
         result << yield(prev_node) if block_given? && !prev_node.nil?
       end
       # else nothing to close - new sub node
-      result << "<li id=c"+node.id.to_s+">"+link_to(node.name,"#")
+      result << "<li id='c"+node.id.to_s+"' class='tree_fold node_expanded'>"+link_to(node.name, '#', :class => "tree_link")
 
       lft,rgt = node.lft,node.rgt
       prev_node = node

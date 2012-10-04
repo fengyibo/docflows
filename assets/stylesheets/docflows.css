@@ -18,6 +18,14 @@ fieldset.docflow_annotation { padding: 10px; margin:10px; margin-left: 25px; mar
 
 li.checklist_record {display: list-item; margin-left: 20px;}
 li.sel_menu {padding: 3px; background-color: #FBE5E0;}
+
+ul.tree_container li.tree_leaf{
+  list-style-image:url(../images/file.png);
+}
+
+ul.tree_container li.tree_fold{
+  list-style-image:url(../images/folder_gray.png);
+}
 /*ul.content-checklists {list-style: none;}
 
 ul.nav-tab-cont {list-style: none; border-bottom: 1px solid #bbb; display:table; width:100%;}

@@ -55,7 +55,7 @@ class DocflowVersion < ActiveRecord::Base
 
   def vailidate_files_and_users
       errors.add(:base, l(:label_docflow_no_files_attached)+(" <a href='#{self.id}/edit'>"+l(:label_docflow_edit_version)+"</a><br>").html_safe ) unless self.files.exists?(:filetype => "src_file") && self.files.exists?(:filetype => "pub_file")
-      errors.add(:base, l(:label_docflow_no_users_attached)+(" <a href='#{self.id}/checklists'>"+l(:label_docflow_edit_check_list)+"</a><br>").html_safe ) unless self.checklists.any?
+      errors.add(:base, l(:label_docflow_no_users_attached)+(" <a href='#{self.id}/checklist'>"+l(:label_docflow_edit_check_list)+"</a><br>").html_safe ) unless self.checklists.any?
   end
 
   def visible_for_user?
