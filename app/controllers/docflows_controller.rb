@@ -53,7 +53,11 @@ class DocflowsController < ApplicationController
       if params[:view_as] == "tree"
         render :partial => 'tree_versions', :layout => false, :locals => {:selection => params[:sel]}
       elsif params[:view_as] == "list"
-        render :partial => 'list_versions', :layout => false, :locals => {:selection => params[:sel]}
+        if params[:sel] == "in_work"
+          render :partial => 'list_versions', :layout => false, :locals => {:selection => params[:sel]}
+        else
+          render :partial => 'list_with_author', :layout => false, :locals => {:selection => params[:sel]}
+        end
       end
     end  
   end
