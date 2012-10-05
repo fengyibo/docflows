@@ -1,7 +1,7 @@
 table.invisi-table { width:100%; cell-padding:0px;cell-spacing:0px;border:none; }
 table.invisi-table th { width: 150px;}
 table.invisi-table td,th { text-align: left; vertical-align: top;}
-table.invisi-table td.button_area {width:80px; text-align:right;}
+table.invisi-table td,th.button_area {width:80px; text-align:right;}
 
 div.first-row {background:#CCCCCC; }
 div.second-row {background:#DDDDDD; }
@@ -19,13 +19,24 @@ fieldset.docflow_annotation { padding: 10px; margin:10px; margin-left: 25px; mar
 li.checklist_record {display: list-item; margin-left: 20px;}
 li.sel_menu {padding: 3px; background-color: #FBE5E0;}
 
-ul.tree_container li.tree_leaf{
+ul.tree_container{
   list-style-image:url(../images/file.png);
+  padding-left: 25px;
 }
 
-ul.tree_container li.tree_fold{
-  list-style-image:url(../images/folder_gray.png);
+ul.tree_container li{
+  margin: 3px 0px;
 }
+
+ul.tree_container li.tree_fold {
+  list-style-image:url(../images/folder_yellow.png);
+}
+
+ul.tree_container li.tree_fold.node_expanded {
+  list-style-image:url(../images/folder_yellow_open.png);
+}
+
+
 /*ul.content-checklists {list-style: none;}
 
 ul.nav-tab-cont {list-style: none; border-bottom: 1px solid #bbb; display:table; width:100%;}
@@ -46,6 +57,8 @@ background-color: #F6F6F6; }
 label.one-name {display:block;}
 
 .icon-group { background-image: url(../images/group.png); }
+.icon-tree { background-image: url(../images/tree_view.png); }
+.icon-list { background-image: url(../images/list_view.png); }
 
 .icon-only {
   background-position: 0% 50%;

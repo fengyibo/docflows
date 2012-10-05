@@ -1,4 +1,17 @@
 jQuery(document).ready(function(){
+  
+  jQuery('.tree_link').click(function(){
+      fold = jQuery(this).parent();
+      if ( jQuery(fold).hasClass("node_expanded") ) {
+        jQuery(fold).children("ul").hide();
+        jQuery(fold).removeClass('node_expanded');
+      }
+      else {
+        jQuery(fold).children("ul").show();
+        jQuery(fold).addClass('node_expanded');
+      }
+      return false;        
+  })   
 
   jQuery('#filer_people').bind("change keyup input",function(){
     if (jQuery(this).val() == ""){
@@ -205,4 +218,19 @@ function removeDocflowChecklistOk(resp){
 function removeDocflowChecklistFail(resp){
   alert(jQuery('#label_docflow_request_failed').val());
   return false;
+}
+
+function sort_tree(tree_id){
+  jQuery("#"+tree_id+" ul.tree_container").each(function (i, el) {
+    first_leaf = jQuery(el).children("li.tree_leaf").first();
+    if ( jQuery(first_leaf).length ) {
+      jQuery(el).children("li.tree_fold").each(function(k, elem){
+        jQuery(elem).insertBefore(first_leaf)
+      })
+    }        
+  })    
+}
+
+function clear_tree(tree_id){
+  jQuery("#"+tree_id+" li.tree_fold:not(li.tree_fold:has(li.tree_leaf))").remove();
 }

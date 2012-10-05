@@ -4,6 +4,8 @@ ru:
   label_docflow: "Документооборот"
   label_docflow_top_title: "Документы"
   label_docflow_administration: "Администрирование"
+  label_docflow_list_view: "Список"
+  label_docflow_tree_view: "Дерево"
   label_docflow_new: "Новый документ"
   label_docflow_edit: "Правка документа"
   label_docflow_categories: "Категории"

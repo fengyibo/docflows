@@ -4,6 +4,8 @@ en:
   label_docflow: "Documents workflow"
   label_docflow_top_title: "Documents"
   label_docflow_administration: "Administration"
+  label_docflow_list_view: "List view"
+  label_docflow_tree_view: "Tree view"
   label_docflow_new: "New document"
   label_docflow_edit: "Edit document"
   label_docflow_categories: "Categories"

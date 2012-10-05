@@ -83,7 +83,8 @@ class DocflowsController < ApplicationController
   def created_by_me
     @versions = DocflowVersion.created_by_me
     @page_title = l(:label_docflows_created_by_me)
-    render ( params[:as_tree] == "y") ? 'tree_versions_list' : 'versions_list'
+    # @as_tree = params[:as_tree]
+    render 'versions_list'
   end
 
   #

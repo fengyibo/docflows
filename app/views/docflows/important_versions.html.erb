@@ -23,7 +23,7 @@
       <td> <%= link_to_version(ver) %> </td>
       <td> <%= ver.docflow.category.name %> </td>
       <td> <%= link_to_user ver.author %> </td>
-      <td> <%= format_date(ver.actual_date.utc.getlocal) %> </td>
+      <td> <%= (ver.actual_date.nil?) ? "-" : format_date(ver.actual_date.utc.getlocal) %> </td>
     </tr>
   <% end %>
   </table>
@@ -47,7 +47,7 @@
       <td> <%= link_to_version(ver) %> </td>
       <td> <%= ver.docflow.category.name %> </td>
       <td> <%= link_to_user ver.author %> </td>
-      <td> <%= format_date(ver.actual_date.utc.getlocal) %> </td>
+      <td> <%= (ver.actual_date.nil?) ? "-" : format_date(ver.actual_date.utc.getlocal) %> </td>
     </tr>
   <% end %>
   </table>
