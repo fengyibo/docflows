@@ -4,30 +4,20 @@
 <div id="docs_tree" style="padding-left:5px;">
   <% unless @versions.empty? %>
     <% categories = DocflowCategory.order("lft")
-       versions = @versions.sort_by{|version| [version.docflow.title,version.version]}
+       sorted_verions = @versions.sort_by{|version| [version.docflow.title,version.version]}
+       docs = Docflow.find(@versions.inject([]){|ar,v| ar.push(v.docflow_id)}).sort_by{|d| d.title}
      %>
     <%= li_tree(categories) do |category| %>
       <%
-        category_versions = versions.inject([]){|cv,version| (version.docflow.docflow_category_id == category.id) ? cv.push(version) : cv }
+        category_docs = docs.inject([]){|ar,doc| (doc.docflow_category_id == category.id) ? ar.push(doc) : ar }
         html = ""
-        prev_ver, ver = nil, nil
 
-        category_versions.each_index do |i|
-          if (!prev_ver.nil? && prev_ver.docflow.id != category_versions[i].docflow.id)
-            html << "<li class='tree_leaf'>"+prev_ver.docflow.type.name+": "+prev_ver.docflow.title+" "+ver+"</li>"
-            ver = nil        
-          end
-
-          if i == category_versions.size-1
-            ver = ver.nil? ? link_to_version(category_versions[i]) : (ver+", "+link_to_version(category_versions[i]))
-            html << "<li class='tree_leaf'>"+prev_ver.docflow.type.name+": "+prev_ver.docflow.title+" "+ver+"</li>"          
-          end
-
-          ver = ver.nil? ? link_to_version(category_versions[i]) : (ver+", "+link_to_version(category_versions[i]))
-          prev_ver = category_versions[i]
+        category_docs.each do |doc|
+          doc_versions = sorted_verions.inject([]){|ar,v| (v.docflow_id == doc.id) ? ar.push(v) : ar }
+          html << "<li class='tree_leaf'>"+doc.type.name+": "+doc.title+" "+
+                    (doc_versions.inject(""){|href,v| href += ((href == "") ? link_to_version(v) : ", "+link_to_version(v))})+"</li>"
         end
         html
-        #category_versions.inject(""){ |html,cv| html << "<li class='tree_leaf'>"+cv.docflow.type.name+": "+cv.docflow.title+" "+link_to_version(cv)+"</li>" }
       %>  
     <% end %>
   <% end %>

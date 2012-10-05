@@ -15,24 +15,31 @@
       <th> <%= l(:label_docflow_version) %> </th>
       <th> <%= l(:label_docflow_actual_from) %> </th>
     </tr>
-  <% 
-    @versions.sort_by{|v| [v.docflow.title,v.version]}.each do |ver| 
-      if ver.docflow.canceled?
-        txt_cur_date = (ver.docflow.last_version.actual_date.nil?) ? ver.docflow.last_version.updated_at : ver.docflow.last_version.actual_date
+<% 
+    docs = Docflow.find(@versions.inject([]){|ar,v| ar.push(v.docflow_id)}).sort_by{|d| d.title}
+    sorted_verions = @versions.sort_by{|v| [v.docflow.title,v.version]}
+
+    docs.each do |doc|
+      doc_versions = sorted_verions.inject([]){|ar,v| (v.docflow_id == doc.id) ? ar.push(v) : ar }
+
+      if doc.canceled?
+        txt_cur_date = (doc.last_version.actual_date.nil?) ? doc.last_version.updated_at : doc.last_version.actual_date
         txt_cur_date = (content_tag(:span, format_date(txt_cur_date.utc.getlocal), :style => "text-decoration: line-through;")+" ("+l(:label_docflow_version_canceled)+")")
-        txt_ver = link_to_version(ver.docflow.last_version)
+        txt_ver = link_to_version(doc.last_version)
       else
-        txt_cur_date = (ver.docflow.actual_version.nil?) ? "-" : format_date(ver.docflow.actual_version.actual_date.utc.getlocal)
-        txt_ver = (ver.docflow.actual_version.nil?) ? "-" : link_to_version(ver.docflow.actual_version)
-      end 
-  %>
+        txt_cur_date = (doc.actual_version.nil?) ? "-" : format_date(doc.actual_version.actual_date.utc.getlocal)
+        txt_ver = (doc.actual_version.nil?) ? "-" : link_to_version(doc.actual_version)
+      end
+
+%>
     <tr>
-      <td> <%= ver.docflow.type.name %>: <%= link_to ver.docflow.title, ver %> </td>      
-      <td> <%= link_to_version(ver) %> </td>
-      <td> <%= ver.docflow.category.name %> </td>
+      <td> <%= doc.type.name %>: <%= link_to doc.title, doc_versions.last %> </td>      
+      <td> <%= doc_versions.inject(""){|href,v| href += ((href == "") ? link_to_version(v) : ", "+link_to_version(v))}.html_safe %> </td>
+      <td> <%= doc.category.name %> </td>
       <td> <%= txt_ver %> </td>
       <td> <%= txt_cur_date %> </td>
     </tr>
   <% end %>
+
   </table>
 <% end %>
