@@ -1,7 +1,12 @@
-<%= link_to(content_tag(:span,l(:label_docflow_list_view)),{:controller => controller.controller_name, :action => controller.action_name}, :class => "icon icon-list") %>
+<% sel = local_assigns[:selection] ? selection : "" %>
+<div id="view_container_<%= sel %>">
+<%= link_to( l(:label_docflow_list_view), 
+             {:controller => controller.controller_name, :action => controller.action_name, :view_as => "list", :sel => sel}, 
+             :onclick => "jQuery('#view_container_#{sel}').load(this.href); return false;", 
+             :class => "icon icon-list") %>
 <hr>
 
-<div id="docs_tree" style="padding-left:5px;">
+<div id="docs_tree_<%= sel %>" style="padding-left:5px;">
   <% unless @versions.empty? %>
     <% categories = DocflowCategory.order("lft")
        sorted_verions = @versions.sort_by{|version| [version.docflow.title,version.version]}
@@ -22,10 +27,10 @@
     <% end %>
   <% end %>
 </div>
-
+</div>
 <script type="text/javascript">
   jQuery(document).ready(function(){
-    sort_tree("docs_tree");
-    clear_tree("docs_tree");
+    sort_tree("docs_tree_<%= sel %>");
+    clear_tree("docs_tree_<%= sel %>");
   });
 </script>

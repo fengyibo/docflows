@@ -1,7 +1,9 @@
 table.invisi-table { width:100%; cell-padding:0px;cell-spacing:0px;border:none; }
 table.invisi-table th { width: 150px;}
 table.invisi-table td,th { text-align: left; vertical-align: top;}
-table.invisi-table td,th.button_area {width:80px; text-align:right;}
+
+table.invisi-table td.button_area {width:80px; text-align:right;}
+table.invisi-table th.button_area {width:80px; text-align:right;}
 
 div.first-row {background:#CCCCCC; }
 div.second-row {background:#DDDDDD; }

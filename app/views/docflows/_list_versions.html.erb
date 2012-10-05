@@ -1,5 +1,9 @@
-
-<%= link_to(content_tag(:span,l(:label_docflow_tree_view)),{:controller => controller.controller_name, :action => controller.action_name, :as_tree => "y"}, :class => "icon icon-tree") %>
+<% sel = local_assigns[:selection] ? selection : "" %>
+<div id="view_container_<%= sel %>">
+<%= link_to( l(:label_docflow_tree_view), 
+             {:controller => controller.controller_name, :action => controller.action_name, :view_as => "tree", :sel => sel}, 
+             :onclick => "jQuery('#view_container_#{sel}').load(this.href); return false;", 
+             :class => "icon icon-tree") %>
 <hr>
 
 <% unless @versions.empty? %>
@@ -43,3 +47,4 @@
 
   </table>
 <% end %>
+</div>

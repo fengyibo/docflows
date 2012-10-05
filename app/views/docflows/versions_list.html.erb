@@ -5,7 +5,7 @@
 
 <h2><%= content_tag(:span,@page_title)  %></h2>
 
-<%= render :partial => ( params[:as_tree] == "y" ? 'tree_versions' : 'list_versions') %>
+<%= render :partial => 'list_versions' %>
 
 <% content_for :sidebar do %>
   <%= render :partial => 'docflows/sidebar' %>

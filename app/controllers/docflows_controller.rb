@@ -41,12 +41,21 @@ class DocflowsController < ApplicationController
   end
 
   def index
-    # todo:
-    # Show 3 blocks at one: Waiting for my approvial, In work and unread
-    @unread = DocflowVersion.unread_for_user
-    @waiting = DocflowVersion.waiting_for_my_approvial
-    @in_work = DocflowVersion.in_work
-    render 'important_versions'
+    if params[:view_as].nil?
+      @unread = DocflowVersion.unread_for_user
+      @waiting = DocflowVersion.waiting_for_my_approvial
+      @in_work = DocflowVersion.in_work
+      render 'important_versions'
+    else
+      @versions = DocflowVersion.in_work if params[:sel] == "in_work"
+      @versions = DocflowVersion.waiting_for_my_approvial if params[:sel] == "waiting"
+      @versions = DocflowVersion.unread_for_user if params[:sel] == "unread"
+      if params[:view_as] == "tree"
+        render :partial => 'tree_versions', :layout => false, :locals => {:selection => params[:sel]}
+      elsif params[:view_as] == "list"
+        render :partial => 'list_versions', :layout => false, :locals => {:selection => params[:sel]}
+      end
+    end  
   end
 
   def all
@@ -63,20 +72,32 @@ class DocflowsController < ApplicationController
   def unread
     @versions = DocflowVersion.unread_for_user
     @page_title = l(:label_docflows_actual)
-    render 'versions_list'
+    if params[:view_as].nil?
+      render 'versions_list'      
+    else
+      render :partial => 'versions_list', :layout => false
+    end
   end
 
   def in_work
     @versions = DocflowVersion.in_work
     @page_title = l(:label_docflows_in_work)
-    render 'versions_list'
+    if params[:view_as].nil?
+      render 'versions_list'      
+    else
+      render :partial => 'versions_list', :layout => false
+    end
   end
 
   # Approved by User document's versions
   def approved_by_me
     @versions = DocflowVersion.approved_by_me
     @page_title = l(:label_docflows_approved_by_me)
-    render 'versions_list'
+    if params[:view_as].nil?
+      render 'versions_list'      
+    else
+      render :partial => 'versions_list', :layout => false
+    end
   end
 
   # Approved by User document's versions
@@ -84,21 +105,33 @@ class DocflowsController < ApplicationController
     @versions = DocflowVersion.created_by_me
     @page_title = l(:label_docflows_created_by_me)
     # @as_tree = params[:as_tree]
-    render 'versions_list'
+    if params[:view_as].nil?
+      render 'versions_list'      
+    else
+      render :partial => 'versions_list', :layout => false
+    end
   end
 
   #
   def waiting_for_my_approvial
     @versions = DocflowVersion.waiting_for_my_approvial
     @page_title = l(:label_docflows_waiting_for_my_approvial)
-    render 'versions_list'
+    if params[:view_as].nil?
+      render 'versions_list'      
+    else
+      render :partial => 'versions_list', :layout => false
+    end
   end
 
   #
   def sent_to_approvial
     @versions = DocflowVersion.sent_to_approvial
     @page_title = l(:label_docflows_sent_to_approvial)
-    render 'versions_list'
+    if params[:view_as].nil?
+      render 'versions_list'      
+    else
+      render :partial => 'versions_list', :layout => false
+    end
   end
 
   def under_control
@@ -110,14 +143,28 @@ class DocflowsController < ApplicationController
   def actual
     @versions = DocflowVersion.actual_for_user
     @page_title = l(:label_docflows_actual)
-    render 'actual_versions'
+
+    if params[:view_as] == "tree"
+      render :partial => 'tree_versions', :layout => false
+    elsif params[:view_as] == "list"
+      render :partial => 'actual_versions', :layout => false
+    else
+      render 'actual_versions'
+    end      
   end
 
   # Canceled documents which was read and accepted by user
   def canceled
     @versions = DocflowVersion.canceled_for_user
     @page_title = l(:label_docflows_canceled)
-    render 'canceled_versions'
+
+    if params[:view_as] == "tree"
+      render :partial => 'tree_versions', :layout => false
+    elsif params[:view_as] == "list"
+      render :partial => 'canceled_versions', :layout => false
+    else
+      render 'canceled_versions'
+    end  
   end
 
   def new
