@@ -1,6 +1,6 @@
 jQuery(document).ready(function(){
   
-  jQuery('.tree_link').click(function(){
+  jQuery('.tree_link').live("click",function(){
       fold = jQuery(this).parent();
       if ( jQuery(fold).hasClass("node_expanded") ) {
         jQuery(fold).children("ul").hide();
