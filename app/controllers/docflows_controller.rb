@@ -139,8 +139,13 @@ class DocflowsController < ApplicationController
   end
 
   def under_control
-    @docs = Docflow.where("responsible_id=?", User.current.id)
-    render 'index'
+    @versions = DocflowVersion.joins("INNER JOIN #{Docflow.table_name} df ON #{DocflowVersion.table_name}.docflow_id=df.id AND df.responsible_id=#{User.current.id}")
+    @page_title = l(:label_docflows_under_control)
+    if params[:view_as].nil?
+      render 'versions_list'      
+    else
+      render :partial => 'versions_list', :layout => false
+    end
   end
 
   # Read and accepted documents which was not canceled

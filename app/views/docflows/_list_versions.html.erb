@@ -1,12 +1,12 @@
-<% sel = local_assigns[:selection] ? selection : "" %>
-<div id="view_container_<%= sel %>">
-<%= link_to( l(:label_docflow_tree_view), 
-             {:controller => controller.controller_name, :action => controller.action_name, :view_as => "tree", :sel => sel}, 
-             :onclick => "jQuery('#view_container_#{sel}').load(this.href); return false;", 
-             :class => "icon icon-tree") %>
-<hr>
-
 <% unless @versions.empty? %>
+  <% sel = local_assigns[:selection] ? selection : "" %>
+  <div id="view_container_<%= sel %>">
+  <%= link_to( l(:label_docflow_tree_view), 
+               {:controller => controller.controller_name, :action => controller.action_name, :view_as => "tree", :sel => sel}, 
+               :onclick => "jQuery('#view_container_#{sel}').load(this.href); return false;", 
+               :class => "icon icon-tree") %>
+  <hr>
+
   <table class="list">
     <tr>
       <th colspan=3 style="text-align:center; background-color: #BAD8BA;"> <%= l(:label_docflow_selected_version) %> </th>      
@@ -46,5 +46,5 @@
   <% end %>
 
   </table>
-<% end %>
 </div>
+<% end %>
