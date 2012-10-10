@@ -1,4 +1,4 @@
-<%= content_tag(:div, flash[:error], :id => "errorExplanation") unless flash[:error].nil? %>
+<%= content_tag(:div, js_err, :id => "errorExplanation") if local_assigns[:js_err] && !js_err.nil? %>
 
 <div class="splitcontentleft" style="width:65%;">
   <% rules = @version.checklists.where('user_department_id IS NOT NULL OR user_title_id IS NOT NULL').order('user_department_id')  %>

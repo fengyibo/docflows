@@ -5,7 +5,7 @@ class DocflowVersionsController < ApplicationController
   helper :docflow_categories
 
   before_filter :check_settings
-  before_filter :modification_allowed?, :only => [:add_checklists, :remove_checklist, :remove_file, :checklist, :edit, :update, :destroy]
+  before_filter :modification_allowed?, :only => [:add_checklists, :remove_checklist, :remove_file, :checklist, :edit, :update, :destroy, :edit_checklists, :remove_checklist_by_department]
   before_filter :new_allowed?, :only => [:new, :create]
 
   before_filter :authorize
@@ -40,10 +40,10 @@ class DocflowVersionsController < ApplicationController
 
     unless cur_version.id == cur_version.docflow.last_version.id && cur_version.docflow_status_id == 1
       respond_to do |format|
-        format.html do
+        format.html {
           flash[:error] = l(:label_docflow_request_failed) + l(:label_docflow_only_last_and_new_editable)
           redirect_to cur_version
-        end
+        }
         format.json { render :json =>{:result => "fail", :msg => l(:label_docflow_only_last_and_new_editable)} }
       end
     end
@@ -159,24 +159,24 @@ class DocflowVersionsController < ApplicationController
   def add_checklists
     @version = DocflowVersion.find(params[:id])
     @version.save_checklists(params[:all_users], params[:users], params[:titles],params[:department_id])
-    
-    result = "ok"
+    result = "ok"    
 
     if @version.processed_checklists.blank? && !(params[:all_users].nil? && params[:users].nil? && params[:titles].nil? && params[:department_id].nil?)
       @version.errors_msgs << l(:label_docflow_check_list_error_db)
       result = "fail"
     end
-    flash[:error] = @version.errors_msgs.join("<br>").html_safe if @version.errors_msgs.any?
+    js_err = @version.errors_msgs.join("<br>").html_safe if @version.errors_msgs.any?
+    flash[:error] = js_err unless js_err.nil?
 
     respond_to do |format|      
       format.html { redirect_to(:action => "checklist")}
       format.js   { 
         render(:update) {|page|
           if(params[:tab_refresh] == "users") 
-            page.replace_html "tab-content-users", :partial => "docflow_checklists/users"
+            page.replace_html "tab-content-users", :partial => "docflow_checklists/users", :locals => {:js_err => js_err}
             @version.processed_checklists.each{ |rec| page.visual_effect(:highlight, "rec-#{rec[:id]}") }
           else
-            page.replace_html "tab-content-groups", :partial => "docflow_checklists/groups"
+            page.replace_html "tab-content-groups", :partial => "docflow_checklists/groups", :locals => {:js_err => js_err}
             hid = (params[:department_id].nil? || params[:department_id] == "")  ? "0" : params[:department_id]
             page.visual_effect(:highlight, "dep-#{hid}")
           end
@@ -197,7 +197,7 @@ class DocflowVersionsController < ApplicationController
     checklists.each do |rec|
       rec.destroy
     end
-    return self.add_checklists
+    self.add_checklists
   end
 
 
@@ -234,13 +234,12 @@ class DocflowVersionsController < ApplicationController
   def remove_checklist
     @version = DocflowVersion.find(params[:id])
     checklist = DocflowChecklist.find(params[:cid])
+
     respond_to do |format|
-      if checklist.destroy
-        format.html { render :inline => "Record dropped!"}
-        format.js   { render(:update) {|page| page.replace_html "tab-content-users", :partial => 'docflow_checklists/users'} }       
+      if checklist.destroy        
+        format.js   { render(:update) {|page| page.replace_html "tab-content-users", :partial => 'docflow_checklists/users' } }       
         format.json { render :json => {:result => "ok", :msg => "", :id => params[:cid]}.to_json }
       else
-        format.html { render :inline => "Failed to drop record!"}
         format.json { render :json =>{:result => "fail", :msg => "Fail remove checklist record"} }
       end
     end
