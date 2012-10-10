@@ -1,4 +1,5 @@
-<%= content_tag(:div,flash[:error], :id => "errorExplanation") unless flash[:error].nil? %>
+<%= content_tag(:div, flash[:error], :id => "errorExplanation") unless flash[:error].nil? %>
+
 <div class="splitcontentleft" style="width:65%;">
   <% is_all = @version.checklists.where("all_users='y'") %>
   <% users = @version.checklists.where('user_id is not null') %>

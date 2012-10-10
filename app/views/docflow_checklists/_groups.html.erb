@@ -1,4 +1,5 @@
-<%= content_tag(:div,flash[:error], :id => "errorExplanation") unless flash[:error].nil? %>
+<%= content_tag(:div, flash[:error], :id => "errorExplanation") unless flash[:error].nil? %>
+
 <div class="splitcontentleft" style="width:65%;">
   <% rules = @version.checklists.where('user_department_id IS NOT NULL OR user_title_id IS NOT NULL').order('user_department_id')  %>
   <% title_only = false %>
@@ -39,7 +40,7 @@
               <%= submit_tag( l(:label_docflow_edit_item), :id => 'record_edit', :class => 'btn-def' ) %>
               <%= link_to( l(:label_docflow_cancel), "#{dep.id}", :class => 'btn-def checklist_cancel' ) %>
             <% end %>
-            <span id="checklist_<%= dep.id %>_list"><%= titles_list.any? ? titles_list.join(', ') : l(:label_docflow_any_title) %></span>
+            <span id="checklist_<%= dep.id %>_list"><%= titles_list.any? ? titles_list.join(', ') : content_tag(:b,l(:label_docflow_any_title)) %></span>
           </td>
           <td class="buttons">
             <%= link_to( l(:button_edit),
