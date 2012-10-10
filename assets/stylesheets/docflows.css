@@ -38,6 +38,8 @@ ul.tree_container li.tree_fold.node_expanded {
   list-style-image:url(../images/folder_yellow_open.png);
 }
 
+form.checklist_form {display: none;}
+
 
 /*ul.content-checklists {list-style: none;}
 
@@ -163,7 +165,7 @@ background-color: #ddd;
 background-repeat: repeat-x;
 display: inline-block;
 cursor: pointer;
-padding: 4px 8px 4px 8px;
+padding: 3px 7px;
 text-align: center;
 text-decoration: none;
 vertical-align: middle;

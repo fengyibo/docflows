@@ -1,5 +1,10 @@
 module DocflowVersionsHelper
 
+  def version_checklists_tabs
+        tabs = [ {:name => 'users', :partial => 'docflow_checklists/users', :label => :label_docflows_users},
+                 {:name => 'groups', :partial => 'docflow_checklists/groups', :label => :label_docflows_groups} ]
+  end
+
   def link_to_remove_checklist_record (rec)
     result = "<li class='checklist_record' id='ch"+rec.id.to_s+"'>"
     result += "<span class='right-marg'>"+ (rec.display_name) +"</span>"

@@ -54,12 +54,8 @@ class DocflowTypesController < ApplicationController
   def destroy
     @type = DocflowType.find(params[:id])
     @type.destroy
-
-    if @type.errors.any?
-      @type.errors.full_messages.each do |msg|
-        flash[:error] = msg
-      end
-    end
+    
+    flash[:error] = @type.errors.full_messages.join("<br>").html_safe if @type.errors.any?
 
     respond_to do |format|
       format.html { redirect_to(docflow_types_url) }

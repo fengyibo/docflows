@@ -1,0 +1,84 @@
+<%= content_tag(:div,flash[:error], :id => "errorExplanation") unless flash[:error].nil? %>
+<div class="splitcontentleft" style="width:65%;">
+  <% rules = @version.checklists.where('user_department_id IS NOT NULL OR user_title_id IS NOT NULL').order('user_department_id')  %>
+  <% title_only = false %>
+  <% departments = UserDepartment.find(rules.inject([]) { |ar,rec| rec.user_department_id.nil? ? (title_only = true; ar) : ar.push(rec.user_department_id) } ) %>
+
+  <% departments.unshift(UserDepartment.new(:name => "")) if title_only %>
+
+  <% user_departments = UserDepartment.all %>
+  <% user_titles = UserTitle.all %>
+
+  <% if rules.any? %>
+    <table class="list users">
+      <thead>
+        <tr>
+          <th><%= l(:label_docflows_user_department) %></th>
+          <th><%= l(:label_docflows_user_title) %></th>
+          <th style="width:15%"></th>
+        </tr>
+      </thead>
+      <tbody>
+      <% departments.sort_by{|el| el.name.to_s}.each do |dep| %>
+        <% dep_titles = rules.inject([]){|ar,rec| (rec.user_department_id == dep.id) ? ar.push(rec.user_title_id) : ar } %>
+        <% dep.id = 0 if dep.id.nil? %>
+        <tr id="dep-<%= dep.id %>" class="<%= cycle 'odd', 'even' %>">
+          <td class="department"><%= dep.name %></td>
+          <td>
+            <% titles_list = [] %>
+            <%= form_tag(edit_checklists_docflow_version_path(@version,dep.id), :class=>'checklist_form', :id =>"checklist_#{dep.id}_form", :remote => true) do %>
+              <input type=hidden name="tab_refresh" value="groups">
+              <div class="list-container">
+              <% user_titles.sort_by{|el| el.name.to_s}.each do |t| %>
+                <%= content_tag( :label,
+                         check_box_tag( "titles[#{t.id}]", t.id, dep_titles.include?(t.id) ) + t.name.to_s,
+                         :class => "one-name" ) %>
+                <% titles_list << t.name if dep_titles.include?(t.id) %>         
+              <% end %>
+              </div>
+              <%= submit_tag( l(:label_docflow_edit_item), :id => 'record_edit', :class => 'btn-def' ) %>
+              <%= link_to( l(:label_docflow_cancel), "#{dep.id}", :class => 'btn-def checklist_cancel' ) %>
+            <% end %>
+            <span id="checklist_<%= dep.id %>_list"><%= titles_list.any? ? titles_list.join(', ') : l(:label_docflow_any_title) %></span>
+          </td>
+          <td class="buttons">
+            <%= link_to( l(:button_edit),
+                                  "#{dep.id}",
+                                  :class => 'icon icon-edit checklist_edit' ) %>            
+            <%= link_to_remote( l(:button_delete),
+                                { :url => remove_checklist_by_department_docflow_version_path(@version,dep.id),
+                                  :method => :delete },
+                                :class => 'icon icon-del' ) %>
+          </td>
+        </tr>
+      <% end %>
+
+      </tbody>
+    </table>
+  <% else %>
+    <p id="no_checklist_groups_records" class="nodata"><%= l(:label_no_data) %></p>
+  <% end %>
+</div>
+
+<div class="splitcontentright" style="width:30%;">
+  <%= form_tag({:action => "checklist"},{:class=>'select_checklist_form', :id =>'select_groups', :remote => true}) do %>
+    <input type=hidden name="tab_refresh" value="groups">
+    <fieldset><legend><strong> <%= l(:label_docflows_groups) %> </strong></legend> 
+      <p><strong><%= l(:label_docflows_departments) %></strong></p>
+      <%= select_tag("department_id", "<option value=\"\" selected>-</option>".html_safe+options_from_collection_for_select(user_departments.sort_by{|el| el.name.to_s},"id","name")) %>
+      <h4><%= l(:label_docflows_users_titles) %></h4>
+      <p><%= text_field_tag('filer_groups', '', :class => 'find-filter') %></p>
+      <div id="group-list" class="list-container">
+        <% user_titles.sort_by{|el| el.name.to_s}.each do |t| %>
+          <%= content_tag( :label,
+                           check_box_tag("titles[#{t.id}]", t.id) + t.name.to_s,
+                           :class => "one-name" ) %>
+        <% end %>
+      </div>
+      <p>
+      <%= submit_tag(l(:label_docflow_add_item), :id => 'record_add', :class => 'btn-def') %>
+      <%= link_to l(:label_docflow_done), @version, :class => 'btn-def' %>
+      </p>
+    </fieldset>
+  <% end %>
+</div>

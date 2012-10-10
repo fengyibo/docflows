@@ -29,8 +29,11 @@ resources :docflow_versions, :except => [:index] do
     post   'approve'
 
     get    'checklist'
-    post   'checklist', :action => 'add_checklists'
+    get    'autocomplete_for_user'
+    post   'checklist', :action => 'add_checklists' 
+    post   'edit_checklists/:department_id', :action => 'edit_checklists', :as => "edit_checklists"
     delete 'remove_checklist/:cid', :action => 'remove_checklist'
+    delete 'remove_checklist_by_department/:department_id', :action => 'remove_checklist_by_department', :as => 'remove_checklist_by_department'
     get    'copy_checklist/:vid', :action => 'copy_checklist'
 
     get    'show_file/:fid', :action => 'show_file'

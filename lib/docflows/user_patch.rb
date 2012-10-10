@@ -10,14 +10,21 @@ module Docflows
 
       base.class_eval do
         has_many :familiarizations, :class_name => 'DocflowFamiliarization', :foreign_key => 'user_id'
+
+        scope :not_in_version, lambda {|version|
+          version_id = version.is_a?(DocflowVersion) ? version.id : version.to_i
+          { :conditions => ["#{User.table_name}.id NOT IN (SELECT user_id FROM #{DocflowChecklist.table_name} WHERE docflow_version_id = ? AND (user_id IS NOT NULL OR all_users='y'))", version_id] }
+        }
       end
 
     end
 
     module ClassMethods
+
     end
 
     module InstanceMethods
+
       def read_date(ver)
         rec = familiarizations.where('docflow_version_id=?', ver).first
         rec.done_date unless rec.nil?

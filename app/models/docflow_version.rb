@@ -388,7 +388,7 @@ class DocflowVersion < ActiveRecord::Base
                                      :id => rec.id,
                                      :type => "all" } unless rec.new_record?
 
-      self.errors_msgs << l(:label_docflows_all_users) if rec.new_record?
+      self.errors_msgs << '&middot; '+l(:label_docflows_all_users) if rec.new_record?
     elsif users.is_a?(Array)
       users.each do |uid|
         rec = DocflowChecklist.create( :docflow_version_id => self.id,
@@ -398,7 +398,7 @@ class DocflowVersion < ActiveRecord::Base
                                        :id => rec.id,
                                        :type => "User" } unless rec.new_record?
 
-        self.errors_msgs << rec.user.name if rec.new_record?
+        self.errors_msgs << '&middot; '+rec.user.name if rec.new_record?
       end
     elsif titles.is_a?(Array)
       titles.each do |tid|
@@ -411,7 +411,7 @@ class DocflowVersion < ActiveRecord::Base
                                        :id => rec.id,
                                        :type => "UserTitle" } unless rec.new_record?
 
-        self.errors_msgs << name if rec.new_record?
+        self.errors_msgs << '&middot; '+name if rec.new_record?
       end
     elsif !department.nil? && department != ""
       rec = DocflowChecklist.create( :docflow_version_id => self.id,
@@ -421,7 +421,7 @@ class DocflowVersion < ActiveRecord::Base
                                      :id => rec.id,
                                      :type => "Department" } unless rec.new_record?
 
-      self.errors_msgs << rec.department.name if rec.new_record?
+      self.errors_msgs << '&middot; '+rec.department.name if rec.new_record?
     end
     self.errors_msgs.unshift(l(:label_docflow_check_list_similar_records)) if self.errors_msgs.any?
   end

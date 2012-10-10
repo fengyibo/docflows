@@ -128,7 +128,7 @@ class DocflowVersionsController < ApplicationController
     @version = DocflowVersion.find(params[:id])
     respond_to do |format|
       if @version.docflow.first_version.id != @version.id && @version.destroy
-        flash[:error] = @version.errors.full_messages.join("<br>".html_safe) if @version.errors.any?
+        flash[:error] = @version.errors.full_messages.join("<br>").html_safe if @version.errors.any?
         format.html { redirect_to(@version.docflow.last_version, :notice => l(:label_docflow_version_deleted)) }
         format.xml  { head :ok }
       else
@@ -141,9 +141,9 @@ class DocflowVersionsController < ApplicationController
 
   def checklist
     @version = DocflowVersion.find(params[:id])
-    @users = User.all
-    @user_departments = UserDepartment.all
-    @user_titles = UserTitle.all
+    # @users = User.all
+    # @user_departments = UserDepartment.all
+    # @user_titles = UserTitle.all
     render 'docflow_checklists/checklist'
   end
 
@@ -164,14 +164,49 @@ class DocflowVersionsController < ApplicationController
       if @version.processed_checklists.any?
         flash[:error] = @version.errors_msgs.join("<br>").html_safe if @version.errors_msgs.any?
         format.html { redirect_to(:action => "checklist")}
+        format.js   { 
+          render(:update) {|page|
+            if(params[:tab_refresh] == "users") 
+              page.replace_html "tab-content-users", :partial => "docflow_checklists/users"
+              @version.processed_checklists.each{ |rec| page.visual_effect(:highlight, "rec-#{rec[:id]}") }
+            else
+              page.replace_html "tab-content-groups", :partial => "docflow_checklists/groups"
+              hid = (params[:department_id].nil? || params[:department_id] == "")  ? "0" : params[:department_id]
+              page.visual_effect(:highlight, "dep-#{hid}")
+            end
+          } 
+        }
         format.json { render :json => {:result => "ok", :msg => flash[:error].gsub("<br>","\n"), :saved => @version.processed_checklists}.to_json }
       else
-        flash[:error] = l(:label_docflow_check_list_error_db)
+        # flash[:error] = l(:label_docflow_check_list_error_db)
+        flash[:error] = @version.errors_msgs.join("<br>").html_safe if @version.errors_msgs.any?
         format.html { redirect_to(:action => "checklist")}
+        format.js   { render(:update) {|page| page.replace_html to_replace, :partial => partial} }
         format.json { render :json =>{:result => "fail", :msg => flash[:error]} }
       end
     end
   end
+
+
+  def edit_checklists
+    if params[:department_id] == "0"
+      checklists = DocflowChecklist.where("user_department_id IS NULL AND user_title_id IS NOT NULL AND docflow_version_id=?",params[:id])
+      params[:department_id] = nil
+    else
+      checklists = DocflowChecklist.where("user_department_id=? AND docflow_version_id=?",params[:department_id],params[:id])
+    end
+    checklists.each do |rec|
+      rec.destroy
+    end
+    return self.add_checklists
+  end
+
+
+  def autocomplete_for_user
+    @version = DocflowVersion.find(params[:id])
+    @users = User.active.not_in_version(@version).like(params[:q]).all(:limit => 100)
+    render :layout => false
+  end  
 
   def show_file
     docfile = DocflowFile.find(params[:fid])
@@ -198,16 +233,41 @@ class DocflowVersionsController < ApplicationController
   end
 
   def remove_checklist
+    @version = DocflowVersion.find(params[:id])
     checklist = DocflowChecklist.find(params[:cid])
     respond_to do |format|
       if checklist.destroy
         format.html { render :inline => "Record dropped!"}
+        format.js   { render(:update) {|page| page.replace_html "tab-content-users", :partial => 'docflow_checklists/users'} }       
         format.json { render :json => {:result => "ok", :msg => "", :id => params[:cid]}.to_json }
       else
         format.html { render :inline => "Failed to drop record!"}
         format.json { render :json =>{:result => "fail", :msg => "Fail remove checklist record"} }
       end
     end
+  end
+
+  def remove_checklist_by_department
+    @version = DocflowVersion.find(params[:id])
+    if params[:department_id] == "0"
+      checklists = DocflowChecklist.where("user_department_id IS NULL AND user_title_id IS NOT NULL AND docflow_version_id=?",params[:id])
+    else
+      checklists = DocflowChecklist.where("user_department_id=? AND docflow_version_id=?",params[:department_id],params[:id])
+    end
+    err = []
+    checklists.each do |rec|
+      err << rec.errors.full_messages.join("<br>").html_safe if !rec.destroy && rec.errors.any?
+    end
+    respond_to do |format|
+      if err.blank?
+        format.js   { render(:update) {|page| page.replace_html "tab-content-groups", :partial => 'docflow_checklists/groups'} }
+        format.json { render :json => {:result => "ok", :msg => "", :id => params[:department_id]}.to_json }
+      else
+        flash[:error] = err.join("<br>").html_safe
+        format.js   { render(:update) {|page| page.replace_html "tab-content-groups", :partial => 'docflow_checklists/groups'} }
+        format.json { render :json =>{:result => "fail", :msg => "Fail remove checklist record"} }
+      end
+    end    
   end
 
   def accept

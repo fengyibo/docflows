@@ -15,11 +15,15 @@ en:
   label_docflows_all_users: "All users"
   label_docflows_users: "Users"
   label_docflows_groups: "Groups"
+  label_docflows_user_department: "Department"
+  label_docflows_user_title: "User title"    
   label_docflows_users_titles: "Users titles"
   label_docflows_departments: "Departments"
   label_docflow_add_item: "Add item"
+  label_docflow_edit_item: "Edit item"
   label_docflow_done: "Done"
   label_docflow_back: "Back"
+  label_docflow_cancel: "Cancel"
   label_docflow_edit_button: "Edit"
   label_docflow_read_document: "Read document"
   label_docflow_download_source_file: "Download source file"
@@ -34,8 +38,9 @@ en:
   label_docflow_version_approve: "Approve"
   label_docflow_version_to_approvial: "To approvial"
   label_docflow_version_ro_rework: "To rework"
-
   label_docflow_version_canceled: "Canceled"
+
+  label_docflow_any_title: "Any users title"
 
   label_docflow_cant_delete_type_while_docflows_exists: "Can't delete type of document while documents of such type exits!"
   label_docflow_type_saved: "Document type saved"

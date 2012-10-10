@@ -15,11 +15,15 @@ ru:
   label_docflows_all_users: "Все сотрудники"
   label_docflows_users: "Люди"
   label_docflows_groups: "Группы"
+  label_docflows_user_department: "Отдел"
+  label_docflows_user_title: "Должность"  
   label_docflows_users_titles: "Должности"
   label_docflows_departments: "Отделы"
   label_docflow_add_item: "Добавить запись"
+  label_docflow_edit_item: "Изменть запись"
   label_docflow_done: "Завершить"
   label_docflow_back: "Назад"
+  label_docflow_cancel: "Отмена"
   label_docflow_edit_button: "Изменить"
   label_docflow_read_document: "Прочитать документ"
   label_docflow_download_source_file: "Скачать исходный файл"
@@ -34,8 +38,9 @@ ru:
   label_docflow_version_approve: "Утвердить"
   label_docflow_version_to_approvial: "На утверждение"
   label_docflow_version_ro_rework: "На доработку"
-
   label_docflow_version_canceled: "Отменен"
+
+  label_docflow_any_title: "Любая должность"
 
   label_docflow_cant_delete_type_while_docflows_exists: "Невозможно удалить указанный тип документа, пока существуют документы данного типа!"
   label_docflow_type_saved: "Тип документа сохранен"

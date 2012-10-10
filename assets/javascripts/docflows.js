@@ -11,17 +11,30 @@ jQuery(document).ready(function(){
         jQuery(fold).addClass('node_expanded');
       }
       return false;        
+  })
+
+  jQuery('.checklist_edit').live("click",function(){
+      dep_id = jQuery(this).attr("href");
+      jQuery("#checklist_"+dep_id+"_form").show();
+      jQuery("#checklist_"+dep_id+"_list").hide();
+      return false;        
+  })
+  jQuery('.checklist_cancel').live("click",function(){
+      dep_id = jQuery(this).attr("href");
+      jQuery("#checklist_"+dep_id+"_form").hide();
+      jQuery("#checklist_"+dep_id+"_list").show();
+      return false;        
   })   
 
-  jQuery('#filer_people').bind("change keyup input",function(){
-    if (jQuery(this).val() == ""){
-      jQuery('#user-list label.one-name').show();
-    }
-    else{
-      jQuery('#user-list label.one-name').hide();
-      jQuery('#user-list label.one-name:contains('+jQuery(this).val()+')').show();
-    }
-  });
+  // jQuery('#filer_people').bind("change keyup input",function(){
+  //   if (jQuery(this).val() == ""){
+  //     jQuery('#user-list label.one-name').show();
+  //   }
+  //   else{
+  //     jQuery('#user-list label.one-name').hide();
+  //     jQuery('#user-list label.one-name:contains('+jQuery(this).val()+')').show();
+  //   }
+  // });
 
   jQuery('#filer_groups').bind("change keyup input",function(){
     if (jQuery(this).val() == ""){
