@@ -6,6 +6,7 @@
        users = approvers_group.users.active %>
     <%= vf.label l(:label_docflow_approver) %>
     <%= vf.collection_select(:approver_id, users.sort_by{|user| user.name}, :id, :name) %>
+    <input type="hidden" id="is_approver_changed" value="n">
   </p>
 
   <p>

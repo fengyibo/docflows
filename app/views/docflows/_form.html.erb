@@ -1,7 +1,11 @@
 <%= render :partial => 'docflows/head' %>
 
 <%= fields_for @doc do |ff|%>
-
+  <div id="default_approvers">
+    <% DocflowCategory.all.each do |category| %>
+      <%= hidden_field_tag("cat-#{category.id}",category.default_approver_id) %>
+    <% end %>
+  </div>
   <p>
     <%= ff.label l(:label_docflow_category) %>
     <%= ff.select :docflow_category_id,

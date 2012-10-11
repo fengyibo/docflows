@@ -1,4 +1,16 @@
 jQuery(document).ready(function(){
+
+  jQuery("#docflow_docflow_category_id").change(function(){
+    cat_id = jQuery(this).val().toString();
+    approver_id = jQuery("#cat-"+cat_id).val().toString();
+    if (jQuery("#is_approver_changed").val() == "n"){
+      jQuery("#docflow_versions_attributes_0_approver_id option[value="+approver_id+"]").attr("selected","selected");
+    }
+  });  
+
+  jQuery("#docflow_versions_attributes_0_approver_id").change(function(){
+    jQuery("#is_approver_changed").val("y");
+  });
   
   jQuery('.tree_link').live("click",function(){
       fold = jQuery(this).parent();
