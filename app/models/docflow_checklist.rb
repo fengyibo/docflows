@@ -10,7 +10,7 @@ class DocflowChecklist < ActiveRecord::Base
   validate  :no_similar_record_exists?
 
   def no_similar_record_exists?
-    errors.add(:user_id, l(:label_docflow_check_list_similar_records)) if extended_records.any?
+    errors.add(:user_id, l(:label_docflow_check_list_similar_records)) if extended_records > 0
   end
 
   def extended_records
@@ -18,7 +18,7 @@ class DocflowChecklist < ActiveRecord::Base
                              ( all_users='y' OR user_id=? OR
                                (user_department_id=? AND user_title_id IS NULL) OR
                                (user_department_id IS NULL AND user_title_id=?) )",
-                            docflow_version_id,user_id,user_department_id,user_title_id )
+                            docflow_version_id,user_id,user_department_id,user_title_id ).count
   end
 
   def display_name

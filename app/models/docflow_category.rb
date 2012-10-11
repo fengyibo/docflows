@@ -18,7 +18,7 @@ class DocflowCategory < ActiveRecord::Base
   # Only redefine destory! No possibility of usage before_destroy :no_any_childs?
   # Proper decision about deletion is possible only before acts_as_nested_set.destroy runs!
   # before_destroy executing only on target object when all childs purged
-  # interrupting of deletion in befor filter leds to nested_set (lft,rgt) crash!
+  # interrupting of deletion in before_delete filter leds of nested_set (lft,rgt) crash!
 
   def destroy
     return super if no_any_childs?

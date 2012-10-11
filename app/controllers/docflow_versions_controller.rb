@@ -165,13 +165,14 @@ class DocflowVersionsController < ApplicationController
       @version.errors_msgs << l(:label_docflow_check_list_error_db)
       result = "fail"
     end
-    js_err = @version.errors_msgs.join("<br>").html_safe if @version.errors_msgs.any?
-    flash[:error] = js_err unless js_err.nil?
+    js_err = @version.errors_msgs.join("<br>").html_safe if @version.errors_msgs.any?    
 
     respond_to do |format|      
-      format.html { redirect_to(:action => "checklist")}
+      format.html { 
+        flash[:error] = js_err unless js_err.nil?
+        redirect_to(:action => "checklist") }
       format.js   { 
-        render(:update) {|page|
+        render(:update) {|page|          
           if(params[:tab_refresh] == "users") 
             page.replace_html "tab-content-users", :partial => "docflow_checklists/users", :locals => {:js_err => js_err}
             @version.processed_checklists.each{ |rec| page.visual_effect(:highlight, "rec-#{rec[:id]}") }
@@ -182,7 +183,7 @@ class DocflowVersionsController < ApplicationController
           end
         } 
       }
-      format.json { render :json => {:result => result, :msg => flash[:error].gsub("<br>","\n"), :saved => @version.processed_checklists}.to_json }
+      format.json { render :json => {:result => result, :msg => (js_err.nil? ? nil : js_err.gsub("<br>","\n")), :saved => @version.processed_checklists}.to_json }
     end
   end
 
@@ -252,16 +253,14 @@ class DocflowVersionsController < ApplicationController
     else
       checklists = DocflowChecklist.where("user_department_id=? AND docflow_version_id=?",params[:department_id],params[:id])
     end
-    err = []
-    checklists.each do |rec|
-      err << rec.errors.full_messages.join("<br>").html_safe if !rec.destroy && rec.errors.any?
-    end
+
+    checklists.each { |checklist|  checklist.destroy }
+
     respond_to do |format|
       if err.blank?
         format.js   { render(:update) {|page| page.replace_html "tab-content-groups", :partial => 'docflow_checklists/groups'} }
         format.json { render :json => {:result => "ok", :msg => "", :id => params[:department_id]}.to_json }
-      else
-        flash[:error] = err.join("<br>").html_safe
+      else        
         format.js   { render(:update) {|page| page.replace_html "tab-content-groups", :partial => 'docflow_checklists/groups'} }
         format.json { render :json =>{:result => "fail", :msg => "Fail remove checklist record"} }
       end

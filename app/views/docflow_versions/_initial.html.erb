@@ -2,9 +2,10 @@
 <%= fields_for @doc do |ff|%>
   <%= ff.fields_for :versions do |vf|%>
   <p>
-  <% approvers = Group.find(Setting.plugin_docflows['approve_allowed_to']) %>
-  <%= vf.label l(:label_docflow_approver) %>
-  <%= vf.collection_select(:approver_id, approvers.users.sort_by{|user| user.name}, :id, :name) %>
+    <% approvers_group = Group.find(Setting.plugin_docflows['approve_allowed_to'])
+       users = approvers_group.users.active %>
+    <%= vf.label l(:label_docflow_approver) %>
+    <%= vf.collection_select(:approver_id, users.sort_by{|user| user.name}, :id, :name) %>
   </p>
 
   <p>
