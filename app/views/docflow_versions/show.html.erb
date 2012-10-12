@@ -85,12 +85,12 @@
 
   <%= render 'docflow_files/show_attachments' %>
 
-  <% unless @version.docflow.description.nil? || @version.docflow.description == "" %>
+  <% unless @version.description.nil? || @version.description == "" %>
     <hr>
 
-    <p><strong><%= l(:label_docflow_description) %>:</strong></p>
-    <div class="wiki">
-      <%= textilizable @version.docflow, :description %>
+    <p><strong><%= l(:label_docflow_text) %>:</strong></p>
+    <div class="docflow_text">
+      <%= textilizable @version, :description %>
     </div>
     <br>
   <% end %>

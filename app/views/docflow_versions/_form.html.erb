@@ -26,6 +26,19 @@
     <%= calendar_for('docflow_version_actual_date') %>
   </p>
 
+  <p>
+    <label><%= l(:label_docflow_text) %>:</label>
+    <%= content_tag 'span', :id => "version_description_and_toolbar", :style => nil do %>
+    <%= ff.text_area :description,
+                     :cols => 60,
+                     :rows => (@version.description.blank? ? 10 : [[10, @version.description.length / 50].max, 100].min),
+                     :accesskey => accesskey(:edit),
+                     :class => 'wiki-edit',
+                     :no_label => true %>
+    <% end %>
+  </p>
+  <%= wikitoolbar_for 'docflow_version_description' %>  
+
   <%= ff.hidden_field :docflow_id %>
   <%= ff.hidden_field :version %>
   <%= ff.hidden_field :author_id %>

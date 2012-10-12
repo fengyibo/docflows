@@ -33,17 +33,4 @@
     <%= ff.collection_select(:responsible_id, users.sort_by{|user| user.name}, :id, :name) %>
   </p>
 
-  <p>
-    <label><%= l(:field_description) %></label>
-    <%= content_tag 'span', :id => "doc_description_and_toolbar", :style => nil do %>
-    <%= ff.text_area :description,
-                     :cols => 60,
-                     :rows => (@doc.description.blank? ? 10 : [[10, @doc.description.length / 50].max, 100].min),
-                     :accesskey => accesskey(:edit),
-                     :class => 'wiki-edit',
-                     :no_label => true %>
-    <% end %>
-  </p>
-  <%= wikitoolbar_for 'docflow_description' %>
-
 <% end %>

@@ -29,23 +29,23 @@ class DocflowVersion < ActiveRecord::Base
   end
 
   def validate_conditions
-    df = Docflow.find(self.docflow_id)    
+    df = Docflow.find(docflow_id)    
 
     if self.new_record?
-      errors.add(:base, l(:label_docflow_actual_date_should_be_new_than_previous)) if !self.actual_date.nil? && df.versions.exists?(['actual_date >= ?', "#{self.actual_date}"])
-      errors.add(:base, l(:label_docflow_only_new_possible_on_create)) unless self.docflow_status_id == 1      
+      errors.add(:base, l(:label_docflow_actual_date_should_be_new_than_previous)) if !actual_date.nil? && df.versions.exists?(['actual_date >= ?', "#{actual_date}"])
+      errors.add(:base, l(:label_docflow_only_new_possible_on_create)) unless docflow_status_id == 1      
       errors.add(:base, l(:label_docflow_cant_create_new_while_previous)) unless df.last_version.nil? || df.last_version.status.id == 3 || df.last_version.status.id == 4
     else
-      errors.add(:base, l(:label_docflow_actual_date_should_be_new_than_previous)) if !self.actual_date.nil? && df.versions.where("id<>?",self.id).exists?(['actual_date >= ?', "#{self.actual_date}"])
-      prev_state = DocflowVersion.find(self.id)
-      errors.add(:base, l(:label_docflow_cant_edit_unless_last)) if self.id != self.docflow.last_version.id
+      errors.add(:base, l(:label_docflow_actual_date_should_be_new_than_previous)) if !actual_date.nil? && df.versions.where("id<>?",id).exists?(['actual_date >= ?', "#{actual_date}"])
+      prev_state = DocflowVersion.find(id)
+      errors.add(:base, l(:label_docflow_cant_edit_unless_last)) if id != docflow.last_version.id
       if docflow_status_id == 2
         vailidate_files_and_users
         errors.add(:base, l(:label_docflow_only_new_can_be_sent_to_approvial)) if !prev_state.nil? && !(prev_state.docflow_status_id == 1 || prev_state.docflow_status_id == 2)
       elsif docflow_status_id == 3
         vailidate_files_and_users
-        errors.add(:base, l(:label_docflow_no_date_entry)) if self.actual_date.nil? || self.actual_date == ""
-        errors.add(:base, l(:label_docflow_no_date_approvial)) if self.approve_date.nil? || self.approve_date == ""
+        errors.add(:base, l(:label_docflow_no_date_entry)) if actual_date.nil? || actual_date == ""
+        errors.add(:base, l(:label_docflow_no_date_approvial)) if approve_date.nil? || approve_date == ""
         # validation removed due issue #3565
         # errors.add(:base, l(:label_docflow_cant_approve_if_not_on_approvial)) if !prev_state.nil? && prev_state.docflow_status_id != 2
       end
@@ -54,8 +54,9 @@ class DocflowVersion < ActiveRecord::Base
   end
 
   def vailidate_files_and_users
-      errors.add(:base, l(:label_docflow_no_files_attached)+(" <a href='#{self.id}/edit'>"+l(:label_docflow_edit_version)+"</a><br>").html_safe ) unless self.files.exists?(:filetype => "src_file") && self.files.exists?(:filetype => "pub_file")
-      errors.add(:base, l(:label_docflow_no_users_attached)+(" <a href='#{self.id}/checklist'>"+l(:label_docflow_edit_check_list)+"</a><br>").html_safe ) unless self.checklists.any?
+      #errors.add(:base, l(:label_docflow_no_files_attached)+(" <a href='#{id}/edit'>"+l(:label_docflow_edit_version)+"</a><br>").html_safe ) unless files.exists?(:filetype => "src_file") && files.exists?(:filetype => "pub_file")
+      errors.add(:base, l(:label_docflow_no_files_attached_or_description_filled)+(" <a href='#{id}/edit'>"+l(:label_docflow_edit_version)+"</a><br>").html_safe ) if (description.nil? || description.strip.empty?) && (!files.exists?(:filetype => "src_file") || !files.exists?(:filetype => "pub_file"))
+      errors.add(:base, l(:label_docflow_no_users_attached)+(" <a href='#{id}/checklist'>"+l(:label_docflow_edit_check_list)+"</a><br>").html_safe ) unless checklists.any?
   end
 
   def visible_for_user?

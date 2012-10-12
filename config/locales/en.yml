@@ -48,7 +48,6 @@ en:
   label_docflow_types: "Documents  types"
   label_docflow_delete_type_confirm: "Are you shure want to delete document type?"
 
-
   label_docflow_confirm_accept_document: "Are you shure want to accept this document?"
   label_docflow_confirm_cancel_document: "Are you shure want to cancel this document?"
   label_docflow_confirm_delete_file: "Are you shure want to Delete this file?"
@@ -72,6 +71,7 @@ en:
   label_docflow_no_date_approvial: "No date of approvial!"
   label_docflow_no_date_entry: "No date of entry into force!"
   label_docflow_no_files_attached: "There are no files attached!"
+  label_docflow_no_files_attached_or_description_filled: "You need to attach files or fill document text into version!"
   label_docflow_no_users_attached: "There are no users for familarization with version selected!"
 
   label_docflow_doc_saved: "Document was successfully saved."
@@ -133,6 +133,7 @@ en:
   label_docflow_actual_from: "Actual from"
   label_docflow_was_actual_from: "Was actual from"
   label_docflow_description: "Description"
+  label_docflow_text: "Text of the document"
   label_docflow_check_list: "Checklist"
   label_docflow_check_list_inform: "Users for imfrom about document:"
   label_docflow_check_list_for: "Checklists for document: "

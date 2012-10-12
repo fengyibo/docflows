@@ -71,6 +71,7 @@ ru:
   label_docflow_no_date_approvial: "Не установлена дата утверждения!"
   label_docflow_no_date_entry: "Не задана дата вступления в силу документа!"
   label_docflow_no_files_attached: "Не хватает файлов!"
+  label_docflow_no_files_attached_or_description_filled: "Необходимо заполнить текст документа либо приложить файлы!"
   label_docflow_no_users_attached: "Не выбраны сотрудники для ознакомления!"
 
   label_docflow_doc_saved: "Документ сохранен."
@@ -132,6 +133,7 @@ ru:
   label_docflow_actual_from: "Действует с"
   label_docflow_was_actual_from: "Действовала с"
   label_docflow_description: "Примечание"
+  label_docflow_text: "Текст документа"
   label_docflow_check_list: "Лист ознакомления"
   label_docflow_check_list_inform: "Список лиц для ознакомления:"
   label_docflow_check_list_for: "Лист ознакомления документа: "
