@@ -1,5 +1,15 @@
 module DocflowVersionsHelper
 
+  def options_for_checklist_department_select(departments)
+    options = ""
+    dep_ids =  departments.inject([]){|ar,el| ar << el.id}
+    UserDepartment.all.sort_by{|el| el.name.to_s}.unshift(UserDepartment.new(:name => "-")).each do |dep|
+      disabled = dep_ids.include?(dep.id) ? " disabled" : ""
+      options << "<option value=\"#{dep.id}\"#{disabled}>#{dep.name}</option>"
+    end
+    options.html_safe
+  end  
+
   def version_checklists_tabs
         tabs = [ {:name => 'users', :partial => 'docflow_checklists/users', :label => :label_docflows_users},
                  {:name => 'groups', :partial => 'docflow_checklists/groups', :label => :label_docflows_groups} ]

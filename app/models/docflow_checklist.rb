@@ -10,15 +10,28 @@ class DocflowChecklist < ActiveRecord::Base
   validate  :no_similar_record_exists?
 
   def no_similar_record_exists?
-    errors.add(:user_id, l(:label_docflow_check_list_similar_records)) if extended_records > 0
+    errors.add(:user_id, l(:label_docflow_check_list_similar_records)) if same_record?
   end
 
-  def extended_records
+  def extended_records?
     DocflowChecklist.where( "docflow_version_id=? AND
                              ( all_users='y' OR user_id=? OR
                                (user_department_id=? AND user_title_id IS NULL) OR
                                (user_department_id IS NULL AND user_title_id=?) )",
-                            docflow_version_id,user_id,user_department_id,user_title_id ).count
+                            docflow_version_id,user_id,user_department_id,user_title_id ).count > 0
+  end
+
+  def same_record?
+    sql = "docflow_version_id=#{docflow_version_id} AND ("
+    conditions = []
+    conditions << "user_id=#{user_id}" unless user_id.nil? # || user_id == ""
+    conditions << "(user_department_id=#{user_department_id} AND user_title_id IS NULL)" if !user_department_id.nil? && user_title_id.nil?
+    conditions << "(user_department_id IS NULL AND user_title_id=#{user_title_id})" if user_department_id.nil? && !user_title_id.nil?
+    conditions << "(user_department_id=#{user_department_id} AND user_title_id=#{user_title_id})" if !user_department_id.nil? && !user_title_id.nil?
+    conditions << "all_users='y'" if all_users == 'y'
+    sql << conditions.join(" OR ") + ")"
+
+    DocflowChecklist.where( sql ).count > 0 if conditions.any? 
   end
 
   def display_name

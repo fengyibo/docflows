@@ -257,13 +257,8 @@ class DocflowVersionsController < ApplicationController
     checklists.each { |checklist|  checklist.destroy }
 
     respond_to do |format|
-      if err.blank?
-        format.js   { render(:update) {|page| page.replace_html "tab-content-groups", :partial => 'docflow_checklists/groups'} }
-        format.json { render :json => {:result => "ok", :msg => "", :id => params[:department_id]}.to_json }
-      else        
-        format.js   { render(:update) {|page| page.replace_html "tab-content-groups", :partial => 'docflow_checklists/groups'} }
-        format.json { render :json =>{:result => "fail", :msg => "Fail remove checklist record"} }
-      end
+      format.js   { render(:update) {|page| page.replace_html "tab-content-groups", :partial => 'docflow_checklists/groups'} }
+      format.json { render :json => {:result => "ok", :msg => "", :id => params[:department_id]}.to_json }
     end    
   end
 
