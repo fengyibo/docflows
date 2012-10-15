@@ -16,6 +16,71 @@
     </p>
   <% end %>
 </div>
+<script type="text/javascript">
+  jQuery(document).ready(function(){
+
+    jQuery("#docflow_version_description, #docflow_versions_attributes_0_description").bind("change keyup input",function(){
+      show_docflow_files(this);
+    })  
+
+    show_docflow_files(jQuery("#docflow_version_description"));
+    show_docflow_files(jQuery("#docflow_versions_attributes_0_description"));
+
+    // jQuery("input.docfile[type=file]").bind("change",function(){
+    //   show_docflow_desc(this);
+    // })     
+  
+  })
+
+  // function show_docflow_desc(obj){
+  //   if( jQuery("p.src_file input[type=file]").val() != "" || jQuery("p.pub_file input[type=file]").val() != "" || 
+  //          jQuery("p.src_file").hasClass("attached_file") || jQuery("p.pub_file").hasClass("attached_file") ){
+  //     if(jQuery("#docflow_version_description").val() != "" || jQuery("#docflow_versions_attributes_0_description").val() != ""){
+  //       jQuery("#docflow_version_description").addClass("ambigous");
+  //       jQuery("#docflow_versions_attributes_0_description").addClass("ambigous");
+  //     }
+  //     else{
+  //       jQuery("#docflow_version_description").hide();
+  //       jQuery("#docflow_versions_attributes_0_description").hide();
+  //     }
+  //   }
+  //   else{
+  //     jQuery("#docflow_version_description").removeClass("ambigous");
+  //     jQuery("#docflow_versions_attributes_0_description").removeClass("ambigous");
+  //     jQuery("#docflow_version_description").show();
+  //     jQuery("#docflow_versions_attributes_0_description").show();        
+  //   }
+  // }
+
+  function show_docflow_files(obj){
+    if (jQuery(obj).val() != ""){
+      if ( jQuery("p.src_file input[type=file]").val() != "" || jQuery("p.pub_file input[type=file]").val() != "" || 
+           jQuery("p.src_file").hasClass("attached_file") || jQuery("p.pub_file").hasClass("attached_file") ){
+        jQuery("p.src_file input[type=file]").addClass("ambigous");
+        jQuery("p.pub_file input[type=file]").addClass("ambigous");        
+        // jQuery("p.src_file a.src_file").addClass("ambigous");
+        // jQuery("p.pub_file a.pub_file").addClass("ambigous");
+        jQuery("p.src_file a.pub_file").attr("style", "border: solid 2px red;");
+        jQuery("p.pub_file a.pub_file").attr("style", "border: solid 2px red;");
+      }
+      else{
+        jQuery("p.src_file").hide();
+        jQuery("p.pub_file").hide();
+      }
+    }
+    else{
+      jQuery("p.src_file").show();
+      jQuery("p.pub_file").show();
+      jQuery("p.src_file input[type=file]").removeClass("ambigous");
+      jQuery("p.pub_file input[type=file]").removeClass("ambigous");
+      // jQuery("p.src_file a.src_file").removeClass("ambigous");
+      // jQuery("p.pub_file a.pub_file").removeClass("ambigous");  
+      jQuery("p.src_file a.pub_file").attr("style", "");
+      jQuery("p.pub_file a.pub_file").attr("style", "");
+    }    
+  }
+
+</script>
 <p><%= link_to l(:label_docflow_add_file), '#', :class => 'add_docfile icon icon-add' %>
 <%= hidden_field_tag("docfile_max_size", Setting.plugin_docflows['max_file_size'].to_i.kilobytes) %>
 <%= hidden_field_tag("pub_file_string", l(:label_docflow_public_file)) %>

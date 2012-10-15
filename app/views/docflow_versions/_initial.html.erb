@@ -2,7 +2,7 @@
 <%= fields_for @doc do |ff|%>
   <%= ff.fields_for :versions do |vf|%>
 
-  <p>
+  <p class="doc_description">
     <label><%= l(:label_docflow_text) %>:</label>
     <%= content_tag 'span', :id => "version_description_and_toolbar", :style => nil do %>
     <%= vf.text_area :description,

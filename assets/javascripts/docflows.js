@@ -90,7 +90,7 @@ jQuery(document).ready(function(){
     +"<input class='docfile' type=file name='new_files["+num_files+"][file]'> "
     +"<input type=text name='new_files["+num_files+"][description]'>"
     +"<input type=hidden name='new_files["+num_files+"][filetype]' value='"+file_type+"'>"
-    +"<a href='#' title='Delete' class='remove_docfile icon-del icon-only'>&nbsp;</a></p>";
+    +" <a href='#' title='Delete' class='remove_docfile icon-del icon-only'>&nbsp;</a></p>";
     if(file_type == ""){
       jQuery("#new_files").append(html);
     }

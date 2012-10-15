@@ -72,6 +72,7 @@ en:
   label_docflow_no_date_entry: "No date of entry into force!"
   label_docflow_no_files_attached: "There are no files attached!"
   label_docflow_no_files_attached_or_description_filled: "You need to attach files or fill document text into version!"
+  label_docflow_only_files_or_description_should_present: "There are only document text should be filled or both of files present!"
   label_docflow_no_users_attached: "There are no users for familarization with version selected!"
 
   label_docflow_doc_saved: "Document was successfully saved."

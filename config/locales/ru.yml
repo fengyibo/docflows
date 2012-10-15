@@ -72,6 +72,7 @@ ru:
   label_docflow_no_date_entry: "Не задана дата вступления в силу документа!"
   label_docflow_no_files_attached: "Не хватает файлов!"
   label_docflow_no_files_attached_or_description_filled: "Необходимо заполнить текст документа либо приложить файлы!"
+  label_docflow_only_files_or_description_should_present: "Допустимо либо заполнить текст документа в версии либо приложить оба основных файла!"
   label_docflow_no_users_attached: "Не выбраны сотрудники для ознакомления!"
 
   label_docflow_doc_saved: "Документ сохранен."

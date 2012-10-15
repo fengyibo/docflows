@@ -26,7 +26,7 @@
     <%= calendar_for('docflow_version_actual_date') %>
   </p>
 
-  <p>
+  <p class="doc_description">
     <label><%= l(:label_docflow_text) %>:</label>
     <%= content_tag 'span', :id => "version_description_and_toolbar", :style => nil do %>
     <%= ff.text_area :description,

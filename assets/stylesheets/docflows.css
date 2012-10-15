@@ -40,7 +40,17 @@ ul.tree_container li.tree_fold.node_expanded {
 
 form.checklist_form {display: none;}
 
+.ambigous {
+  border: solid 2px red;
+}
 
+.ambigous:visited {
+  border: solid 2px red;
+}
+
+.ambigous:link {
+  border: solid 2px red;
+}
 /*ul.content-checklists {list-style: none;}
 
 ul.nav-tab-cont {list-style: none; border-bottom: 1px solid #bbb; display:table; width:100%;}

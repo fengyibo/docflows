@@ -54,9 +54,16 @@ class DocflowVersion < ActiveRecord::Base
   end
 
   def vailidate_files_and_users
-      #errors.add(:base, l(:label_docflow_no_files_attached)+(" <a href='#{id}/edit'>"+l(:label_docflow_edit_version)+"</a><br>").html_safe ) unless files.exists?(:filetype => "src_file") && files.exists?(:filetype => "pub_file")
-      errors.add(:base, l(:label_docflow_no_files_attached_or_description_filled)+(" <a href='#{id}/edit'>"+l(:label_docflow_edit_version)+"</a><br>").html_safe ) if (description.nil? || description.strip.empty?) && (!files.exists?(:filetype => "src_file") || !files.exists?(:filetype => "pub_file"))
-      errors.add(:base, l(:label_docflow_no_users_attached)+(" <a href='#{id}/checklist'>"+l(:label_docflow_edit_check_list)+"</a><br>").html_safe ) unless checklists.any?
+    num_files = files.where(:filetype => "src_file").count + files.where(:filetype => "pub_file").count
+    no_description = (description.nil? || description.strip.empty?)
+    has_description = !no_description
+    # both_files = files.exists?(:filetype => "src_file") && files.exists?(:filetype => "pub_file")
+    # any_file = files.exists?(:filetype => "src_file") || files.exists?(:filetype => "pub_file")
+    
+    #errors.add(:base, l(:label_docflow_no_files_attached)+(" <a href='#{id}/edit'>"+l(:label_docflow_edit_version)+"</a><br>").html_safe ) unless both_files
+    errors.add(:base, l(:label_docflow_no_files_attached_or_description_filled)+(" <a href='#{id}/edit'>"+l(:label_docflow_edit_version)+"</a><br>").html_safe ) if no_description && num_files < 2
+    errors.add(:base, l(:label_docflow_only_files_or_description_should_present)+(" <a href='#{id}/edit'>"+l(:label_docflow_edit_version)+"</a><br>").html_safe ) if num_files > 0 && has_description
+    errors.add(:base, l(:label_docflow_no_users_attached)+(" <a href='#{id}/checklist'>"+l(:label_docflow_edit_check_list)+"</a><br>").html_safe ) unless checklists.any?
   end
 
   def visible_for_user?
