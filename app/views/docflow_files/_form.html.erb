@@ -23,8 +23,12 @@
       show_docflow_files(this);
     })  
 
-    show_docflow_files(jQuery("#docflow_version_description"));
-    show_docflow_files(jQuery("#docflow_versions_attributes_0_description"));
+    if(jQuery("#docflow_version_description").length){
+      show_docflow_files(jQuery("#docflow_version_description"));
+    }
+    else{
+      show_docflow_files(jQuery("#docflow_versions_attributes_0_description"));
+    }
 
     // jQuery("input.docfile[type=file]").bind("change",function(){
     //   show_docflow_desc(this);
