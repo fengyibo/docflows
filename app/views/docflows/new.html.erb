@@ -33,9 +33,13 @@
       После нажатия кнопки "Сохранить", на втором шаге следует выбрать сотрудников/отделы/должности для ознакомления с  документом.
     </fieldset>
 <% end %>
-    <%= render 'form' %>
-    <%= render 'docflow_versions/initial' %>
-    <%= render 'docflow_files/form', :is_new => true %>
+    <fieldset class="docflow_annotation"><legend> Информация о документе </legend>
+      <%= render 'form' %>
+    </fieldset>    
+    <fieldset class="docflow_annotation"><legend> Информация о версии </legend>    
+      <%= render 'docflow_versions/initial' %>
+      <%= render 'docflow_files/form', :is_new => true %>
+    </fieldset>
   </div>
 </div>
 <%= f.submit l(:button_create), :class=>"btn-def" %>

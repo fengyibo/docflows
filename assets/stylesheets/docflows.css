@@ -13,7 +13,13 @@ div.bottom-bordered { border: none; border-bottom: solid 1px #ccc; }
 
 span.base_file {padding: 30px; padding-left: 0px;}
 
-fieldset.docflow_annotation { padding: 10px; margin:10px; margin-left: 25px; margin-right: 25px; }
+fieldset.docflow_annotation { 
+  padding: 10px; 
+  margin:10px; 
+  margin-left: -10px; 
+  margin-right: -10px; 
+  border: 0px;
+  border-top: 1px solid #E4E4E4;}
 
 .ver-current { background-color: #FBE5E0; padding: 4px; margin:3px;}
 .ver-actual { border: 1px solid #999; padding: 4px; margin:3px;}
