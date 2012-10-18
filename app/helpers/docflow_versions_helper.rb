@@ -116,7 +116,8 @@ module DocflowVersionsHelper
   end
 
   def docflow_version_approve_button      
-    if @version.status.id == 2 && (User.current.admin? || @version.approver_id == User.current.id)
+    if ( @version.status.id == 1 && (@version.author_id == User.current.id && @version.author_id == @version.approver_id) ) ||
+       ( @version.status.id == 2 && (User.current.admin? || @version.approver_id == User.current.id) )
       link_to( image_tag("exclamation.png", :class=>'img-b')+' '+content_tag(:span,l(:label_docflow_version_approve), :class => "dotted_link"), 
                  '#', :class => 'btn', :id => "show-approve-btn")
     end

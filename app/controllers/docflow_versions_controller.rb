@@ -29,7 +29,7 @@ class DocflowVersionsController < ApplicationController
     elsif  (params[:action] == "cancel" )
       render_403 unless User.current.cancel_docflows?
     elsif ( params[:action] == "approve" )
-      render_403 unless User.current.approve_docflows? && ver.approver_id == User.current.id
+      render_403 unless User.current.admin? || (User.current.approve_docflows? && ver.approver_id == User.current.id)
     else
       render_403 unless ver.editable_by_user?
     end

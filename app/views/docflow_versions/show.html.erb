@@ -51,7 +51,7 @@
   <%= content_tag(:span, "" ,
                   :class => "fake-block") if @version.docflow.last_version.status.id == 3 && (User.current.edit_docflows? || User.current.edit_docflows_in_category?(@version.docflow.docflow_category_id) ) %>
 </div>
-<% if @version.status.id == 2 %>
+<% if [1,2].include?(@version.docflow_status_id) %>
   <div id="approve-form" style="display:none;">
     <%= form_tag({:controller => 'docflow_versions', :action=> 'approve'}, :method => "post") do %>
       <%= link_to('',{},:class=>'icon close-icon',:id => "close-approve-btn", :style=>"margin-left:-18px; margin-top:-1px;") %>

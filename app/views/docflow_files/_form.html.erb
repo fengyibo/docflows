@@ -60,12 +60,14 @@
     if (jQuery(obj).val() != ""){
       if ( jQuery("p.src_file input[type=file]").val() != "" || jQuery("p.pub_file input[type=file]").val() != "" || 
            jQuery("p.src_file").hasClass("attached_file") || jQuery("p.pub_file").hasClass("attached_file") ){
-        jQuery("p.src_file input[type=file]").addClass("ambigous");
-        jQuery("p.pub_file input[type=file]").addClass("ambigous");        
+        // jQuery("p.src_file input[type=file]").addClass("ambigous");
+        // jQuery("p.pub_file input[type=file]").addClass("ambigous");        
         // jQuery("p.src_file a.src_file").addClass("ambigous");
         // jQuery("p.pub_file a.pub_file").addClass("ambigous");
-        jQuery("p.src_file a.pub_file").attr("style", "border: solid 2px red;");
-        jQuery("p.pub_file a.pub_file").attr("style", "border: solid 2px red;");
+        // jQuery("p.src_file a.pub_file").attr("style", "border: solid 2px red;");
+        // jQuery("p.pub_file a.pub_file").attr("style", "border: solid 2px red;");
+        jQuery("p.src_file").show();
+        jQuery("p.pub_file").show();        
       }
       else{
         jQuery("p.src_file").hide();
@@ -75,12 +77,12 @@
     else{
       jQuery("p.src_file").show();
       jQuery("p.pub_file").show();
-      jQuery("p.src_file input[type=file]").removeClass("ambigous");
-      jQuery("p.pub_file input[type=file]").removeClass("ambigous");
+      // jQuery("p.src_file input[type=file]").removeClass("ambigous");
+      // jQuery("p.pub_file input[type=file]").removeClass("ambigous");
       // jQuery("p.src_file a.src_file").removeClass("ambigous");
       // jQuery("p.pub_file a.pub_file").removeClass("ambigous");  
-      jQuery("p.src_file a.pub_file").attr("style", "");
-      jQuery("p.pub_file a.pub_file").attr("style", "");
+      // jQuery("p.src_file a.pub_file").attr("style", "");
+      // jQuery("p.pub_file a.pub_file").attr("style", "");
     }    
   }
 
