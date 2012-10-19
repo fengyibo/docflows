@@ -1,10 +1,11 @@
 <% unless @versions.empty? %>
-  <% sel = local_assigns[:selection] ? selection : "" %>
-  <div id="view_container_<%= sel %>">
+  <% sel = "" unless local_assigns[:sel] %>
+
   <%= link_to( l(:label_docflow_tree_view), 
                {:controller => controller.controller_name, :action => controller.action_name, :view_as => "tree", :sel => sel}, 
-               :onclick => "jQuery('#view_container_#{sel}').load(this.href); return false;", 
+               :onclick => "jQuery.getScript(this.href); return false;", 
                :class => "icon icon-tree") %>
+  <%= docflow_query_annotation( sel.empty? ? controller.action_name : sel) %>
   <hr>
 
   <table class="list">
@@ -46,5 +47,4 @@
   <% end %>
 
   </table>
-</div>
 <% end %>

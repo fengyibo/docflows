@@ -8,19 +8,25 @@
 <% unless @waiting.empty? %>
   <h3><%= l(:label_docflows_waiting_for_my_approvial)+" ("+@waiting.size.to_s+")" %></h3>
   <% @versions = @waiting %>
-  <%= render :partial => 'list_with_author', :locals => {:selection => 'waiting'} %>
+  <div id="view_container_waiting_for_my_approvial">    
+    <%= render :partial => 'list_with_author', :locals => {:sel => 'waiting_for_my_approvial'} %>
+  </div>
 <% end %>
 
 <% unless @unread.empty? %>
   <h3><%= l(:label_docflows_need_to_familiarize)+" ("+@unread.size.to_s+")" %></h3>
   <% @versions = @unread %>
-  <%= render :partial => 'list_with_author', :locals => {:selection => 'unread'} %>
+  <div id="view_container_unread">
+    <%= render :partial => 'list_with_author', :locals => {:sel => 'unread'} %>
+  </div>
 <% end %>
 
 <% unless @in_work.empty? %>
   <h3><%= l(:label_docflows_in_work)+" ("+@in_work.size.to_s+")" %></h3>
   <% @versions = @in_work %>
-  <%= render :partial => 'list_versions', :locals => {:selection => 'in_work'} %>
+  <div id="view_container_in_work">
+    <%= render :partial => 'list_versions', :locals => {:sel => 'in_work'} %>
+  </div>
 <% end %>
 
 <% content_for :sidebar do %>

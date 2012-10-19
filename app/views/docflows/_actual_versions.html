@@ -1,5 +1,8 @@
-<div id="view_container">
-  <%= link_to( l(:label_docflow_tree_view), "#", :onclick => "jQuery('#view_container').load('#{controller.action_name}?view_as=tree')", :class => "icon icon-tree") %>
+<% unless @versions.empty? %>
+  <%= link_to( l(:label_docflow_tree_view), 
+               {:controller => controller.controller_name, :action => controller.action_name, :view_as => "tree"}, 
+               :onclick => "jQuery.getScript(this.href); return false;", 
+               :class => "icon icon-tree") %>      
   <hr>
   <table class="list">
     <tr>
@@ -19,5 +22,4 @@
     </tr>
   <% end %>
   </table>
-</div>
-
+<% end %>  

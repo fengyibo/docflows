@@ -40,126 +40,98 @@ class DocflowsController < ApplicationController
     render 'settings/plugin_disabled'
   end
 
+  def render_default
+    respond_to do |format|   
+      format.html { render 'versions_list' }
+      format.js   { 
+        render(:update) {|page| page.replace_html "view_container", :partial => ( params[:view_as] == "tree" ? 'tree_versions' : 'list_versions') } 
+      }       
+    end
+  end
+
   def index
-    if params[:view_as].nil?
-      @unread = DocflowVersion.unread_for_user
-      @waiting = DocflowVersion.waiting_for_my_approvial
-      @in_work = DocflowVersion.in_work
-      render 'important_versions'
-    else
-      @versions = DocflowVersion.in_work if params[:sel] == "in_work"
-      @versions = DocflowVersion.waiting_for_my_approvial if params[:sel] == "waiting"
-      @versions = DocflowVersion.unread_for_user if params[:sel] == "unread"
-      if params[:view_as] == "tree"
-        render :partial => 'tree_versions', :layout => false, :locals => {:selection => params[:sel]}
-      elsif params[:view_as] == "list"
-        if params[:sel] == "in_work"
-          render :partial => 'list_versions', :layout => false, :locals => {:selection => params[:sel]}
-        else
-          render :partial => 'list_with_author', :layout => false, :locals => {:selection => params[:sel]}
-        end
-      end
-    end  
+    @unread = DocflowVersion.unread_for_user
+    @waiting = DocflowVersion.waiting_for_my_approvial
+    @in_work = DocflowVersion.in_work
+
+    respond_to do |format|   
+      format.html { render 'important_versions' }
+      format.js {
+        @versions = @in_work if params[:sel] == "in_work"
+        @versions = @waiting if params[:sel] == "waiting_for_my_approvial"
+        @versions = @unread if params[:sel] == "unread"
+
+        partial = (params[:sel] == "in_work") ? "list_versions" : "list_with_author"
+        partial = (params[:view_as] == "tree") ? "tree_versions" : partial
+
+        render(:update) {|page| page.replace_html "view_container_"+params[:sel], :partial => partial, :locals => {:sel => params[:sel]} } 
+      }       
+    end
   end
 
   def all
-    # todo:
-    # Show 3 blocks at one: Waiting for my approvial, In work and unread
     @docs = Docflow.all
     render 'index'
   end
 
-  # todo: select only one version for unread, accepted - equal to current
-
-  # Versions which shoud be accepted by User
-  # todo: exclude read versions
+  # Versions which shoud be accepted by User, but not yet
   def unread
     @versions = DocflowVersion.unread_for_user
     @page_title = l(:label_docflows_actual)
-    if params[:view_as].nil?
-      render 'versions_list'      
-    else
-      render :partial => 'versions_list', :layout => false
-    end
+    render_default
   end
 
+  # Created by user versions which is in work (not approved yet)
   def in_work
     @versions = DocflowVersion.in_work
     @page_title = l(:label_docflows_in_work)
-    if params[:view_as].nil?
-      render 'versions_list'      
-    else
-      render :partial => 'versions_list', :layout => false
-    end
+    render_default
   end
 
   # Approved by User document's versions
   def approved_by_me
     @versions = DocflowVersion.approved_by_me
     @page_title = l(:label_docflows_approved_by_me)
-    if params[:view_as].nil?
-      render 'versions_list'      
-    else
-      render :partial => 'versions_list', :layout => false
-    end
+    render_default
   end
 
   # Approved by User document's versions
   def created_by_me
     @versions = DocflowVersion.created_by_me
     @page_title = l(:label_docflows_created_by_me)
-    # @as_tree = params[:as_tree]
-    if params[:view_as].nil?
-      render 'versions_list'      
-    else
-      render :partial => 'versions_list', :layout => false
-    end
+    render_default
   end
 
   #
   def waiting_for_my_approvial
     @versions = DocflowVersion.waiting_for_my_approvial
     @page_title = l(:label_docflows_waiting_for_my_approvial)
-    if params[:view_as].nil?
-      render 'versions_list'      
-    else
-      render :partial => 'versions_list', :layout => false
-    end
+    render_default
   end
 
   #
   def sent_to_approvial
     @versions = DocflowVersion.sent_to_approvial
     @page_title = l(:label_docflows_sent_to_approvial)
-    if params[:view_as].nil?
-      render 'versions_list'      
-    else
-      render :partial => 'versions_list', :layout => false
-    end
+    render_default
   end
 
   def under_control
-    @versions = DocflowVersion.joins("INNER JOIN #{Docflow.table_name} df ON #{DocflowVersion.table_name}.docflow_id=df.id AND df.responsible_id=#{User.current.id}")
+    @versions = DocflowVersion.joins(:docflow).where("responsible_id=#{User.current.id}")
     @page_title = l(:label_docflows_under_control)
-    if params[:view_as].nil?
-      render 'versions_list'      
-    else
-      render :partial => 'versions_list', :layout => false
-    end
+    render_default
   end
 
   # Read and accepted documents which was not canceled
   def actual
     @versions = DocflowVersion.actual_for_user
     @page_title = l(:label_docflows_actual)
-
-    if params[:view_as] == "tree"
-      render :partial => 'tree_versions', :layout => false
-    elsif params[:view_as] == "list"
-      render :partial => 'actual_versions', :layout => false
-    else
-      render 'actual_versions'
-    end      
+    respond_to do |format|   
+      format.html { render 'versions_list' }
+      format.js   { 
+        render(:update) {|page| page.replace_html "view_container", :partial => ( params[:view_as] == "tree" ? 'tree_versions' : 'actual_versions') } 
+      }       
+    end    
   end
 
   # Canceled documents which was read and accepted by user
@@ -167,13 +139,12 @@ class DocflowsController < ApplicationController
     @versions = DocflowVersion.canceled_for_user
     @page_title = l(:label_docflows_canceled)
 
-    if params[:view_as] == "tree"
-      render :partial => 'tree_versions', :layout => false
-    elsif params[:view_as] == "list"
-      render :partial => 'canceled_versions', :layout => false
-    else
-      render 'canceled_versions'
-    end  
+    respond_to do |format|   
+      format.html { render 'versions_list' }
+      format.js   { 
+        render(:update) {|page| page.replace_html "view_container", :partial => ( params[:view_as] == "tree" ? 'tree_versions' : 'canceled_versions') } 
+      }       
+    end
   end
 
   def new

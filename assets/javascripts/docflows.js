@@ -1,5 +1,27 @@
 jQuery(document).ready(function(){
 
+  jQuery('.show_annotation').live("click",function(){
+    jQuery(this).hide();
+    jQuery(this).nextAll('a.hide_annotation_a').show();
+    jQuery(this).nextAll('div.annotation').show();
+  })
+
+  jQuery('.hide_annotation').live("click",function(){
+    jQuery(this).parent().hide();
+    jQuery(this).parent().prevAll('a.hide_annotation_a').hide();
+    
+    jQuery(this).parent().prevAll('a.show_annotation').show();    
+  })
+
+  jQuery('.hide_annotation_a').live("click",function(){
+    jQuery(this).hide();    
+    jQuery(this).nextAll('div.annotation').hide();
+
+    jQuery(this).prevAll('a.show_annotation').show();
+  })
+
+  
+
   jQuery("#docflow_docflow_category_id").change(function(){
     cat_id = jQuery(this).val().toString();
     approver_id = jQuery("#cat-"+cat_id).val().toString();

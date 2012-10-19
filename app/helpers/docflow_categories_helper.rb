@@ -1,30 +1,5 @@
 module DocflowCategoriesHelper
 
-  def li_tree(nested_set)
-    lft,rgt,max_rgt = 0,0,0
-    result = ""
-    prev_node = nil
-
-    nested_set.each do |node|
-
-      if node.lft > lft+1
-        result << "</li>" if rgt+1 == node.lft # neighbours - same level
-        result << "</li></ul>"*(node.lft-rgt-1) if (node.lft-rgt) > 1 # level(s) up
-      else # node.lft == lft+1
-        result << "<ul class='tree_container'>"
-        result << yield(prev_node) if block_given? && !prev_node.nil?
-      end
-      # else nothing to close - new sub node
-      result << "<li id='c"+node.id.to_s+"' class='tree_fold node_expanded'>"+link_to(node.name, '#', :class => "tree_link")
-
-      lft,rgt = node.lft,node.rgt
-      prev_node = node
-      max_rgt = (max_rgt > rgt) ? max_rgt : rgt
-    end
-    result << "</li></ul>"*(max_rgt-rgt+1)
-    result.html_safe
-  end
-
   def div_tree(ns)
     lft,rgt = 0,0
     pad_left = -20
@@ -57,6 +32,29 @@ module DocflowCategoriesHelper
     # result += "</div>"*(max_rgt-rgt+1)
     render :inline => result
   end
+
+  def li_tree(nested_set)
+    lft,rgt,max_rgt = 0,0,0
+
+    result = "<ul class='tree_container'>"
+    nested_set.each do |node|
+
+      if node.lft > lft+1
+        result << "</ul></li>" if rgt+1 == node.lft # neighbours - same level
+        result << "</ul></li>"*(node.lft-rgt-1) if (node.lft-rgt) > 1 # level(s) up
+      end
+      # else nothing to close - new sub node
+      
+      result << "<li id='c"+node.id.to_s+"' class='tree_fold node_expanded'>"+link_to(node.name, '#', :class => "tree_link")+"<ul class='tree_container'>"
+      result << yield(node) if block_given?
+
+      lft,rgt = node.lft,node.rgt
+      max_rgt = (max_rgt > rgt) ? max_rgt : rgt
+    end
+    result << "</ul></li>"*(max_rgt-rgt+1)
+    result << "</ul>"
+    result.html_safe
+  end   
 
   def div_tree_nested(ns)
     lft,rgt = 0,0

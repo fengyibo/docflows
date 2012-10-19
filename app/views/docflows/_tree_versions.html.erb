@@ -1,38 +1,35 @@
 <% unless @versions.empty? %>
-  <% sel = local_assigns[:selection] ? selection : "" %>
-  <div id="view_container_<%= sel %>">
-    <%= link_to( l(:label_docflow_list_view), 
-                 {:controller => controller.controller_name, :action => controller.action_name, :view_as => "list", :sel => sel}, 
-                 :onclick => "jQuery('#view_container_#{sel}').load(this.href); return false;", 
-                 :class => "icon icon-list") %>
-    <hr>
+  <% sel = "" unless local_assigns[:sel] %>
 
-    <div id="docs_tree_<%= sel %>" style="padding-left:5px;">
+  <%= link_to( l(:label_docflow_list_view), 
+               {:controller => controller.controller_name, :action => controller.action_name, :view_as => "list", :sel => sel}, 
+               :onclick => "jQuery.getScript(this.href); return false;", 
+               :class => "icon icon-list") %>
+  <%= docflow_query_annotation( sel.empty? ? controller.action_name : sel) %>
+  <hr>
+  <% dig = Random.rand(32000) %>
+  <div id="docs_tree_<%= dig %>" style="padding-left:5px;">
 
-      <% categories = DocflowCategory.order("lft")
-         sorted_verions = @versions.sort_by{|version| [version.docflow.title,version.version]}
-         docs = Docflow.find(@versions.inject([]){|ar,v| ar.push(v.docflow_id)}).sort_by{|d| d.title}
-       %>
-      <%= li_tree(categories) do |category| %>
-        <%
+    <% categories = DocflowCategory.order("lft")
+       sorted_verions = @versions.sort_by{|version| [version.docflow.title,version.version]}
+       docs = Docflow.find(@versions.collect{|v| v.docflow_id}).sort_by{|d| d.title}  %>   
+
+    <%= li_tree(categories) do |category|
           category_docs = docs.inject([]){|ar,doc| (doc.docflow_category_id == category.id) ? ar.push(doc) : ar }
           html = ""
 
           category_docs.each do |doc|
             doc_versions = sorted_verions.inject([]){|ar,v| (v.docflow_id == doc.id) ? ar.push(v) : ar }
             html << "<li class='tree_leaf'>"+doc.type.name+": "+doc.title+" "+
-                      (doc_versions.inject(""){|href,v| href += ((href == "") ? link_to_version(v) : ", "+link_to_version(v))})+"</li>"
-          end
-          html
-        %>  
-      <% end %>
+                        (doc_versions.inject(""){|href,v| href += ((href == "") ? link_to_version(v) : ", "+link_to_version(v))})+"</li>"
+        end 
+        html
+      end %>
     </div>
-  </div>
 <% end %>
 <script type="text/javascript">
   jQuery(document).ready(function(){
-    sort_tree("docs_tree_<%= sel %>");
-    clear_tree("docs_tree_<%= sel %>");
-
+     sort_tree("docs_tree_<%= dig %>");
+     clear_tree("docs_tree_<%= dig %>");
   });
 </script>

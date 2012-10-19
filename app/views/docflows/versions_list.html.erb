@@ -5,7 +5,15 @@
 
 <h2><%= content_tag(:span,@page_title)  %></h2>
 
-<%= render :partial => 'list_versions' %>
+<div id="view_container">
+  <% if controller.action_name == "canceled" %>
+    <%= render :partial => 'canceled_versions' %>
+  <% elsif controller.action_name == "actual" %>
+    <%= render :partial => 'actual_versions' %>
+  <% else %>
+    <%= render :partial => 'list_versions' %>
+  <% end %>
+</div>
 
 <% content_for :sidebar do %>
   <%= render :partial => 'docflows/sidebar' %>

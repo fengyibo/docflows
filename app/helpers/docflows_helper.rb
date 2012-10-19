@@ -22,4 +22,19 @@ module DocflowsHelper
     end    
   end  
 
+  def docflow_query_annotation(qu)
+    # html = "<div class='anno_helper'>"
+    html = ""
+    html << link_to(l(:label_docflow_query_legend), '#', :class => 'icon icon-help show_annotation')
+    html << link_to(l(:label_docflow_query_legend_hide), '#', :class => 'icon icon-help hide_annotation_a', :style => "display:none;")
+    # html << "</div>"
+
+    html << "<div class='annotation' style='display:none;'>"
+    html << link_to('', '#', :class => 'icon close-icon hide_annotation', :style=>"margin-left:-18px; margin-top:-1px;", :legend => l(:label_docflow_query_legend_hide))    
+    html << content_tag(:span, l( "label_docflow_#{qu}_query_legend".to_sym ).html_safe )
+    html << "</div>"
+
+    html.html_safe
+  end
+
 end
