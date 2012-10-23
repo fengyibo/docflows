@@ -106,7 +106,8 @@ class DocflowVersion < ActiveRecord::Base
                          ((dc.user_id IS NOT NULL AND u.id = dc.user_id) OR
                           (dc.all_users='y' AND dc.user_department_id IS NULL AND dc.user_title_id IS NULL) OR
                           (dc.user_department_id IS NOT NULL AND dc.user_title_id IS NOT NULL AND dc.user_title_id=u.user_title_id AND dc.user_department_id=u.user_department_id AND dc.all_users IS NULL) OR
-                          (dc.user_department_id IS NOT NULL AND dc.user_department_id=u.user_department_id AND dc.user_title_id IS NULL))
+                          (dc.user_department_id IS NOT NULL AND dc.user_department_id=u.user_department_id AND dc.user_title_id IS NULL) OR
+                          (dc.user_department_id IS NULL AND dc.user_title_id IS NOT NULL AND dc.user_title_id=u.user_title_id))
                     WHERE u.id=#{User.current.id}
                     GROUP BY dc.docflow_version_id) vids
               ON vids.docflow_version_id=v.id
@@ -137,7 +138,8 @@ class DocflowVersion < ActiveRecord::Base
                          ((dc.user_id IS NOT NULL AND u.id = dc.user_id) OR
                           (dc.all_users='y' AND dc.user_department_id IS NULL AND dc.user_title_id IS NULL) OR
                           (dc.user_department_id IS NOT NULL AND dc.user_title_id IS NOT NULL AND dc.user_title_id=u.user_title_id AND dc.user_department_id=u.user_department_id AND dc.all_users IS NULL) OR
-                          (dc.user_department_id IS NOT NULL AND dc.user_department_id=u.user_department_id AND dc.user_title_id IS NULL))
+                          (dc.user_department_id IS NOT NULL AND dc.user_department_id=u.user_department_id AND dc.user_title_id IS NULL) OR
+                          (dc.user_department_id IS NULL AND dc.user_title_id IS NOT NULL AND dc.user_title_id=u.user_title_id))
                     WHERE u.id=#{User.current.id}
                     GROUP BY dc.docflow_version_id) with_checklist
               ON with_checklist.docflow_version_id=v.id
@@ -162,7 +164,8 @@ class DocflowVersion < ActiveRecord::Base
                          ((dc.user_id IS NOT NULL AND u.id = dc.user_id) OR
                           (dc.all_users='y' AND dc.user_department_id IS NULL AND dc.user_title_id IS NULL) OR
                           (dc.user_department_id IS NOT NULL AND dc.user_title_id IS NOT NULL AND dc.user_title_id=u.user_title_id AND dc.user_department_id=u.user_department_id AND dc.all_users IS NULL) OR
-                          (dc.user_department_id IS NOT NULL AND dc.user_department_id=u.user_department_id AND dc.user_title_id IS NULL))
+                          (dc.user_department_id IS NOT NULL AND dc.user_department_id=u.user_department_id AND dc.user_title_id IS NULL) OR
+                          (dc.user_department_id IS NULL AND dc.user_title_id IS NOT NULL AND dc.user_title_id=u.user_title_id))
                     WHERE u.id=#{User.current.id}
                     GROUP BY dc.docflow_version_id) vids
               ON vids.docflow_version_id=v.id    
@@ -174,7 +177,9 @@ class DocflowVersion < ActiveRecord::Base
                      ((dc.user_id IS NOT NULL AND u.id = dc.user_id) OR
                       (dc.all_users='y' AND dc.user_department_id IS NULL AND dc.user_title_id IS NULL) OR
                       (dc.user_department_id IS NOT NULL AND dc.user_title_id IS NOT NULL AND dc.user_title_id=u.user_title_id AND dc.user_department_id=u.user_department_id AND dc.all_users IS NULL) OR
-                      (dc.user_department_id IS NOT NULL AND dc.user_department_id=u.user_department_id AND dc.user_title_id IS NULL))
+                      (dc.user_department_id IS NOT NULL AND dc.user_department_id=u.user_department_id AND dc.user_title_id IS NULL) OR
+                      (dc.user_department_id IS NULL AND dc.user_title_id IS NOT NULL AND dc.user_title_id=u.user_title_id) OR
+                      (dc.user_department_id IS NULL AND dc.user_title_id IS NOT NULL AND dc.user_title_id=u.user_title_id))
                     INNER JOIN #{DocflowVersion.table_name} dv ON dv.id=dc.docflow_version_id AND dv.docflow_status_id>2
                   WHERE u.id=#{User.current.id}
                   GROUP BY dv.docflow_id) last_approved_checklist_version 
@@ -248,7 +253,8 @@ class DocflowVersion < ActiveRecord::Base
                      ((dc.user_id IS NOT NULL AND u.id = dc.user_id) OR
                       (dc.all_users='y' AND dc.user_department_id IS NULL AND dc.user_title_id IS NULL) OR
                       (dc.user_department_id IS NOT NULL AND dc.user_title_id IS NOT NULL AND dc.user_title_id=u.user_title_id AND dc.user_department_id=u.user_department_id AND dc.all_users IS NULL) OR
-                      (dc.user_department_id IS NOT NULL AND dc.user_department_id=u.user_department_id AND dc.user_title_id IS NULL))
+                      (dc.user_department_id IS NOT NULL AND dc.user_department_id=u.user_department_id AND dc.user_title_id IS NULL) OR
+                      (dc.user_department_id IS NULL AND dc.user_title_id IS NOT NULL AND dc.user_title_id=u.user_title_id))
                     INNER JOIN #{DocflowVersion.table_name} dv ON dv.id=dc.docflow_version_id AND dv.docflow_status_id>2
                   WHERE u.id=#{User.current.id}
                   GROUP BY dv.docflow_id) last_checklist_version 
@@ -275,7 +281,8 @@ class DocflowVersion < ActiveRecord::Base
                      ((dc.user_id IS NOT NULL AND u.id = dc.user_id) OR
                       (dc.all_users='y' AND dc.user_department_id IS NULL AND dc.user_title_id IS NULL) OR
                       (dc.user_department_id IS NOT NULL AND dc.user_title_id IS NOT NULL AND dc.user_title_id=u.user_title_id AND dc.user_department_id=u.user_department_id AND dc.all_users IS NULL) OR
-                      (dc.user_department_id IS NOT NULL AND dc.user_department_id=u.user_department_id AND dc.user_title_id IS NULL))
+                      (dc.user_department_id IS NOT NULL AND dc.user_department_id=u.user_department_id AND dc.user_title_id IS NULL) OR
+                      (dc.user_department_id IS NULL AND dc.user_title_id IS NOT NULL AND dc.user_title_id=u.user_title_id))
                 WHERE u.id=#{User.current.id}
                 GROUP BY dc.docflow_version_id) vids
           ON vids.docflow_version_id=v.id
@@ -291,9 +298,9 @@ class DocflowVersion < ActiveRecord::Base
                INNER JOIN #{DocflowChecklist.table_name} dc ON dc.docflow_version_id=#{self.id} AND
                  ((dc.user_id IS NOT NULL AND u.id = dc.user_id) OR
                   (dc.all_users='y' AND dc.user_department_id IS NULL AND dc.user_title_id IS NULL) OR
-                  (dc.user_department_id IS NOT NULL AND dc.user_title_id IS NOT NULL AND
-                    dc.user_title_id=u.user_title_id AND dc.user_department_id=u.user_department_id) OR
-                  (dc.user_department_id IS NOT NULL AND dc.user_department_id=u.user_department_id AND dc.user_title_id IS NULL))
+                  (dc.user_department_id IS NOT NULL AND dc.user_title_id IS NOT NULL AND dc.user_title_id=u.user_title_id AND dc.user_department_id=u.user_department_id AND dc.all_users IS NULL) OR
+                  (dc.user_department_id IS NOT NULL AND dc.user_department_id=u.user_department_id AND dc.user_title_id IS NULL) OR
+                  (dc.user_department_id IS NULL AND dc.user_title_id IS NOT NULL AND dc.user_title_id=u.user_title_id))
               GROUP BY u.id) uids ON uids.id=#{User.table_name}.id
            WHERE #{User.table_name}.type='User'"
     User.find_by_sql(sql)
@@ -306,9 +313,9 @@ class DocflowVersion < ActiveRecord::Base
                INNER JOIN #{DocflowChecklist.table_name} dc ON dc.docflow_version_id=#{self.id} AND
                  ((dc.user_id IS NOT NULL AND u.id = dc.user_id) OR
                   (dc.all_users='y' AND dc.user_department_id IS NULL AND dc.user_title_id IS NULL) OR
-                  (dc.user_department_id IS NOT NULL AND dc.user_title_id IS NOT NULL AND
-                    dc.user_title_id=u.user_title_id AND dc.user_department_id=u.user_department_id) OR
-                  (dc.user_department_id IS NOT NULL AND dc.user_department_id=u.user_department_id AND dc.user_title_id IS NULL))
+                  (dc.user_department_id IS NOT NULL AND dc.user_title_id IS NOT NULL AND dc.user_title_id=u.user_title_id AND dc.user_department_id=u.user_department_id) OR
+                  (dc.user_department_id IS NOT NULL AND dc.user_department_id=u.user_department_id AND dc.user_title_id IS NULL) OR
+                  (dc.user_department_id IS NULL AND dc.user_title_id IS NOT NULL AND dc.user_title_id=u.user_title_id))
               GROUP BY u.id) uids ON uids.id=#{User.table_name}.id
            WHERE #{User.table_name}.type='User' AND #{User.table_name}.id=#{uid}"
     !User.find_by_sql(sql).first.nil?
