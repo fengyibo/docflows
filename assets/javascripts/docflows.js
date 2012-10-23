@@ -1,3 +1,9 @@
+jQuery.expr[":"].Contains = jQuery.expr.createPseudo(function(arg) {
+    return function( elem ) {
+        return jQuery(elem).text().toUpperCase().indexOf(arg.toUpperCase()) >= 0;
+    };
+});
+
 jQuery(document).ready(function(){
 
   jQuery('.show_annotation').live("click",function(){
@@ -76,7 +82,7 @@ jQuery(document).ready(function(){
     }
     else{
       jQuery('#group-list label.one-name').hide();
-      jQuery('#group-list label.one-name:contains('+jQuery(this).val()+')').show();
+      jQuery('#group-list label.one-name:Contains('+jQuery(this).val()+')').show();
     }
   });
 
