@@ -8,7 +8,7 @@
   <% departments.unshift(UserDepartment.new(:name => "")) if title_only %>
 
   <% user_departments = UserDepartment.all %>
-  <% user_titles = UserTitle.joins("INNER JOIN (SELECT user_title_id FROM #{User.table_name} GROUP BY user_title_id) ti ON ti.user_title_id=#{UserTitle.table_name}.id") %>
+  <% user_titles = UserTitle.joins(:users).where("#{User.table_name}.status <> ?", User::STATUS_LOCKED).uniq %>
 
   <% if rules.any? %>
     <table class="list users">
