@@ -1,4 +1,3 @@
-require 'docflows/user_patch'
 
 Redmine::Plugin.register :docflows do
   name 'Document Workflows plugin'
