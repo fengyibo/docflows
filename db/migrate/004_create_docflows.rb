@@ -6,7 +6,7 @@ class CreateDocflows < ActiveRecord::Migration
       t.integer   :responsible_id, :null => false
       t.integer   :docflow_category_id, :null => false
       t.integer   :docflow_type_id, :null => false
-      t.string    :description
+      t.text    :description
 
       t.timestamps
     end
