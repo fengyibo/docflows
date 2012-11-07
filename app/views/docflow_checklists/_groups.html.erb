@@ -67,7 +67,7 @@
     <fieldset><legend><strong> <%= l(:label_docflows_groups) %> </strong></legend> 
       <p><strong><%= l(:label_docflows_departments) %></strong></p>
       <%#= select_tag("department_id", "<option value=\"\" selected>-</option>".html_safe+options_from_collection_for_select(user_departments.sort_by{|el| el.name.to_s},"id","name")) %>
-      <%= select_tag("department_id", options_for_checklist_department_select(departments)) %>
+      <%= select_tag("department_id", options_for_checklist_department_select(departments), :style => "width:94%;") %>
       <h4><%= l(:label_docflows_users_titles) %></h4>
       <p><%= text_field_tag('filer_groups', '', :class => 'find-filter') %></p>
       <div id="group-list" class="list-container">

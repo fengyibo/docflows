@@ -9,6 +9,6 @@
   <%= f.submit l(:button_create), :class => 'btn-def' %>
 <% end %>
 
-<%= javascript_tag "Form.Element.focus('docflow_category_name');" %>
+<%= javascript_tag "jQuery('#docflow_category_name').focus();" %>
 
 <%= link_to l(:label_docflow_back), docflow_categories_path, :class => 'btn-def' %>
