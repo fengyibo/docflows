@@ -7,7 +7,8 @@
                :class => "icon icon-list") %>
   <%= docflow_query_annotation( sel.empty? ? controller.action_name : sel) %>
   <hr>
-  <% dig = Random.rand(32000) %>
+  <% t = Time.now %>
+  <% dig = "#{t.to_i}-#{t.nsec}" %>
   <div id="docs_tree_<%= dig %>" style="padding-left:5px;">
 
     <% categories = DocflowCategory.order("lft")
