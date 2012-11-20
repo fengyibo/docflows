@@ -45,8 +45,15 @@
 
 <% if User.current.edit_docflows_categories? %>
   <h3><%= l(:label_docflow_administration) %></h3>
-  <ul class="nav-menu">
+  <ul class="nav-menu">    
     <%= content_tag(:li, link_to(l(:label_docflow_categories), docflow_categories_path ), :class => (controller.controller_name == "docflow_categories" ? "sel_menu" : "")) %>
     <%= content_tag(:li, link_to(l(:label_docflow_types), docflow_types_path ), :class => (controller.controller_name == "docflow_types" ? "sel_menu" : "")) if User.current.admin? %>
+  </ul>
+<% end %>
+
+<% if defined?(GroupSet) && User.current.global_permission_to?("group_sets", "index") %>
+  <h3><%= l(:label_group_sets) %></h3>
+  <ul class="nav-menu">
+    <%= content_tag(:li, link_to(l(:label_group_sets), group_sets_path ), :class => (controller.controller_name == "group_sets" ? "sel_menu" : "")) %>
   </ul>
 <% end %>
