@@ -12,6 +12,12 @@ class Docflow < ActiveRecord::Base
 
   attr_accessor :editable_version
 
+  def self.ldap_users_sync_plugin?
+    true if Kernel.const_get('GroupSet')
+  rescue NameError
+    false
+  end
+
   # todo: magick numbers in status comparements
 
   def canceled?

@@ -51,7 +51,7 @@
   </ul>
 <% end %>
 
-<% if defined?(GroupSet) && User.current.global_permission_to?("group_sets", "index") %>
+<% if Docflow.ldap_users_sync_plugin? && User.current.global_permission_to?("group_sets", "index") %>
   <h3><%= l(:label_group_sets) %></h3>
   <ul class="nav-menu">
     <%= content_tag(:li, link_to(l(:label_group_sets), group_sets_path ), :class => (controller.controller_name == "group_sets" ? "sel_menu" : "")) %>
