@@ -5,21 +5,20 @@ jQuery.expr[":"].Contains = jQuery.expr.createPseudo(function(arg) {
 });
 
 jQuery(document).ready(function(){
-
-  jQuery('.show_annotation').live("click",function(){
+  jQuery(document.body).on("click", ".show_annotation", function(){
     jQuery(this).hide();
     jQuery(this).nextAll('a.hide_annotation_a').show();
     jQuery(this).nextAll('div.annotation').show();
   })
 
-  jQuery('.hide_annotation').live("click",function(){
+  jQuery(document.body).on("click", ".hide_annotation", function(){
     jQuery(this).parent().hide();
     jQuery(this).parent().prevAll('a.hide_annotation_a').hide();
     
     jQuery(this).parent().prevAll('a.show_annotation').show();    
   })
 
-  jQuery('.hide_annotation_a').live("click",function(){
+  jQuery(document.body).on("click", ".hide_annotation_a", function(){
     jQuery(this).hide();    
     jQuery(this).nextAll('div.annotation').hide();
 
@@ -40,7 +39,7 @@ jQuery(document).ready(function(){
     jQuery("#is_approver_changed").val("y");
   });
   
-  jQuery('.tree_link').live("click",function(){
+  jQuery(document.body).on("click", ".tree_link", function(){
       fold = jQuery(this).parent();
       if ( jQuery(fold).hasClass("node_expanded") ) {
         jQuery(fold).children("ul").hide();
@@ -53,13 +52,14 @@ jQuery(document).ready(function(){
       return false;        
   })
 
-  jQuery('.checklist_edit').live("click",function(){
+  jQuery(document.body).on("click", ".checklist_edit", function(){
       dep_id = jQuery(this).attr("href");
       jQuery("#checklist_"+dep_id+"_form").show();
       jQuery("#checklist_"+dep_id+"_list").hide();
       return false;        
   })
-  jQuery('.checklist_cancel').live("click",function(){
+
+  jQuery(document.body).on("click", ".checklist_cancel", function(){
       dep_id = jQuery(this).attr("href");
       jQuery("#checklist_"+dep_id+"_form").hide();
       jQuery("#checklist_"+dep_id+"_list").show();
@@ -75,14 +75,23 @@ jQuery(document).ready(function(){
   //     jQuery('#user-list label.one-name:contains('+jQuery(this).val()+')').show();
   //   }
   // });
-
-  jQuery('#filer_groups').bind("change keyup input",function(){
+  jQuery(document.body).on("change keyup input", "#filer_groups", function(){
     if (jQuery(this).val() == ""){
       jQuery('#group-list label.one-name').show();
     }
     else{
       jQuery('#group-list label.one-name').hide();
       jQuery('#group-list label.one-name:Contains('+jQuery(this).val()+')').show();
+    }
+  });
+
+  jQuery(document.body).on("change keyup input", "#filer_group_sets", function(){
+    if (jQuery(this).val() == ""){
+      jQuery('#pattern-list label.one-name').show();
+    }
+    else{
+      jQuery('#pattern-list label.one-name').hide();
+      jQuery('#pattern-list label.one-name:Contains('+jQuery(this).val()+')').show();
     }
   });
 
@@ -106,7 +115,7 @@ jQuery(document).ready(function(){
     jQuery('#approve-form').hide();
   });
 
-  jQuery('a.add_docfile').live('click', function(){
+  jQuery(document.body).on("click", "a.add_docfile", function(){
     num_files = jQuery("p.new_attach").size();
     file_type = (jQuery("p.src_file").size() > 0) ? "" : "src_file";
     file_type = (jQuery("p.pub_file").size() > 0) ? file_type : "pub_file";
@@ -129,7 +138,7 @@ jQuery(document).ready(function(){
   });
 
   // todo: check files sizes
-  jQuery('input.docfile').live('change', function(){
+  jQuery(document.body).on("change", "input.docfile", function(){  
     maxFileSize = jQuery('#docfile_max_size').val();
     if(this.files[0].size > maxFileSize){
         alert("File is too big!");
@@ -137,11 +146,11 @@ jQuery(document).ready(function(){
     }
   });
 
-  jQuery('a.remove_docfile').live('click', function(){
+  jQuery(document.body).on("click", "a.remove_docfile", function(){
     jQuery(this).parent("p.new_attach").remove();
   });
 
-  jQuery('a.remove_attached_file').live('click', function(){
+  jQuery(document.body).on("click", "a.remove_attached_file", function(){
     if (confirm(jQuery('#label_docflow_confirm_delete_file').val())) {
       jQuery.ajax({ type: 'POST',
                     url: this.href,
@@ -154,7 +163,7 @@ jQuery(document).ready(function(){
     return false;
   });
 
-  jQuery('a.remove_checklist_rec').live('click', function(){
+  jQuery(document.body).on("click", "a.remove_checklist_rec", function(){
     if (confirm(jQuery('#label_docflow_confirm_delete').val()+jQuery(this).prev('span').html()+' ?')){
       jQuery.ajax({ type: 'POST',
                     url: this.href,

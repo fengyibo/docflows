@@ -27,7 +27,7 @@
           <td class="user"><%= link_to_user User.find(rec.user_id) %></td>
           <td class="buttons">
             <%= link_to_remote( l(:button_delete),
-                                { :url => "remove_checklist/#{rec.id}",
+                                { :url => "remove_checklist/#{rec.id}?tab_refresh=users",
                                   :method => :delete },
                                 :class => 'icon icon-del' ) %>
           </td>

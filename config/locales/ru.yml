@@ -15,6 +15,8 @@ ru:
   label_docflows_all_users: "Все сотрудники"
   label_docflows_users: "Люди"
   label_docflows_groups: "Группы"
+  label_docflows_patterns: "Шаблоны"
+  label_docflows_pattern_name: "Название шаблона"
   label_docflows_user_department: "Отдел"
   label_docflows_user_title: "Должность"  
   label_docflows_users_titles: "Должности"

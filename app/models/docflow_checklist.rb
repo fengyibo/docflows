@@ -6,6 +6,7 @@ class DocflowChecklist < ActiveRecord::Base
   belongs_to :user
   belongs_to :department, :class_name => "UserDepartment", :foreign_key => :user_department_id
   belongs_to :title, :class_name => "UserTitle", :foreign_key => :user_title_id
+  belongs_to :group_set
 
   validate  :no_similar_record_exists?
 
@@ -45,6 +46,8 @@ class DocflowChecklist < ActiveRecord::Base
       full_name += ', '+title.name unless title.nil?
     elsif !title.nil?
       full_name = title.name
+    elsif !group_set.nil?
+      full_name = group_set.name      
     end
     return full_name
   end

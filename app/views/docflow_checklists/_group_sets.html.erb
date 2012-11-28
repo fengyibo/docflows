@@ -1,0 +1,54 @@
+<% if Docflow.ldap_users_sync_plugin? %>
+
+  <%= content_tag(:div, js_err, :id => "errorExplanation") if local_assigns[:js_err] && !js_err.nil? %>
+  
+  <div class="splitcontentleft" style="width:65%;">
+    <% group_sets = @version.checklists.where('group_set_id is not null') %>
+  
+    <% if group_sets.any? %>
+      <table class="list patterns">
+        <thead><tr>
+          <th><%= l(:label_docflows_pattern_name) %></th>
+          <th style="width:15%"></th>
+        </tr></thead>
+        <tbody>
+        <% group_sets.sort_by{|el| el.display_name}.each do |rec| %>
+          <tr id="rec-<%= rec.id %>" class="<%= cycle 'odd', 'even' %>">
+            <td class="group_set"><%= rec.display_name %></td>
+            <td class="buttons">
+              <%= link_to_remote( l(:button_delete),
+                                  { :url => "remove_checklist/#{rec.id}?tab_refresh=group_sets",                                  
+                                    :method => :delete },
+                                  :class => 'icon icon-del' ) %>
+            </td>
+          </tr>
+        <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <p class="nodata"><%= l(:label_no_data) %></p>
+    <% end %>  
+  </div>
+
+  <% patterns = GroupSet.not_in_docflow_version(@version).all %>
+  <div class="splitcontentright" style="width:30%;">
+    <%= form_tag({:action => "checklist"},{:class=>'select_checklist_form', :id =>'select_groups', :remote => true}) do %>
+      <input type=hidden name="tab_refresh" value="group_sets">
+      <fieldset><legend><strong> <%= l(:label_docflows_groups) %> </strong></legend> 
+        <h4><%= l(:label_docflows_users_titles) %></h4>
+        <p><%= text_field_tag('filer_group_sets', '', :class => 'find-filter') %></p>
+        <div id="pattern-list" class="list-container">
+          <% patterns.sort_by{|el| el.name}.each do |p| %>
+            <nobr><%= content_tag( :label,
+                             check_box_tag("group_sets[#{p.id}]", p.id) + p.name,
+                             :class => "one-name" ) %></nobr>
+          <% end %>
+        </div>
+        <p>
+        <%= submit_tag(l(:label_docflow_add_item), :id => 'record_add', :class => 'btn-def') %>
+        <%= link_to l(:label_docflow_done), @version, :class => 'btn-def' %>
+        </p>
+      </fieldset>
+    <% end %>
+  </div>
+<% end %>

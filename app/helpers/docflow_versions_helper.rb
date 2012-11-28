@@ -13,6 +13,7 @@ module DocflowVersionsHelper
   def version_checklists_tabs
         tabs = [ {:name => 'users', :partial => 'docflow_checklists/users', :label => :label_docflows_users},
                  {:name => 'groups', :partial => 'docflow_checklists/groups', :label => :label_docflows_groups} ]
+        tabs << {:name => 'group_sets', :partial => 'docflow_checklists/group_sets', :label => :label_docflows_patterns} if Docflow.ldap_users_sync_plugin?                 
   end
 
   def link_to_remove_checklist_record (rec)

@@ -158,7 +158,7 @@ class DocflowVersionsController < ApplicationController
   # todo: change JS on async list generation
   def add_checklists
     @version = DocflowVersion.find(params[:id])
-    @version.save_checklists(params[:all_users], params[:users], params[:titles],params[:department_id])
+    @version.save_checklists(params[:all_users], params[:users], params[:titles], params[:department_id], params[:group_sets])
     result = "ok"    
 
     if @version.processed_checklists.blank? && !(params[:all_users].nil? && params[:users].nil? && params[:titles].nil? && params[:department_id].nil?)
@@ -176,6 +176,9 @@ class DocflowVersionsController < ApplicationController
           if(params[:tab_refresh] == "users") 
             page.replace_html "tab-content-users", :partial => "docflow_checklists/users", :locals => {:js_err => js_err}
             @version.processed_checklists.each{ |rec| page.visual_effect(:highlight, "rec-#{rec[:id]}") }
+          elsif(params[:tab_refresh] == "group_sets") 
+            page.replace_html "tab-content-group_sets", :partial => "docflow_checklists/group_sets", :locals => {:js_err => js_err}
+            @version.processed_checklists.each{ |rec| page.visual_effect(:highlight, "rec-#{rec[:id]}") }            
           else
             page.replace_html "tab-content-groups", :partial => "docflow_checklists/groups", :locals => {:js_err => js_err}
             hid = (params[:department_id].nil? || params[:department_id] == "")  ? "0" : params[:department_id]
@@ -237,9 +240,13 @@ class DocflowVersionsController < ApplicationController
     checklist = DocflowChecklist.find(params[:cid])
 
     respond_to do |format|
-      if checklist.destroy        
-        format.js   { render(:update) {|page| page.replace_html "tab-content-users", :partial => 'docflow_checklists/users' } }       
-        format.json { render :json => {:result => "ok", :msg => "", :id => params[:cid]}.to_json }
+      if checklist.destroy
+        if(params[:tab_refresh] == "users")     
+          format.js   { render(:update) {|page| page.replace_html "tab-content-users", :partial => 'docflow_checklists/users' } }       
+          format.json { render :json => {:result => "ok", :msg => "", :id => params[:cid]}.to_json }
+        else
+          format.js { render(:update) {|page| page.replace_html "tab-content-group_sets", :partial => 'docflow_checklists/group_sets' } }       
+        end
       else
         format.json { render :json =>{:result => "fail", :msg => "Fail remove checklist record"} }
       end

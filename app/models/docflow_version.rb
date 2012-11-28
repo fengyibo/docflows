@@ -29,7 +29,7 @@ class DocflowVersion < ActiveRecord::Base
   end
 
   def validate_conditions
-    df = Docflow.find(docflow_id)    
+    df = Docflow.find(docflow_id)
 
     if self.new_record?
       errors.add(:base, l(:label_docflow_actual_date_should_be_new_than_previous)) if !actual_date.nil? && df.versions.exists?(['actual_date >= ?', "#{actual_date}"])
@@ -96,13 +96,25 @@ class DocflowVersion < ActiveRecord::Base
     where("approver_id=? AND docflow_status_id=2", User.current.id)
   end
 
+  def self.checklist_fork
+    if Docflow.ldap_users_sync_plugin?
+      "(SELECT idc.docflow_version_id, idc.all_users, idc.user_id, idc.user_department_id, idc.user_title_id FROM  #{DocflowChecklist.table_name} idc
+          UNION
+        SELECT idc2.docflow_version_id, NULL, NULL, gsr.user_department_id, gsr.user_title_id FROM  #{DocflowChecklist.table_name} idc2 
+          INNER JOIN #{GroupSet.table_name} gs ON gs.id=idc2.group_set_id
+          INNER JOIN #{GroupSetRule.table_name} gsr ON gsr.group_set_id=gs.id)"
+    else
+      "#{DocflowChecklist.table_name}"
+    end
+  end
+
   # todo: only actual and current versions should be selected
   # todo: profile of sql query in mysql
   def self.unread
     sql = "SELECT v.* FROM #{DocflowVersion.table_name} v
               INNER JOIN
                   (SELECT dc.docflow_version_id FROM #{User.table_name} u
-                       INNER JOIN #{DocflowChecklist.table_name} dc ON
+                       INNER JOIN #{self.checklist_fork} dc ON
                          ((dc.user_id IS NOT NULL AND u.id = dc.user_id) OR
                           (dc.all_users='y' AND dc.user_department_id IS NULL AND dc.user_title_id IS NULL) OR
                           (dc.user_department_id IS NOT NULL AND dc.user_title_id IS NOT NULL AND dc.user_title_id=u.user_title_id AND dc.user_department_id=u.user_department_id AND dc.all_users IS NULL) OR
@@ -134,7 +146,7 @@ class DocflowVersion < ActiveRecord::Base
 
               INNER JOIN
                   (SELECT dc.docflow_version_id FROM #{User.table_name} u
-                       INNER JOIN #{DocflowChecklist.table_name} dc ON
+                       INNER JOIN #{self.checklist_fork} dc ON
                          ((dc.user_id IS NOT NULL AND u.id = dc.user_id) OR
                           (dc.all_users='y' AND dc.user_department_id IS NULL AND dc.user_title_id IS NULL) OR
                           (dc.user_department_id IS NOT NULL AND dc.user_title_id IS NOT NULL AND dc.user_title_id=u.user_title_id AND dc.user_department_id=u.user_department_id AND dc.all_users IS NULL) OR
@@ -160,7 +172,7 @@ class DocflowVersion < ActiveRecord::Base
     sql = "SELECT v.* FROM #{DocflowVersion.table_name} v
               INNER JOIN
                   (SELECT dc.docflow_version_id FROM #{User.table_name} u
-                       INNER JOIN #{DocflowChecklist.table_name} dc ON
+                       INNER JOIN #{self.checklist_fork} dc ON
                          ((dc.user_id IS NOT NULL AND u.id = dc.user_id) OR
                           (dc.all_users='y' AND dc.user_department_id IS NULL AND dc.user_title_id IS NULL) OR
                           (dc.user_department_id IS NOT NULL AND dc.user_title_id IS NOT NULL AND dc.user_title_id=u.user_title_id AND dc.user_department_id=u.user_department_id AND dc.all_users IS NULL) OR
@@ -173,7 +185,7 @@ class DocflowVersion < ActiveRecord::Base
 
               INNER JOIN 
                 (SELECT dv.docflow_id, MAX(dc.docflow_version_id) AS id FROM #{User.table_name} u
-                    INNER JOIN #{DocflowChecklist.table_name} dc ON
+                    INNER JOIN #{self.checklist_fork} dc ON
                      ((dc.user_id IS NOT NULL AND u.id = dc.user_id) OR
                       (dc.all_users='y' AND dc.user_department_id IS NULL AND dc.user_title_id IS NULL) OR
                       (dc.user_department_id IS NOT NULL AND dc.user_title_id IS NOT NULL AND dc.user_title_id=u.user_title_id AND dc.user_department_id=u.user_department_id AND dc.all_users IS NULL) OR
@@ -249,7 +261,7 @@ class DocflowVersion < ActiveRecord::Base
 
               INNER JOIN 
                 (SELECT dv.docflow_id, MAX(dc.docflow_version_id) AS id FROM #{User.table_name} u
-                    INNER JOIN #{DocflowChecklist.table_name} dc ON
+                    INNER JOIN #{self.checklist_fork} dc ON
                      ((dc.user_id IS NOT NULL AND u.id = dc.user_id) OR
                       (dc.all_users='y' AND dc.user_department_id IS NULL AND dc.user_title_id IS NULL) OR
                       (dc.user_department_id IS NOT NULL AND dc.user_title_id IS NOT NULL AND dc.user_title_id=u.user_title_id AND dc.user_department_id=u.user_department_id AND dc.all_users IS NULL) OR
@@ -275,9 +287,7 @@ class DocflowVersion < ActiveRecord::Base
   # approved versions with familiarization for user
   def self.for_familiarization
     sql = "SELECT v.* FROM #{DocflowVersion.table_name} v
-          INNER JOIN
-              (SELECT dc.docflow_version_id FROM #{User.table_name} u
-                   INNER JOIN #{DocflowChecklist.table_name} dc ON
+          INNER JOIN #{self.checklist_fork} dc ON
                      ((dc.user_id IS NOT NULL AND u.id = dc.user_id) OR
                       (dc.all_users='y' AND dc.user_department_id IS NULL AND dc.user_title_id IS NULL) OR
                       (dc.user_department_id IS NOT NULL AND dc.user_title_id IS NOT NULL AND dc.user_title_id=u.user_title_id AND dc.user_department_id=u.user_department_id AND dc.all_users IS NULL) OR
@@ -295,12 +305,14 @@ class DocflowVersion < ActiveRecord::Base
     sql = "SELECT #{User.table_name}.* FROM #{User.table_name}
               INNER JOIN
               (SELECT u.id FROM #{User.table_name} u
-               INNER JOIN #{DocflowChecklist.table_name} dc ON dc.docflow_version_id=#{self.id} AND
+               INNER JOIN #{DocflowVersion.checklist_fork} dc ON              
+                dc.docflow_version_id=#{self.id} AND
                  ((dc.user_id IS NOT NULL AND u.id = dc.user_id) OR
                   (dc.all_users='y' AND dc.user_department_id IS NULL AND dc.user_title_id IS NULL) OR
                   (dc.user_department_id IS NOT NULL AND dc.user_title_id IS NOT NULL AND dc.user_title_id=u.user_title_id AND dc.user_department_id=u.user_department_id AND dc.all_users IS NULL) OR
                   (dc.user_department_id IS NOT NULL AND dc.user_department_id=u.user_department_id AND dc.user_title_id IS NULL) OR
-                  (dc.user_department_id IS NULL AND dc.user_title_id IS NOT NULL AND dc.user_title_id=u.user_title_id))
+                  (dc.user_department_id IS NULL AND dc.user_title_id IS NOT NULL AND dc.user_title_id=u.user_title_id)
+                 )
               GROUP BY u.id) uids ON uids.id=#{User.table_name}.id
            WHERE #{User.table_name}.type='User'"
     User.find_by_sql(sql)
@@ -310,7 +322,8 @@ class DocflowVersion < ActiveRecord::Base
     sql = "SELECT #{User.table_name}.* FROM #{User.table_name}
               INNER JOIN
               (SELECT u.id FROM #{User.table_name} u
-               INNER JOIN #{DocflowChecklist.table_name} dc ON dc.docflow_version_id=#{self.id} AND
+               INNER JOIN #{DocflowVersion.checklist_fork} dc ON  
+                dc.docflow_version_id=#{self.id} AND
                  ((dc.user_id IS NOT NULL AND u.id = dc.user_id) OR
                   (dc.all_users='y' AND dc.user_department_id IS NULL AND dc.user_title_id IS NULL) OR
                   (dc.user_department_id IS NOT NULL AND dc.user_title_id IS NOT NULL AND dc.user_title_id=u.user_title_id AND dc.user_department_id=u.user_department_id) OR
@@ -385,13 +398,14 @@ class DocflowVersion < ActiveRecord::Base
     end
   end
 
-  def save_checklists(is_all, users, titles, department)
+  def save_checklists(is_all, users, titles, department, group_sets)
     self.processed_checklists,self.errors_msgs = [],[]
     rec = nil
     deleted = ""
 
     users = users.values if users.is_a?(Hash)
     titles = titles.values if titles.is_a?(Hash)
+    group_sets = group_sets.values if group_sets.is_a?(Hash)
 
     # Only one type of possible record variants will be added at one time
     # Case:  ALL | Users | Titel+Department | Title | Department
@@ -415,6 +429,17 @@ class DocflowVersion < ActiveRecord::Base
 
         self.errors_msgs << '&middot; '+rec.user.name if rec.new_record?
       end
+    elsif group_sets.is_a?(Array)
+      group_sets.each do |gs_id|
+        rec = DocflowChecklist.create( :docflow_version_id => self.id,
+                                       :group_set_id => gs_id )
+
+        self.processed_checklists << { :name => rec.group_set.name,
+                                       :id => rec.id,
+                                       :type => "Group_set" } unless rec.new_record?
+
+        self.errors_msgs << '&middot; '+rec.group_set.name if rec.new_record?
+      end      
     elsif titles.is_a?(Array)
       titles.each do |tid|
         rec = DocflowChecklist.create( :docflow_version_id => self.id,

@@ -15,6 +15,8 @@ en:
   label_docflows_all_users: "All users"
   label_docflows_users: "Users"
   label_docflows_groups: "Groups"
+  label_docflows_patterns: "Patterns"
+  label_docflows_pattern_name: "Pattern name"
   label_docflows_user_department: "Department"
   label_docflows_user_title: "User title"    
   label_docflows_users_titles: "Users titles"
