@@ -39,7 +39,21 @@
         <%= f.label l(:label_docflow_actual_from)+":" %>
         <%= f.text_field(:actual_date, {:value => @version.actual_date ? @version.actual_date.utc.getlocal.to_date : "", :size => "10"}) %>
         <%= calendar_for('docflow_version_actual_date') %>
+      </p>
+
+      <p class="doc_description">
+        <label><%= l(:label_docflow_text) %>:</label>
+        <%= content_tag 'span', :id => "version_description_and_toolbar", :style => nil do %>
+        <%= f.text_area :description,
+                         :cols => 60,
+                         :rows => (@version.description.blank? ? 10 : [[10, @version.description.length / 50].max, 100].min),
+                         :accesskey => accesskey(:edit),
+                         :class => 'wiki-edit',
+                         :no_label => true %>
+        <% end %>
       </p>      
+      <%= wikitoolbar_for 'docflow_version_description' %>
+
       <%= f.hidden_field :docflow_id %>
       <%= f.hidden_field :version %>
       <%= f.hidden_field :author_id %>
