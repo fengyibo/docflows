@@ -34,8 +34,7 @@
   <div class="splitcontentright" style="width:30%;">
     <%= form_tag({:action => "checklist"},{:class=>'select_checklist_form', :id =>'select_groups', :remote => true}) do %>
       <input type=hidden name="tab_refresh" value="group_sets">
-      <fieldset><legend><strong> <%= l(:label_docflows_groups) %> </strong></legend> 
-        <h4><%= l(:label_docflows_users_titles) %></h4>
+      <fieldset><legend><strong> <%= l(:label_docflows_patterns) %> </strong></legend>         
         <p><%= text_field_tag('filer_group_sets', '', :class => 'find-filter') %></p>
         <div id="pattern-list" class="list-container">
           <% patterns.sort_by{|el| el.name}.each do |p| %>
