@@ -26,10 +26,7 @@
         <tr id="rec-<%= rec.id %>" class="<%= cycle 'odd', 'even' %>">
           <td class="user"><%= link_to_user User.find(rec.user_id) %></td>
           <td class="buttons">
-            <%= link_to_remote( l(:button_delete),
-                                { :url => "remove_checklist/#{rec.id}?tab_refresh=users",
-                                  :method => :delete },
-                                :class => 'icon icon-del' ) %>
+            <%= delete_link "remove_checklist/#{rec.id}?tab_refresh=users", :remote => true %>
           </td>
         </tr>
       <% end %>
@@ -50,15 +47,8 @@
       <% users = User.active.not_in_version(@version).all(:limit => 100) %>
 
       <p><%= text_field_tag('filter_people', '', :class => 'find-filter') %></p>
-      <%= observe_field(:filter_people,
-                   :frequency => 0.5,
-                   :update => :users_list,
-                   :url => autocomplete_for_user_docflow_version_path(@version),
-                   :method => :get,
-                   :before => "jQuery('#filter_people').addClass('ajax-loading')",
-                   :complete => "jQuery('#filter_people').removeClass('ajax-loading')",
-                   :with => 'q')
-                    %>    
+      <%= javascript_tag "observeSearchfield('filter_people', 'users_list', '#{ escape_javascript autocomplete_for_user_docflow_version_path(@version) }')" %>
+  
       <div id="users_list" class="list-container">
         <%= principals_check_box_tags "users[]", users.sort_by{|el| el.name.to_s} %>
       </div>

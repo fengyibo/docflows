@@ -172,19 +172,15 @@ class DocflowVersionsController < ApplicationController
         flash[:error] = js_err unless js_err.nil?
         redirect_to(:action => "checklist") }
       format.js   { 
-        render(:update) {|page|          
-          if(params[:tab_refresh] == "users") 
-            page.replace_html "tab-content-users", :partial => "docflow_checklists/users", :locals => {:js_err => js_err}
-            @version.processed_checklists.each{ |rec| page.visual_effect(:highlight, "rec-#{rec[:id]}") }
-          elsif(params[:tab_refresh] == "group_sets") 
-            page.replace_html "tab-content-group_sets", :partial => "docflow_checklists/group_sets", :locals => {:js_err => js_err}
-            @version.processed_checklists.each{ |rec| page.visual_effect(:highlight, "rec-#{rec[:id]}") }            
-          else
-            page.replace_html "tab-content-groups", :partial => "docflow_checklists/groups", :locals => {:js_err => js_err}
-            hid = (params[:department_id].nil? || params[:department_id] == "")  ? "0" : params[:department_id]
-            page.visual_effect(:highlight, "dep-#{hid}")
-          end
-        } 
+        if(params[:tab_refresh] == "users")
+          partial, div, obj, ids = "docflow_checklists/users", "users", "rec", @version.processed_checklists.map{ |r| r[:id] }
+        elsif(params[:tab_refresh] == "group_sets") 
+          partial, div, obj, ids = "docflow_checklists/group_sets", "group_sets", "rec", @version.processed_checklists.map{ |r| r[:id] }
+        else
+          partial, div, obj = "docflow_checklists/groups", "groups", "dep"
+          ids = [ ((params[:department_id].nil? || params[:department_id] == "")  ? "0" : params[:department_id]) ]
+        end
+        render :partial => "edit_checklists", :locals => {:partial => partial, :div => div, :obj => obj, :ids => ids}
       }
       format.json { render :json => {:result => result, :msg => (js_err.nil? ? nil : js_err.gsub("<br>","\n")), :saved => @version.processed_checklists}.to_json }
     end
@@ -241,12 +237,15 @@ class DocflowVersionsController < ApplicationController
 
     respond_to do |format|
       if checklist.destroy
-        if(params[:tab_refresh] == "users")     
-          format.js   { render(:update) {|page| page.replace_html "tab-content-users", :partial => 'docflow_checklists/users' } }       
-          format.json { render :json => {:result => "ok", :msg => "", :id => params[:cid]}.to_json }
-        else
-          format.js { render(:update) {|page| page.replace_html "tab-content-group_sets", :partial => 'docflow_checklists/group_sets' } }       
-        end
+        format.json { render :json => {:result => "ok", :msg => "", :id => params[:cid]}.to_json }
+        format.js {
+          if(params[:tab_refresh] == "users")
+            partial, div = "docflow_checklists/users", "users"
+          else
+            partial, div = "docflow_checklists/group_sets", "group_sets"
+          end  
+          render :partial => "edit_checklists", :locals => {:partial => partial, :div => div, :obj => "rec", :ids => []}
+        }  
       else
         format.json { render :json =>{:result => "fail", :msg => "Fail remove checklist record"} }
       end
@@ -264,7 +263,9 @@ class DocflowVersionsController < ApplicationController
     checklists.each { |checklist|  checklist.destroy }
 
     respond_to do |format|
-      format.js   { render(:update) {|page| page.replace_html "tab-content-groups", :partial => 'docflow_checklists/groups'} }
+      format.js   { 
+        render :partial => "edit_checklists", :locals => {:partial => "docflow_checklists/groups", :div => "groups", :obj => "dep", :ids => []}
+      }
       format.json { render :json => {:result => "ok", :msg => "", :id => params[:department_id]}.to_json }
     end    
   end

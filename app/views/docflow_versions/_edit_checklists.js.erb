@@ -1,0 +1,4 @@
+$('#tab-content-<%= div %>').html('<%= escape_javascript(render :partial => partial) %>');
+<% ids.each do |id| %>
+  $('#<%= "#{obj}-#{id}" %>').effect("highlight");
+<% end %>

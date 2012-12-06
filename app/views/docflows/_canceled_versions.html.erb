@@ -1,8 +1,10 @@
 <% unless @versions.empty? %>
+  <% sel = "" unless local_assigns[:sel] %>
   <%= link_to( l(:label_docflow_tree_view), 
                {:controller => controller.controller_name, :action => controller.action_name, :view_as => "tree"}, 
-               :onclick => "jQuery.getScript(this.href); return false;", 
-               :class => "icon icon-tree") %>      
+               :remote => true,
+               :class => "icon icon-tree") %>
+  <%= docflow_query_annotation( sel.empty? ? controller.action_name : sel) %>  
   <hr>
   <table class="list">
     <tr>
@@ -10,7 +12,8 @@
       <th> <%= l(:label_docflow_title) %> </th>      
       <th> <%= l(:label_docflow_version) %> </th>
       <th> <%= l(:label_docflow_category) %> </th>
-      <th> <%= l(:label_docflow_actual_from) %> </th>
+      <th> <%= l(:label_docflow_was_actual_from) %> </th>
+      <th> <%= l(:label_docflow_version_canceled) %> </th>
     </tr>
   <% @versions.sort_by{|v| v.docflow.title}.each do |ver| %>
     <tr>
@@ -19,7 +22,8 @@
       <td> <%= link_to_version(ver) %> </td>
       <td> <%= ver.docflow.category.name %> </td>
       <td> <%= (ver.actual_date.nil?) ? "-" : format_date(ver.actual_date.utc.getlocal)  %> </td>
+      <td> <%= (ver.docflow.last_version.docflow_status_id == 4) ? format_date(ver.docflow.last_version.updated_at.utc.getlocal) : format_date(ver.updated_at.utc.getlocal) %> </td>
     </tr>
   <% end %>
   </table>
-<% end %>  
+<% end %>

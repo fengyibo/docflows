@@ -44,12 +44,9 @@
           </td>
           <td class="buttons">
             <%= link_to( l(:button_edit),
-                                  "#{dep.id}",
-                                  :class => 'icon icon-edit checklist_edit' ) %>            
-            <%= link_to_remote( l(:button_delete),
-                                { :url => remove_checklist_by_department_docflow_version_path(@version,dep.id),
-                                  :method => :delete },
-                                :class => 'icon icon-del' ) %>
+                         "#{dep.id}",
+                         :class => 'icon icon-edit checklist_edit' ) %>
+            <%= delete_link remove_checklist_by_department_docflow_version_path(@version,dep.id), :remote => true %>                                 
           </td>
         </tr>
       <% end %>

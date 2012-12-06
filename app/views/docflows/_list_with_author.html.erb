@@ -3,7 +3,7 @@
 
   <%= link_to( l(:label_docflow_tree_view), 
                {:controller => controller.controller_name, :action => controller.action_name, :view_as => "tree", :sel => sel}, 
-               :onclick => "jQuery.getScript(this.href); return false;", 
+               :remote => true,
                :class => "icon icon-tree") %>
   <%= docflow_query_annotation( sel.empty? ? controller.action_name : sel) %>
   <hr>

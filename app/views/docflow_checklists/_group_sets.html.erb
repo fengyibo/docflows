@@ -16,10 +16,7 @@
           <tr id="rec-<%= rec.id %>" class="<%= cycle 'odd', 'even' %>">
             <td class="group_set"><%= rec.display_name %></td>
             <td class="buttons">
-              <%= link_to_remote( l(:button_delete),
-                                  { :url => "remove_checklist/#{rec.id}?tab_refresh=group_sets",                                  
-                                    :method => :delete },
-                                  :class => 'icon icon-del' ) %>
+              <%= delete_link "remove_checklist/#{rec.id}?tab_refresh=group_sets", :remote => true %>
             </td>
           </tr>
         <% end %>

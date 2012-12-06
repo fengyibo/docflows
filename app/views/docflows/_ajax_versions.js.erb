@@ -1,0 +1,1 @@
+$('#view_container<%= escape_javascript((local_assigns[:sel] && sel != '') ? '_'+sel : '' ) %>').html('<%= escape_javascript(render :partial => partial, :locals => {:sel => (local_assigns[:sel] ? sel : '')} ) %>');

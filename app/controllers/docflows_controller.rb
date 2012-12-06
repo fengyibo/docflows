@@ -43,9 +43,10 @@ class DocflowsController < ApplicationController
   def render_default
     respond_to do |format|   
       format.html { render 'versions_list' }
-      format.js   { 
-        render(:update) {|page| page.replace_html "view_container", :partial => ( params[:view_as] == "tree" ? 'tree_versions' : 'list_versions') } 
-      }       
+      format.js  { 
+        partial = (params[:view_as] == 'tree') ? 'tree_versions' : 'list_versions'
+        render :partial => 'ajax_versions', :locals => {:partial => partial } 
+      }
     end
   end
 
@@ -64,7 +65,7 @@ class DocflowsController < ApplicationController
         partial = (params[:sel] == "in_work") ? "list_versions" : "list_with_author"
         partial = (params[:view_as] == "tree") ? "tree_versions" : partial
 
-        render(:update) {|page| page.replace_html "view_container_"+params[:sel], :partial => partial, :locals => {:sel => params[:sel]} } 
+        render :partial => 'ajax_versions', :locals => {:partial => partial, :sel => params[:sel] }
       }       
     end
   end
@@ -128,9 +129,10 @@ class DocflowsController < ApplicationController
     @page_title = l(:label_docflows_actual)
     respond_to do |format|   
       format.html { render 'versions_list' }
-      format.js   { 
-        render(:update) {|page| page.replace_html "view_container", :partial => ( params[:view_as] == "tree" ? 'tree_versions' : 'actual_versions') } 
-      }       
+      format.js  { 
+        partial = (params[:view_as] == 'tree') ? 'tree_versions' : 'actual_versions'
+        render :partial => 'ajax_versions', :locals => {:partial => partial } 
+      }             
     end    
   end
 
@@ -141,9 +143,10 @@ class DocflowsController < ApplicationController
 
     respond_to do |format|   
       format.html { render 'versions_list' }
-      format.js   { 
-        render(:update) {|page| page.replace_html "view_container", :partial => ( params[:view_as] == "tree" ? 'tree_versions' : 'canceled_versions') } 
-      }       
+      format.js  { 
+        partial = (params[:view_as] == 'tree') ? 'tree_versions' : 'canceled_versions'
+        render :partial => 'ajax_versions', :locals => {:partial => partial } 
+      }  
     end
   end
 
