@@ -14,7 +14,7 @@ class DocflowVersion < ActiveRecord::Base
 
   has_many :files, :class_name => "DocflowFile"
   before_destroy :drop_files
-  before_save :validate_fields, :validate_conditions, :validate_permissions
+  before_save :validate_fields, :validate_conditions #, :validate_permissions
 
   def validate_permissions
     errors.add(:base, l(:label_docflow_permissions_cant_save_document)) unless User.current.edit_docflows? || User.current.edit_docflows_in_category?(docflow.docflow_category_id)
