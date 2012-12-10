@@ -46,7 +46,7 @@ class Docflow < ActiveRecord::Base
   private
 
   def validate_fields
-    errors.add(:base, l(:label_docflow_permissions_cant_save_document)) unless User.current.edit_docflows? || User.current.edit_docflows_in_category?(docflow_category_id)
+    # errors.add(:base, l(:label_docflow_permissions_cant_save_document)) unless User.current.edit_docflows? || User.current.edit_docflows_in_category?(docflow_category_id)
     # errors.add(:base, l(:label_docflow_permissions_cant_save_document_in_category)) unless User.current.edit_docflows_in_category?(docflow_category_id)
     errors.add(:docflow_category_id, l(:label_docflow_category_undefined)) if docflow_category_id.nil?
     errors.add(:docflow_type_id, l(:label_docflow_type_undefined)) if docflow_type_id.nil?
