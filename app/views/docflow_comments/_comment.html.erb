@@ -9,7 +9,7 @@
     <div class="contextual">
       <%= link_to( image_tag('edit.png'), 
                    '#', 
-                   :onclick => "$('#comment-#{comment.id}-form').show(); $('#comment-#{comment.id}').hide(); return false;",
+                   :onclick => "jQuery('#comment-#{comment.id}-form').show(); jQuery('#comment-#{comment.id}').hide(); return false;",
                    :title => l(:button_edit) ) %>
       <%= delete_link( {:action=>'remove_comment', :cid => comment}, :remote => true ) %>
     </div>
