@@ -16,6 +16,15 @@ module DocflowVersionsHelper
         tabs << {:name => 'group_sets', :partial => 'docflow_checklists/group_sets', :label => :label_docflows_patterns} if Docflow.ldap_users_sync_plugin?                 
   end
 
+  def version_details_tabs
+    tabs = []
+    if [@version.approver_id, @version.author_id, @version.docflow.responsible_id].include?(User.current.id) || authorized_globaly_to?(:docflow_versions, :add_comment)
+      tabs << {:name => 'comments', :partial => 'docflow_comments/comments', :label => :label_docflow_comments}
+    end
+    tabs << {:name => 'lists', :partial => 'docflow_checklists/result_list', :label => :label_docflows_users_familiarized}
+             
+  end
+
   def link_to_remove_checklist_record (rec)
     result = "<li class='checklist_record' id='ch"+rec.id.to_s+"'>"
     result += "<span class='right-marg'>"+ (rec.display_name) +"</span>"
@@ -82,9 +91,8 @@ module DocflowVersionsHelper
 
 
 
-
   def docflow_version_edit_button
-    if @version.status.id == 1 && (User.current.edit_docflows? || User.current.edit_docflows_in_category?(@version.docflow.docflow_category_id))
+    if @version.status.id == 1 && (authorized_globaly_to?(:docflow_versions, :edit) || User.current.edit_docflows_in_category?(@version.docflow.docflow_category_id))
       link_to( image_tag("edit.png", :class=>'img-b')+' '+content_tag(:span,l(:label_docflow_edit_version), :class => "line_link"),
                edit_docflow_version_path(@version),
                :class => "btn btn-right") 
@@ -92,7 +100,7 @@ module DocflowVersionsHelper
   end
 
   def docflow_version_new_button      
-    if @version.docflow.last_version.status.id == 3 && (User.current.edit_docflows? || User.current.edit_docflows_in_category?(@version.docflow.docflow_category_id))
+    if @version.docflow.last_version.status.id == 3 && (authorized_globaly_to?(:docflow_versions, :new) || User.current.edit_docflows_in_category?(@version.docflow.docflow_category_id))
       link_to( image_tag("add.png", :class=>'img-b')+' '+content_tag(:span,l(:label_docflow_new_version), :class => "line_link"),
                {:controller => 'docflow_versions', :action => 'new', :docflow_id => @version.docflow_id},
                :class => "btn btn-right") 
@@ -100,7 +108,7 @@ module DocflowVersionsHelper
   end
 
   def docflow_version_checklist_button
-    if @version.status.id == 1 && (User.current.edit_docflows? || User.current.edit_docflows_in_category?(@version.docflow.docflow_category_id))
+    if @version.status.id == 1 && (authorized_globaly_to?(:docflow_versions, :checklist) || User.current.edit_docflows_in_category?(@version.docflow.docflow_category_id))
       link_to( image_tag("group.png", :class=>'img-b')+' '+content_tag(:span,l(:label_docflow_check_list), :class => "line_link"),
                 {:controller => 'docflow_versions', :action => 'checklist'},
                  :class => "btn btn-right") 
@@ -108,7 +116,7 @@ module DocflowVersionsHelper
   end
 
   def docflow_version_delete_button
-    if @version.status.id == 1 && (User.current.edit_docflows? || User.current.edit_docflows_in_category?(@version.docflow.docflow_category_id))
+    if @version.status.id == 1 && (authorized_globaly_to?(:docflow_versions, :destroy) || User.current.edit_docflows_in_category?(@version.docflow.docflow_category_id))
       link_to( image_tag("delete.png", :class=>'img-b')+' '+content_tag(:span, l(:label_docflow_version_delete), :class => "line_link"),
                docflow_version_path(@version),
                :confirm => l(:label_docflow_delete_confirm),
@@ -119,22 +127,26 @@ module DocflowVersionsHelper
   def docflow_version_approve_button      
     if ( @version.status.id == 1 && (@version.author_id == User.current.id && @version.author_id == @version.approver_id) ) ||
        ( @version.status.id == 2 && (User.current.admin? || @version.approver_id == User.current.id) )
-      link_to( image_tag("exclamation.png", :class=>'img-b')+' '+content_tag(:span,l(:label_docflow_version_approve), :class => "dotted_link"), 
-                 '#', :class => 'btn', :id => "show-approve-btn")
+      link_to( image_tag("exclamation.png", :class=>'img-b')+' '+content_tag(:span,l(:label_docflow_version_approve), :class => "dotted_link"),                
+               {:controller => 'docflow_versions', :action=> 'approve'}, 
+               :id => "approve-version",
+               :class => 'btn comment_refresh')
     end
   end
 
   def docflow_version_postpone_button
-    if @version.status.id == 2 && (User.current.admin? || (@version.approver_id == User.current.id || @version.author_id == User.current.id))
+    if @version.status.id == 2 && (authorized_globaly_to?(:docflow_versions, :postpone) || [@version.approver_id, @version.author_id].include?(User.current.id))
       link_to( image_tag("bullet_end.png", :class=>'img-b')+' '+content_tag(:span,l(:label_docflow_version_ro_rework), :class => "line_link"), 
-               {:controller => 'docflow_versions', :action=> 'postpone'}, :class => 'btn') 
+               {:controller => 'docflow_versions', :action=> 'postpone'}, 
+               :class => 'btn comment_refresh') 
     end
   end
 
   def docflow_version_to_approvial_button
-    if @version.status.id == 1 && (User.current.admin? || (@version.author_id == User.current.id))
+    if @version.status.id == 1 && (authorized_globaly_to?(:docflow_versions, :to_approvial) || (@version.author_id == User.current.id))
       link_to( image_tag("bullet_go.png", :class=>'img-b')+' '+content_tag(:span,l(:label_docflow_version_to_approvial), :class => "line_link"), 
-               {:controller => 'docflow_versions', :action=> 'to_approvial'}, :class => 'btn')
+               {:controller => 'docflow_versions', :action=> 'to_approvial'},               
+               :class => 'btn comment_refresh')
     end
   end
 
@@ -142,19 +154,27 @@ module DocflowVersionsHelper
   def docflow_version_accept_button
     if ( @version.status.id == 3 && @version.user_in_checklist?(User.current.id) && 
          DocflowFamiliarization.where('user_id=? and docflow_version_id=?', User.current.id, @version.id).first.nil? )
-
       link_to( image_tag("true.png", :class=>'img-b')+' '+content_tag(:span,l(:label_docflows_familiarize), :class => "line_link"),
                  {:controller => 'docflow_versions', :action=> 'accept'},
-                 :class => 'btn', :id => "accept-ver-btn") 
+                 :class => 'btn', :id => "accept-ver-btn")
     end    
   end
 
   def docflow_version_cancel_button
-    if @version.status.id == 3 && (User.current.admin? || (@version.id == @version.docflow.last_version.id && User.current.cancel_docflows?))
+    if @version.status.id == 3 && @version.id == @version.docflow.last_version.id && authorized_globaly_to?(:docflow_versions, :cancel)
       link_to( image_tag("false.png", :class=>'img-b')+' '+content_tag(:span,l(:label_docflow_version_cancel), :class => "line_link"), 
-               {:controller => 'docflow_versions', :action=> 'cancel'}, :class => 'btn', :id => "cancel-doc-btn") 
+               {:controller => 'docflow_versions', :action=> 'cancel'}, 
+               :class => 'btn comment_refresh', 
+               :id => "cancel-doc-btn") 
     end
   end
 
+  def comment_button
+    if [@version.approver_id, @version.author_id, @version.docflow.responsible_id].include?(User.current.id) || authorized_globaly_to?(:docflow_versions, :add_comment)
+      link_to( image_tag("speech.png", :class=>'img-b')+' '+content_tag(:span,l(:label_comment_add), :class => "dotted_link"),
+               {:controller => 'docflow_versions', :action => 'add_comment'}, 
+               :class=> 'btn comment_remote')
+    end
+  end
 
 end

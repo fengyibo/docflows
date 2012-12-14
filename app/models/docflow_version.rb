@@ -13,11 +13,13 @@ class DocflowVersion < ActiveRecord::Base
   has_many :familarizations, :class_name => "DocflowFamiliarization"
 
   has_many :files, :class_name => "DocflowFile"
+  has_many :comments, :class_name => "DocflowComment", :as => :commentable, :dependent => :destroy
+
   before_destroy :drop_files
   before_save :validate_fields, :validate_conditions #, :validate_permissions
 
   def validate_permissions
-    errors.add(:base, l(:label_docflow_permissions_cant_save_document)) unless User.current.edit_docflows? || User.current.edit_docflows_in_category?(docflow.docflow_category_id)
+    errors.add(:base, l(:label_docflow_permissions_cant_save_document)) unless User.current.global_permission_to?(:docflow_versions, :edit) || User.current.edit_docflows_in_category?(docflow.docflow_category_id)
     errors.blank?
   end
 
@@ -44,6 +46,8 @@ class DocflowVersion < ActiveRecord::Base
         errors.add(:base, l(:label_docflow_only_new_can_be_sent_to_approvial)) if !prev_state.nil? && !(prev_state.docflow_status_id == 1 || prev_state.docflow_status_id == 2)
       elsif docflow_status_id == 3
         vailidate_files_and_users
+        
+        errors.add(:base, l(:label_docflow_approve_once_allowed)) if !prev_state.nil? && prev_state.docflow_status_id > 2
         errors.add(:base, l(:label_docflow_no_date_entry)) if actual_date.nil? || actual_date == ""
         errors.add(:base, l(:label_docflow_no_date_approvial)) if approve_date.nil? || approve_date == ""
         # validation removed due issue #3565
@@ -67,13 +71,13 @@ class DocflowVersion < ActiveRecord::Base
   end
 
   def visible_for_user?
-    (user_in_checklist?(User.current.id) || [approver_id, docflow.responsible_id, author_id].include?(User.current.id) || 
-    User.current.edit_docflows? || User.current.edit_docflows_in_category?(docflow.docflow_category_id) || 
-    User.current.cancel_docflows? || User.current.approve_docflows?)
+    user_in_checklist?(User.current.id) || [approver_id, docflow.responsible_id, author_id].include?(User.current.id) || 
+    User.current.global_permission_to?(:docflow_versions, :edit) || User.current.edit_docflows_in_category?(docflow.docflow_category_id) || 
+    User.current.global_permission_to?(:docflow_versions, :cancel) || User.current.global_permission_to?(:docflow_versions, :approve)
   end
 
   def editable_by_user?
-    User.current.edit_docflows? || User.current.edit_docflows_in_category?(docflow.docflow_category_id)    
+    User.current.global_permission_to?(:docflow_versions, :edit) || User.current.edit_docflows_in_category?(docflow.docflow_category_id)    
   end  
 
   def self.approved_by_me

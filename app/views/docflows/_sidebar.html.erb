@@ -43,7 +43,7 @@
 <%= content_tag(:li,link_to(l(:label_docflows_canceled_for_me) +' ('+canceled.to_s+')', canceled_docflows_path), :class => (controller.action_name == "canceled" ? "sel_menu" : "")) %>
 </ul>
 
-<% if User.current.edit_docflows_categories? %>
+<% if authorized_globaly_to?(:docflow_categories, :edit) %>
   <h3><%= l(:label_docflow_administration) %></h3>
   <ul class="nav-menu">    
     <%= content_tag(:li, link_to(l(:label_docflow_categories), docflow_categories_path ), :class => (controller.controller_name == "docflow_categories" ? "sel_menu" : "")) %>
@@ -51,7 +51,7 @@
   </ul>
 <% end %>
 
-<% if Docflow.ldap_users_sync_plugin? && User.current.global_permission_to?("group_sets", "index") %>
+<% if Docflow.ldap_users_sync_plugin? && authorized_globaly_to?(:group_sets, :index) %>
   <h3><%= l(:label_group_sets) %></h3>
   <ul class="nav-menu">
     <%= content_tag(:li, link_to(l(:label_group_sets), group_sets_path ), :class => (controller.controller_name == "group_sets" ? "sel_menu" : "")) %>

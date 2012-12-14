@@ -21,7 +21,7 @@ class DocflowsController < ApplicationController
     if (params[:action] == "new")
       render_403 unless User.current.edit_docflows_in_some_category?
     else
-      render_403 unless User.current.edit_docflows? || ( !doc.nil? && User.current.edit_docflows_in_category?(doc.docflow_category_id) )
+      render_403 unless authorized_globaly_to?(:docflows, :edit) || ( !doc.nil? && User.current.edit_docflows_in_category?(doc.docflow_category_id) )
     end
 
     removial_allowed? if params[:action] == "destroy"

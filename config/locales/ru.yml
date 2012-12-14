@@ -1,5 +1,13 @@
 # Русские строки для модуля Документооборот
 ru:
+  permission_edit_docflows: "Редактирование документов"
+  permission_edit_versions: "Редактирование версий документов"
+  permission_approve_versions: "Утверждение и отмена версий"
+  permission_cancel_versions: "Отмена документов"
+  permission_edit_categories: "Редактирование категорий"
+  permission_edit_types: "Редактирование типов документов"
+  permission_comment_versions: "Комментирование версий"
+
   label_docflow_enable_plugin: "Разрешить плагин"
   label_docflow: "Документооборот"
   label_docflow_top_title: "Документы"
@@ -23,6 +31,7 @@ ru:
   label_docflows_departments: "Отделы"
   label_docflow_add_item: "Добавить запись"
   label_docflow_edit_item: "Изменть запись"
+  label_docflow_comments: "Комментарии"
   label_docflow_done: "Завершить"
   label_docflow_back: "Назад"
   label_docflow_cancel: "Отмена"
@@ -149,6 +158,8 @@ ru:
   label_docflow_cant_create_new_version:  "Невозможно создать новую версию пока предыдущая не утверждена/отменена"
   label_docflow_document_not_found: "Документ для указанной версии не найден"
   label_docflow_removial_not_allowed: "Невозможно удалить документ, если существует более одной версии, либо первая версия не в статусе НОВАЯ!"
+
+  label_docflow_approve_once_allowed: "Невозможно утвердить версию, которая уже утверждена либо отменена"
 
   label_docflow_file_not_pdf: "Файл для ознакомления не в формате pdf"
   label_docflow_file_not_docx: "Исходный файл не формате docx"

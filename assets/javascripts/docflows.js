@@ -10,18 +10,48 @@ jQuery.expr[':'].Contains = function(elem, index, match) {
   return jQuery(elem).text().toUpperCase().indexOf(match[3].toUpperCase()) >= 0;
 };
 
+function modify_comment_form(obj){
+    jQuery('#comment-new-title').html(jQuery(obj).find("span").html());
+    jQuery('#comment-optional-fields').hide();
+
+    if(jQuery('#'+jQuery(obj).attr('id')+'-fields').length > 0){
+      jQuery('#'+jQuery(obj).attr('id')+'-fields').show();
+      jQuery('#comment-optional-fields').show();
+    }
+
+    jQuery('#comment-new-form').show(); 
+    jQuery('#comment-form').show(); 
+    jQuery('#comment-new-form').attr('action',jQuery(obj).attr('href'));
+}
+
 jQuery(document).ready(function(){
+
+  jQuery(document.body).on("click", ".comment_remote", function(){
+    modify_comment_form(this);
+    jQuery('#comment-new-form').attr('data-remote','true');
+    return false;
+  })
+
+  jQuery(document.body).on("click", ".comment_refresh", function(){
+    modify_comment_form(this);
+    jQuery('#comment-new-form').removeAttr('data-remote');
+    jQuery('#comment-new-form').removeAttr('data-submitted');    
+    return false;
+  })  
+
   jQuery(document.body).on("click", ".show_annotation", function(){
     jQuery(this).hide();
     jQuery(this).nextAll('a.hide_annotation_a').show();
     jQuery(this).nextAll('div.annotation').show();
+    return false;
   })
 
   jQuery(document.body).on("click", ".hide_annotation", function(){
     jQuery(this).parent().hide();
     jQuery(this).parent().prevAll('a.hide_annotation_a').hide();
     
-    jQuery(this).parent().prevAll('a.show_annotation').show();    
+    jQuery(this).parent().prevAll('a.show_annotation').show();
+    return false;
   })
 
   jQuery(document.body).on("click", ".hide_annotation_a", function(){
@@ -29,6 +59,7 @@ jQuery(document).ready(function(){
     jQuery(this).nextAll('div.annotation').hide();
 
     jQuery(this).prevAll('a.show_annotation').show();
+    return false;
   })
 
   
@@ -107,19 +138,21 @@ jQuery(document).ready(function(){
     }
   });
 
-  jQuery('#cancel-doc-btn').click(function(){
-    if (!confirm(jQuery('#label_docflow_confirm_cancel_document').val())) {
-      return false;
-    }
-  });
+  // jQuery('#cancel-doc-btn').click(function(){
+  //   if (!confirm(jQuery('#label_docflow_confirm_cancel_document').val())) {
+  //     return false;
+  //   }
+  // });
 
   jQuery('#show-approve-btn').click(function(){
     jQuery('#approve-form').show();
+    return false;
   });
 
-  jQuery('#close-approve-btn').click(function(){
-    jQuery('#approve-form').hide();
-  });
+  jQuery(document.body).on("click", "a.close-grey-form", function(){
+    jQuery(this).parent().hide();
+    return false;
+  });  
 
   jQuery(document.body).on("click", "a.add_docfile", function(){
     num_files = jQuery("p.new_attach").size();
