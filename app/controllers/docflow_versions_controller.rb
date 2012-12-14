@@ -34,7 +34,7 @@ class DocflowVersionsController < ApplicationController
     elsif  (params[:action] == "cancel" )
       render_403 unless authorized_globaly_to?(:docflow_versions, :cancel)
     elsif ( params[:action] == "approve" )
-      render_403 unless authorized_globaly_to?(:docflow_versions, :approve) && @version.approver_id == User.current.id
+      render_403 unless authorized_globaly_to?(:docflow_versions, :approve) || @version.approver_id == User.current.id
     elsif ["show_comments","add_comment","update_comment","remove_comment"].include?(params[:action])
       render_403 unless [@version.approver_id, @version.author_id, @version.docflow.responsible_id].include?(User.current.id) || authorized_globaly_to?(:docflow_versions, :show_comments)
     else
