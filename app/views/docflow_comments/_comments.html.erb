@@ -1,0 +1,5 @@
+<div id="comments-list">
+  <% @comments.each do |comment| %>
+    <%= render :partial => 'docflow_comments/comment',  :locals => {:comment => comment} %>
+  <% end %>
+</div>
