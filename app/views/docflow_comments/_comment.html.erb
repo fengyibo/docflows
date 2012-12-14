@@ -11,7 +11,11 @@
                    '#', 
                    :onclick => "jQuery('#comment-#{comment.id}-form').show(); jQuery('#comment-#{comment.id}').hide(); return false;",
                    :title => l(:button_edit) ) %>
-      <%= delete_link( {:action=>'remove_comment', :cid => comment}, :remote => true ) %>
+
+      <%= link_to_remote( l(:button_delete),
+                    { :url => {:action=>'remove_comment', :cid => comment},
+                      :method => :delete },
+                    :class => 'icon icon-del' ) %>
     </div>
   <% end %>
   <%= textilizable(comment, :notes) %>
