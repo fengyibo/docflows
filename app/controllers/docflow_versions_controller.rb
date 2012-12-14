@@ -4,6 +4,8 @@ class DocflowVersionsController < ApplicationController
   helper :docflows
   helper :docflow_categories
 
+  before_filter :find_version, :except => [:new, :create]
+
   before_filter :check_settings
   before_filter :modification_allowed?, :only => [:add_checklists, :remove_checklist, :remove_file, :checklist, :edit, :update, :destroy, :edit_checklists, :remove_checklist_by_department]
   before_filter :new_allowed?, :only => [:new, :create]
@@ -17,23 +19,29 @@ class DocflowVersionsController < ApplicationController
   end
 
   def authorize
-    return false if params[:id].nil? || params[:id] == ""
-    ver = DocflowVersion.find(params[:id])
+    # return false if params[:id].nil? || params[:id] == ""
+    # ver = DocflowVersion.find(params[:id])
+    return true unless @version
 
     if ( params[:action] == "show")
-      render_403 unless ver.visible_for_user?
+      render_403 unless @version.visible_for_user?
     elsif ( params[:action] == "postpone" )
-      render_403 unless [ver.author_id, ver.approver_id].include?(User.current.id) || User.current.admin?
+      render_403 unless [@version.author_id, @version.approver_id].include?(User.current.id) || authorized_globaly_to?(:docflow_versions, :postpone) || User.current.edit_docflows_in_category?(@version.docflow.docflow_category_id)
+    elsif ( params[:action] == "to_approvial" )
+      render_403 unless (@version.author_id == User.current.id) || authorized_globaly_to?(:docflow_versions, :to_approvial) || User.current.edit_docflows_in_category?(@version.docflow.docflow_category_id)
     elsif ( params[:action] == "accept" )
-      render_403 unless ver.user_in_checklist?(User.current.id)
+      render_403 unless @version.user_in_checklist?(User.current.id)
     elsif  (params[:action] == "cancel" )
-      render_403 unless User.current.cancel_docflows?
+      render_403 unless authorized_globaly_to?(:docflow_versions, :cancel)
     elsif ( params[:action] == "approve" )
-      render_403 unless User.current.admin? || (User.current.approve_docflows? && ver.approver_id == User.current.id)
+      render_403 unless authorized_globaly_to?(:docflow_versions, :approve) && @version.approver_id == User.current.id
+    elsif ["show_comments","add_comment","update_comment","remove_comment"].include?(params[:action])
+      render_403 unless [@version.approver_id, @version.author_id, @version.docflow.responsible_id].include?(User.current.id) || authorized_globaly_to?(:docflow_versions, :show_comments)
     else
-      render_403 unless ver.editable_by_user?
+      render_403 unless @version.editable_by_user?
     end
   end
+
 
   def modification_allowed?
     cur_version = DocflowVersion.find(params[:id]) unless params[:id].nil? || params[:id] == ""
@@ -65,7 +73,10 @@ class DocflowVersionsController < ApplicationController
 
 
   def show
-    @version = DocflowVersion.find(params[:id])
+    @comments = @version.comments.includes(:user) #.order("id")
+    Rails.logger.debug "\n\n !!!!!!!!!!!!!!!! Test="+@comments.inspect
+    # @comments = []
+
   end
 
   def new
@@ -101,13 +112,10 @@ class DocflowVersionsController < ApplicationController
   end
 
   def edit
-    @version = DocflowVersion.find(params[:id])
     @files = @version.files.order('filetype DESC')
   end
 
   def update
-    @version = DocflowVersion.find(params[:id])
-
     respond_to do |format|
       if @version.update_attributes(params[:docflow_version])
         @version.save_files(params[:new_files])        
@@ -125,7 +133,6 @@ class DocflowVersionsController < ApplicationController
   # todo: check if someone knows about version (already read document).
   # Generaly imposible variant - because of knowelege is after approvial
   def destroy
-    @version = DocflowVersion.find(params[:id])
     respond_to do |format|
       if @version.docflow.first_version.id != @version.id && @version.destroy
         flash[:error] = @version.errors.full_messages.join("<br>").html_safe if @version.errors.any?
@@ -140,24 +147,44 @@ class DocflowVersionsController < ApplicationController
   end
 
   def checklist
-    @version = DocflowVersion.find(params[:id])
-    # @users = User.all
-    # @user_departments = UserDepartment.all
-    # @user_titles = UserTitle.all
     render 'docflow_checklists/checklist'
   end
 
   def copy_checklist
-    @version = DocflowVersion.find(params[:id])
     from_version = DocflowVersion.find(params[:vid])
 
     @version.copy_checklist(from_version)
     redirect_to(@version)
+  end
+
+  def show_comments
+    @comments = @version.comments 
+    respond_to do |format|
+      format.js { render('show_comments') }
+    end
+  end
+
+  def add_comment
+    append_comment
+    show_comments    
+  end
+
+  def update_comment
+    @comment = DocflowComment.find(params[:cid])    
+    @comment.update_attributes(params[:docflow_comment])
+
+    show_comments    
+  end
+
+  def remove_comment
+    @comment = DocflowComment.find(params[:cid])
+    @comment.destroy
+
+    show_comments
   end  
 
   # todo: change JS on async list generation
   def add_checklists
-    @version = DocflowVersion.find(params[:id])
     @version.save_checklists(params[:all_users], params[:users], params[:titles], params[:department_id], params[:group_sets])
     result = "ok"    
 
@@ -202,7 +229,6 @@ class DocflowVersionsController < ApplicationController
 
 
   def autocomplete_for_user
-    @version = DocflowVersion.find(params[:id])
     @users = User.active.not_in_version(@version).like(params[:q]).all(:limit => 100)
     render :layout => false
   end  
@@ -232,7 +258,6 @@ class DocflowVersionsController < ApplicationController
   end
 
   def remove_checklist
-    @version = DocflowVersion.find(params[:id])
     checklist = DocflowChecklist.find(params[:cid])
 
     respond_to do |format|
@@ -253,7 +278,6 @@ class DocflowVersionsController < ApplicationController
   end
 
   def remove_checklist_by_department
-    @version = DocflowVersion.find(params[:id])
     if params[:department_id] == "0"
       checklists = DocflowChecklist.where("user_department_id IS NULL AND user_title_id IS NOT NULL AND docflow_version_id=?",params[:id])
     else
@@ -271,7 +295,6 @@ class DocflowVersionsController < ApplicationController
   end
 
   def accept
-    @version = DocflowVersion.find(params[:id])
     @fam = DocflowFamiliarization.new(:user_id => User.current.id,
                                       :docflow_version_id => params[:id],
                                       :done_date => Time.now)
@@ -289,7 +312,6 @@ class DocflowVersionsController < ApplicationController
   end
 
   def approve
-    @version = DocflowVersion.find(params[:id])
     @version.actual_date = Date.parse(params[:actual_date]).to_date unless params[:actual_date].nil? || params[:actual_date] == ""
     @version.approve_date = Time.now
     change_status DocflowStatus::DOCFLOW_STATUS_APPROVED
@@ -303,14 +325,32 @@ class DocflowVersionsController < ApplicationController
     change_status DocflowStatus::DOCFLOW_STATUS_CANCELED
   end
 
-  def change_status (status)
-    @version = DocflowVersion.find(params[:id]) if @version.nil?
+  def change_status (status)    
     @version.docflow_status_id = status
+
+    append_comment
 
     unless @version.save
       flash[:error] = @version.errors.full_messages.join(" ") if @version.errors.any?
     end
     redirect_to(@version)
+  end
+
+  def append_comment
+    if params[:docflow_comment]
+      @comment = DocflowComment.new(params[:docflow_comment])      
+      @comment.user_id = User.current.id
+      @comment.commentable = @version
+      @comment.save unless @comment.notes.empty?
+    end 
+  end
+
+  private
+
+  def find_version
+    @version = DocflowVersion.find(params[:id])    
+  rescue ActiveRecord::RecordNotFound
+    render_404
   end
 
 end

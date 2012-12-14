@@ -1,5 +1,13 @@
 # English strings go here for Rails i18n
 en:
+  permission_edit_docflows: "Edit documents"
+  permission_edit_versions: "Edit documents versions"
+  permission_approve_versions: "Approve versions"
+  permission_cancel_versions: "Cancel documents"
+  permission_edit_categories: "Categories management"
+  permission_edit_types: "Document types management"
+  permission_comment_versions: "Commentary on version allowed"
+
   label_docflow_enable_plugin: "Enable plugin"
   label_docflow: "Documents workflow"
   label_docflow_top_title: "Documents"
@@ -23,6 +31,7 @@ en:
   label_docflows_departments: "Departments"
   label_docflow_add_item: "Add item"
   label_docflow_edit_item: "Edit item"
+  label_docflow_comments: "Comments"
   label_docflow_done: "Done"
   label_docflow_back: "Back"
   label_docflow_cancel: "Cancel"
@@ -149,6 +158,8 @@ en:
   label_docflow_cant_create_new_version:  "You can create new version only if previous approved / canceled!"
   label_docflow_document_not_found: "Document for version was not found"
   label_docflow_removial_not_allowed: "Document can't be deleted due more than one versions exists or initial version not in NEW state!"
+
+  label_docflow_approve_once_allowed: "Only new or on_Approvial version can be approved"
 
   label_docflow_file_not_pdf: "Public file is not pdf"
   label_docflow_file_not_docx: "Source file is not docx"

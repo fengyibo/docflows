@@ -1,16 +1,16 @@
 class DocflowCategoriesController < ApplicationController
   unloadable
 
-  before_filter :check_settings, :authorize
+  before_filter :check_settings, :authorized_globaly?
 
   def check_settings
     flash[:warning] = "Setup Plugin! Groups was not selected" if Setting.plugin_docflows['approve_allowed_to'].nil?
     redirect_to "/docflows/plugin_disabled" unless Setting.plugin_docflows['enable_plugin']
   end
 
-  def authorize
-    render_403 unless User.current.edit_docflows_categories?
-  end
+  # def authorize
+  #   render_403 unless authorized_globaly_to?(params[:controller], params[:action])
+  # end
 
   def index
     @categories = DocflowCategory.order("lft")

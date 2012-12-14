@@ -19,8 +19,8 @@
   css = (@version.status.id < 4) ? "stat stat-def" : "stat stat-cancel"
 
   status = @version.status.name
-  status = l(:label_docflows_need_to_familiarize) if @version.status.id == 3 && @version.user_in_checklist?(User.current.id)
-  status = l(:label_docflows_familiarized) if @version.status.id != 4 && !DocflowFamiliarization.where('user_id=? and docflow_version_id=?', User.current.id, @version.id).first.nil?
+  status = l(:label_docflows_need_to_familiarize) if @version.docflow_status_id == 3 && @version.user_in_checklist?(User.current.id)
+  status = l(:label_docflows_familiarized) if @version.docflow_status_id != 4 && !DocflowFamiliarization.where('user_id=? and docflow_version_id=?', User.current.id, @version.id).first.nil?
  %>
 <h2>
   <%= content_tag(:span, status, :class => css) %> 
@@ -37,6 +37,8 @@
   <%= docflow_version_approve_button %>
   
   <%= docflow_version_cancel_button %>
+
+  <%= comment_button %>
   
   <%= docflow_version_delete_button %>
   
@@ -49,20 +51,15 @@
   <%= docflow_version_accept_button %>
 
   <%= content_tag(:span, "" ,
-                  :class => "fake-block") if @version.docflow.last_version.status.id == 3 && (User.current.edit_docflows? || User.current.edit_docflows_in_category?(@version.docflow.docflow_category_id) ) %>
+                  :class => "fake-block") if @version.docflow.last_version.docflow_status_id == 3 && (authorized_globaly_to?(:docflow_versions, :edit) || User.current.edit_docflows_in_category?(@version.docflow.docflow_category_id) ) %>
 </div>
-<% if [1,2].include?(@version.docflow_status_id) %>
-  <div id="approve-form" style="display:none;">
-    <%= form_tag({:controller => 'docflow_versions', :action=> 'approve'}, :method => "post") do %>
-      <%= link_to('',{},:class=>'icon close-icon',:id => "close-approve-btn", :style=>"margin-left:-18px; margin-top:-1px;") %>
-      <p>
-        <strong><%= l(:label_docflow_actual_from) %>: </strong>
-        <%= text_field_tag(:actual_date, (@version.actual_date ? @version.actual_date.utc.getlocal.to_date : ""), :size => "10") %><%= calendar_for('actual_date') %>
-      </p>
-      <%= submit_tag('Утвердить') %>
-    <% end %>
+ 
+<% if [@version.approver_id, @version.author_id, @version.docflow.responsible_id].include?(User.current.id) || authorized_globaly_to?(:docflow_versions, :add_comment) %>
+  <div id="comment-form" class="hidden-grey-form">
+    <%= render :partial => 'docflow_comments/form_comment' %>
   </div>
 <% end %>
+
 <div class="issue status-1 priority-1 details">
   <div class="ver-list">
     <strong><%= l(:label_docflow_versions) %>: </strong>
@@ -126,9 +123,7 @@
   </div>
 </div>
 
-<div id="fam_list">
-  <%= render 'docflow_checklists/result_list' %>
-</div>
+<%= render_tabs version_details_tabs %>
 
 <% content_for :sidebar do %>
     <%= render :partial => 'docflows/sidebar' %>
