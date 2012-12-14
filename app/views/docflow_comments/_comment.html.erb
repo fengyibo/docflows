@@ -1,0 +1,20 @@
+<div id="comment-<%= comment.id %>">
+<h4>
+  <%= avatar(comment.user, :size => "24") %>
+  <%= authoring comment.created_at, comment.user, :label => :label_updated_time_by %>
+</h4>
+
+<div class="wiki editable">
+  <% if User.current.admin? %>
+    <div class="contextual">
+      <%= link_to( image_tag('edit.png'), 
+                   '#', 
+                   :onclick => "$('#comment-#{comment.id}-form').show(); $('#comment-#{comment.id}').hide(); return false;",
+                   :title => l(:button_edit) ) %>
+      <%= delete_link( {:action=>'remove_comment', :cid => comment}, :remote => true ) %>
+    </div>
+  <% end %>
+  <%= textilizable(comment, :notes) %>
+</div>
+</div>
+<%= render :partial => 'docflow_comments/form_comment',  :locals => {:comment => comment} %>
