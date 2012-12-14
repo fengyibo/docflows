@@ -1,0 +1,4 @@
+jQuery('#comment-form').hide();
+jQuery('#tab-content-comments').html('<%= escape_javascript(render 'docflow_comments/comments') %>');
+jQuery('#comment-form').html('<%= escape_javascript(render :partial => 'docflow_comments/form_comment') %>');
+jQuery('#tab-comments').trigger('click');

@@ -1,0 +1,33 @@
+<% id = local_assigns[:comment] ? comment.id : 'new' %>
+<% comment = local_assigns[:comment] ? comment : DocflowComment.new %>
+
+<% action = local_assigns[:comment] ? {:action => "update_comment", :cid => comment} : {:action => "add_comment"} %>
+
+<%= link_to('','#',:class=>'icon close-icon close-grey-form', :style=>"margin-left:-18px; margin-top:-1px;") unless local_assigns[:comment]%>
+
+<%= form_tag(action,{:id => "comment-#{id}-form", :remote => true, :class => "checklist_form"}) do %>
+  <%= content_tag(:h4, l(:label_comment_add), :id=>"comment-#{id}-title") %>
+  <%= fields_for comment do |f| %>
+    <p>
+      <%#= f.label l(:description_notes) %>
+      <%= f.text_area :notes,
+                      :id => "comment_#{id}_notes",
+                      :class => 'wiki-edit',
+                      :rows => (comment.notes.blank? ? 10 : [[10, comment.notes.length / 50].max, 100].min) %>
+    </p>
+
+    <div id="comment-optional-fields" style="display:none;">
+      <div id="approve-version-fields" style="display:none;">
+        <strong><%= l(:label_docflow_actual_from)+": " %></strong>
+        <%= text_field_tag(:actual_date, (@version.actual_date ? @version.actual_date.utc.getlocal.to_date : ""), :size => "10") %>
+        <%= calendar_for('actual_date') %>
+      </div>
+    </div>
+ 
+    <p>
+      <%= f.submit l(:button_save) %>
+      <%= link_to( l(:button_cancel), '#', :onclick => "$('#comment-#{id}-form').hide(); $('#comment-form').hide();$('#comment-#{id}').show(); return false;") %>
+    </p>
+    <%= wikitoolbar_for "comment_#{id}_notes" %>
+  <% end %>
+<% end %>
