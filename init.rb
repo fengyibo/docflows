@@ -16,8 +16,13 @@ Redmine::Plugin.register :docflows do
   menu :top_menu, :docflow, { :controller => 'docflows', :action => 'index' }, :caption => Proc.new {User.current.df_top_menu_link}, :if => Proc.new { Setting.plugin_docflows['enable_plugin'] && User.current.logged? }
 
   project_module :docflows do
-    permission :new_docflows, :docflows => :new
-    permission :new_versions, :docflow_versions => :new
+    permission :edit_docflows, :docflows => [:new, :create, :edit, :update, :destroy]
+    permission :edit_versions, :docflow_versions => [:new, :update, :edit, :create, :checklist, :copy_checklist, :add_checklists, :edit_checklists, :remove_checklist, :remove_checklist_by_department, :to_approvial, :postpone, :destroy]
+    permission :approve_versions, :docflow_versions => [:approve]
+    permission :cancel_versions, :docflow_versions => [:cancel]
+    permission :edit_categories, :docflow_categories => [:index, :new, :create, :update, :edit, :destroy]
+    permission :edit_types, :docflow_types => [:index, :new, :create, :update, :edit, :destroy]
+    permission :comment_versions, :docflow_versions => [:show_comments, :add_comment, :update_comment, :remove_comment]
   end
 
   # requires_redmine_plugin :global_roles, :version_or_higher => '0.0.0'

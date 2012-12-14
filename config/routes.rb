@@ -22,11 +22,12 @@ resources :docflow_types, :except => [:show]
 
 resources :docflow_versions, :except => [:index] do
   member do
-    get    'to_approvial'
-    get    'postpone'
-    get    'cancel'
+    match  'to_approvial', :via => [:get, :post]
+    match  'postpone', :via => [:get, :post]
+    match  'cancel', :via => [:get, :post]
+    match  'approve', :via => [:get, :post]
     get    'accept'
-    post   'approve'
+
 
     get    'checklist'
     get    'autocomplete_for_user'
@@ -38,5 +39,10 @@ resources :docflow_versions, :except => [:index] do
 
     get    'show_file/:fid', :action => 'show_file'
     delete 'remove_file/:fid', :action => 'remove_file'
+
+    post   'add_comment', :action => 'add_comment'
+    get    'show_comments', :action => 'show_comments'
+    post   'update_comment/:cid', :action => 'update_comment'
+    delete 'remove_comment/:cid', :action => 'remove_comment'
   end
 end

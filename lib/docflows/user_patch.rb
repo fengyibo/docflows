@@ -30,19 +30,19 @@ module Docflows
         rec.done_date unless rec.nil?
       end
 
-      def edit_docflows_categories?
-        return true if self.admin?
-        unless Setting.plugin_docflows['edit_categories_allowed_to'].nil?
-          Group.find(Setting.plugin_docflows['edit_categories_allowed_to']).users.exists?(self.id)
-        end
-      end
+      # def edit_docflows_categories?
+      #   return true if self.admin?
+      #   unless Setting.plugin_docflows['edit_categories_allowed_to'].nil?
+      #     Group.find(Setting.plugin_docflows['edit_categories_allowed_to']).users.exists?(self.id)
+      #   end
+      # end
 
-      def edit_docflows?
-        return true if self.admin?
-        unless Setting.plugin_docflows['edit_documents_allowed_to'].nil?
-          Group.find(Setting.plugin_docflows['edit_documents_allowed_to']).users.exists?(self.id)
-        end
-      end
+      # def edit_docflows?
+      #   return true if self.admin?
+      #   unless Setting.plugin_docflows['edit_documents_allowed_to'].nil?
+      #     Group.find(Setting.plugin_docflows['edit_documents_allowed_to']).users.exists?(self.id)
+      #   end
+      # end
 
       def edit_docflows_in_category?(category_id)
         return true if self.admin?
@@ -58,19 +58,19 @@ module Docflows
         return !category.first.nil?
       end      
 
-      def approve_docflows?
-        return true if self.admin?
-        unless Setting.plugin_docflows['approve_allowed_to'].nil?
-          Group.find(Setting.plugin_docflows['approve_allowed_to']).users.exists?(self.id)
-        end
-      end
+      # def approve_docflows?
+      #   return true if self.admin?
+      #   unless Setting.plugin_docflows['approve_allowed_to'].nil?
+      #     Group.find(Setting.plugin_docflows['approve_allowed_to']).users.exists?(self.id)
+      #   end
+      # end
 
-      def cancel_docflows?
-        return true if self.admin?
-        unless Setting.plugin_docflows['cancel_allowed_to'].nil?
-          Group.find(Setting.plugin_docflows['cancel_allowed_to']).users.exists?(self.id)
-        end
-      end
+      # def cancel_docflows?
+      #   return true if self.admin?
+      #   unless Setting.plugin_docflows['cancel_allowed_to'].nil?
+      #     Group.find(Setting.plugin_docflows['cancel_allowed_to']).users.exists?(self.id)
+      #   end
+      # end
 
       def df_top_menu_link
         unread = DocflowVersion.unread_for_user.count
