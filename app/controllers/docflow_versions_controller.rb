@@ -23,7 +23,7 @@ class DocflowVersionsController < ApplicationController
     # ver = DocflowVersion.find(params[:id])
     return true unless @version
 
-    if ( params[:action] == "show")
+    if ["show", "show_file"].include?(params[:action])
       render_403 unless @version.visible_for_user?
     elsif ( params[:action] == "postpone" )
       render_403 unless [@version.author_id, @version.approver_id].include?(User.current.id) || authorized_globaly_to?(:docflow_versions, :postpone) || User.current.edit_docflows_in_category?(@version.docflow.docflow_category_id)
